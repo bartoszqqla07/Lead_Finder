@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>LeadFinder</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Plik trafia do bin/ każdego projektu, który referuje Core (CLI i Web).
+         Po edycji wystarczy `dotnet run` – plik zostanie skopiowany, kod nie jest rekompilowany. -->
+    <None Update="Config\categories.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

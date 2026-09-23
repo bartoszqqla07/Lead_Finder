@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>LeadFinder.Web</RootNamespace>
+    <AssemblyName>LeadFinder.Web</AssemblyName>
+    <!-- dotnet run (także z innego katalogu): content root, czyli wwwroot i .env, to katalog projektu. -->
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>
+    <ClientAppDir>ClientApp\</ClientAppDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.31" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.31">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LeadFinder.Core\LeadFinder.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Źródła frontendu nie są częścią kompilacji ani publikacji .NET. -->
+  <ItemGroup>
+    <Content Remove="$(ClientAppDir)**" />
+    <None Remove="$(ClientAppDir)**" />
+    <None Include="$(ClientAppDir)**" Exclude="$(ClientAppDir)node_modules\**" />
+    <ClientAppSource Include="$(ClientAppDir)src\**;$(ClientAppDir)index.html;$(ClientAppDir)package.json;$(ClientAppDir)vite.config.ts" />
+  </ItemGroup>
+
+  <!--
+    Frontend (React + Vite) budowany automatycznie przy `dotnet build` / `dotnet run` do wwwroot/.
+    Target jest inkrementalny: npm uruchamia się tylko, gdy zmieniły się pliki w ClientApp.
+    Pominięcie: właściwość SkipClientBuild=true (np. przy pracy z npm run dev).
+  -->
+  <Target Name="NpmInstall" Condition="'$(SkipClientBuild)' != 'true' And !Exists('$(ClientAppDir)node_modules')" BeforeTargets="BuildClientApp">
+    <Message Importance="high" Text="Instaluję zależności frontendu (npm install) – tylko za pierwszym razem…" />
+    <Exec Command="npm install --no-audit --no-fund" WorkingDirectory="$(ClientAppDir)" />
+  </Target>
+
+  <Target Name="BuildClientApp" Condition="'$(SkipClientBuild)' != 'true'" BeforeTargets="BeforeBuild"
+          Inputs="@(ClientAppSource)" Outputs="wwwroot\index.html">
+    <Message Importance="high" Text="Buduję frontend (npm run build)…" />
+    <Exec Command="npm run build" WorkingDirectory="$(ClientAppDir)" />
+  </Target>
+
+</Project>

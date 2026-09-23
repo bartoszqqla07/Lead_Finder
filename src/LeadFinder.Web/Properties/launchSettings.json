@@ -1,0 +1,26 @@
+{
+  "profiles": {
+    "LeadFinder": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5178",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      }
+    },
+    "Demo": {
+      "commandName": "Project",
+      "commandLineArgs": "--demo",
+      "applicationUrl": "http://localhost:5178",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      }
+    },
+    "Dev": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5178",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
