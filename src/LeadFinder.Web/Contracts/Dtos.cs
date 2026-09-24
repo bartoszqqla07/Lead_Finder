@@ -33,6 +33,8 @@ public sealed record LeadDto(
     int FirstSearchRunId,
     int LastSearchRunId,
     IReadOnlyList<MessageDraft> Drafts,
+    LeadScore Score,
+    string? BusinessStatus,
     string GoogleMapsUrl);
 
 /// <summary>

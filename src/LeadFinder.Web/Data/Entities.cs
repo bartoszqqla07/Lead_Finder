@@ -38,6 +38,9 @@ public sealed class LeadEntity
     public double? Rating { get; set; }
     public int? UserRatingCount { get; set; }
 
+    /// <summary>OPERATIONAL / CLOSED_TEMPORARILY / CLOSED_PERMANENTLY; null dla leadów sprzed dodania pola.</summary>
+    public string? BusinessStatus { get; set; }
+
     public required string City { get; set; }
     public required string CategoryId { get; set; }
     public required string CategoryQuery { get; set; }
@@ -49,6 +52,11 @@ public sealed class LeadEntity
     public string? CheckNote { get; set; }
     public string? Technology { get; set; }
     public string? ProfilePlatform { get; set; }
+
+    // Sygnały przestarzałej strony (do oceny szansy); null = nie sprawdzano albo lead sprzed dodania pól.
+    public bool? IsMobileFriendly { get; set; }
+    public int? CopyrightYear { get; set; }
+    public bool? UsesHttps { get; set; }
 
     public OutreachStage Stage { get; set; } = OutreachStage.New;
     public string Notes { get; set; } = string.Empty;

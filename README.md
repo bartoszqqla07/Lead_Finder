@@ -8,6 +8,8 @@ fryzjerów, barberów, salony paznokci, spa, studia tatuażu…) w podanym mieś
 
 - **Wyszukiwanie z postępem na żywo:** miasto i kategorie wybierasz w formularzu, postęp przychodzi przez Server-Sent Events.
 - **Klasyfikacja leadów:** brak strony, strona nie działa, WordPress do odświeżenia, ma stronę.
+- **Szansa na zlecenie 0–100** z uzasadnieniem: stan strony (także brak wersji na telefon i stara stopka),
+  ruch w salonie, ocena i branża. Lista jest posortowana od najlepszych leadów.
 - **Mini-CRM:** etap kontaktu (nowy → skontaktowany → odpowiedział → klient / odpada) i notatki zapisywane automatycznie.
 - **Pamięć między wyszukiwaniami:** ponowne przeszukanie miasta pokazuje, które firmy są nowe.
   Twoje etapy i notatki nie są nadpisywane.
@@ -33,6 +35,9 @@ dotnet run --project src\LeadFinder.Web
 Przeglądarka otworzy się sama na http://localhost:5178. Pierwsze uruchomienie trwa 1–2 minuty, bo instaluje
 zależności frontendu. Aplikację wyłączasz, zamykając okno konsoli.
 
+Możesz też zainstalować LeadFindera jak aplikację, z osobnym oknem i ikoną na pasku zadań.
+W Edge wybierz *menu … → Aplikacje → Zainstaluj tę witrynę jako aplikację*, a w Chrome ikonę instalacji w pasku adresu.
+
 Przy pierwszym wejściu kliknij **Ustawienia**, wklej klucz API i wpisz swoje imię oraz podpis do szkiców.
 Klucz jest od razu sprawdzany zapytaniem, które według cennika Google jest bezpłatne.
 
@@ -53,56 +58,6 @@ Przykładowe, fikcyjne dane w osobnej bazie. Przydatne, żeby obejrzeć aplikacj
 Tworzy `dist\LeadFinder.Web.exe`. Na docelowym komputerze wystarczy
 [.NET 8 Runtime (ASP.NET Core)](https://dotnet.microsoft.com/download/dotnet/8.0). Folder `dist` można przenieść
 w dowolne miejsce i zrobić skrót na pulpicie.
-
-## Wersja w internecie i na telefonie (Azure)
-
-Ta sama aplikacja działa też na serwerze, więc jest dostępna z telefonu przez całą dobę, bez włączonego komputera.
-Na serwerze wymagane jest **hasło**: bez niego aplikacja w ogóle się nie uruchomi. Działa na **darmowym planie F1
-Azure App Service** z serwerem w Polsce lub Europie Zachodniej. Każdy `git push` do `main` wdraża nową wersję
-przez GitHub Actions ([.github/workflows/deploy-azure.yml](.github/workflows/deploy-azure.yml)).
-
-### Jednorazowa konfiguracja
-
-1. **Konto Azure:** [azure.microsoft.com/free](https://azure.microsoft.com/free). Karta służy tylko do weryfikacji.
-   Po 30 dniach Azure poprosi o przejście na „pay-as-you-go”. Plan F1 dalej kosztuje 0 zł, ale dla spokoju ustaw
-   [budżet z alertem](https://portal.azure.com/#view/Microsoft_Azure_CostManagement/Menu/~/budgets).
-2. **Utwórz aplikację:** Portal → *Create a resource* → **Web App**:
-   - *Name*: np. `leadfinder-bartosz` (adres: `https://leadfinder-bartosz.azurewebsites.net`)
-   - *Publish*: **Code**, *Runtime stack*: **.NET 8 (LTS)**, *Operating System*: **Windows**
-   - *Region*: **Poland Central**, a gdy F1 jest tam niedostępny, **West Europe**
-   - *Pricing plan*: nowy plan, **Free F1**
-   - zakładka *Monitoring*: Application Insights **wyłączone**
-3. **Ustawienia aplikacji** (Web App → *Settings → Environment variables → App settings*):
-   - `LeadFinder__Password` = długie hasło, którym będziesz się logować
-   - opcjonalnie `GOOGLE_PLACES_API_KEY`; klucz można też wpisać później w aplikacji, w Ustawieniach
-4. **Settings → Configuration → General settings:** włącz **HTTPS Only** oraz
-   **SCM Basic Auth Publishing Credentials** (potrzebne do wdrażania z GitHuba). Zapisz.
-5. **Overview → Download publish profile**, czyli pobierz plik `.PublishSettings`.
-6. **GitHub → repozytorium → Settings → Secrets and variables → Actions:**
-   - zakładka *Secrets*: `AZURE_WEBAPP_PUBLISH_PROFILE` = cała zawartość pobranego pliku
-   - zakładka *Variables*: `AZURE_WEBAPP_NAME` = nazwa aplikacji z punktu 2
-7. **`git push`**, a w zakładce *Actions* poczekaj, aż „Deploy to Azure” zakończy się sukcesem (ok. 3 minuty).
-
-### Na telefonie
-
-Otwórz adres aplikacji i zaloguj się. Sesja trwa 30 dni. Potem zainstaluj ją jak aplikację:
-- **Android (Chrome):** menu ⋮ → *Zainstaluj aplikację* / *Dodaj do ekranu głównego*
-- **iPhone (Safari):** *Udostępnij* → *Do ekranu początkowego*
-
-### Warto wiedzieć
-
-- **Pierwsze otwarcie po przerwie trwa 10–20 s.** Na planie F1 aplikacja „zasypia” po ok. 20 minutach bezczynności.
-- **Baza leży w `D:\home\data\LeadFinder`** i przetrwa restarty oraz wdrożenia. Kopię zapasową pobierzesz przez Kudu:
-  `https://<nazwa>.scm.azurewebsites.net` → *Debug console* → pobierz `leadfinder.db`.
-- **Przeniesienie lokalnych leadów na serwer:** zatrzymaj aplikację w Azure (*Stop*), wgraj przez Kudu swój plik
-  `%LOCALAPPDATA%\LeadFinder\leadfinder.db` do `D:\home\data\LeadFinder` i uruchom ją ponownie (*Start*).
-- **Bezpieczeństwo:**
-  - logowanie ma limit 5 prób na minutę;
-  - ciasteczko sesji ma flagi `HttpOnly`, `SameSite=Strict` i jest wysyłane tylko przez HTTPS;
-  - wszystkie dane (`/api`) wymagają zalogowania;
-  - klucz Google możesz dodatkowo ograniczyć do adresów wychodzących serwera
-    (*Web App → Properties → Outbound IP addresses* → w Google Cloud: *Application restrictions → IP addresses*).
-- **Lokalnie** (`LeadFinder.cmd`) aplikacja działa jak dotąd: bez hasła, tylko na `localhost`.
 
 ## Jak zdobyć klucz API
 
@@ -187,6 +142,25 @@ i informacja o problemie bez oferty niosą najmniejsze ryzyko. To nie jest porad
 Kod 403/429 często oznacza ochronę przed botami (np. Cloudflare), a nie martwą stronę.
 Notatka przy leadzie podpowiada wtedy, żeby sprawdzić stronę ręcznie.
 
+## Szansa na zlecenie (0–100)
+
+Każdy lead dostaje szacunek, jak duża jest szansa, że firma zechce nową stronę. Lista jest domyślnie
+posortowana od największej szansy, a w szczegółach leada widać, z czego wziął się wynik (np. „+45 strona nie działa”).
+To heurystyka z jawnych sygnałów, a nie pewność. Wagi są w jednym pliku,
+[LeadScorer.cs](src/LeadFinder.Core/Services/LeadScorer.cs), i warto je poprawiać, gdy zobaczysz, kto faktycznie odpowiada.
+
+| Grupa | Sygnały | Punkty |
+|---|---|---|
+| **Potrzeba** | strona nie działa · tylko Booksy · tylko profil IG/FB · brak strony · WordPress | 45 · 42 · 38 · 35 · 20 |
+| | stary WordPress (< 6) · brak wersji na telefon · stopka sprzed 3+ lat · brak HTTPS | +10 · +15 · +8 · +7 |
+| **Możliwości** | liczba opinii: 200+ · 80+ · 30+ · 10+ | 20 · 16 · 12 · 6 |
+| | ocena: 4,7+ · 4,3+ · poniżej 4,0 | +8 · +4 · −5 |
+| **Branża** | spa / kosmetologia · fryzjer / kosmetyczka / tatuaż · barber / paznokcie | 8 · 5 · 3 |
+| **Inne** | brak telefonu · tymczasowo zamknięta · zamknięta na stałe | −5 · −20 · wynik 0 |
+
+Poziomy: **65+ wysoka**, **40–64 średnia**, **poniżej 40 niska**. Sygnały strony (telefon, stopka, HTTPS) i status firmy
+z Google są zbierane przy wyszukiwaniu, więc leady znalezione wcześniej dostaną je po ponownym przeszukaniu miasta.
+
 ## Kategorie
 
 Lista jest w [src/LeadFinder.Core/Config/categories.json](src/LeadFinder.Core/Config/categories.json).
@@ -219,7 +193,7 @@ Kody wyjścia: `0` sukces, `1` błąd API lub konfiguracji, `2` złe argumenty, 
 - **Ocena z przecinkiem (`4,7`)**: `4.7` Excel zamieniłby na datę.
 - Pola zaczynające się od `=`, `+`, `-`, `@` dostają prefiks `'` (ochrona przed CSV injection).
 
-Kolumny: `Nazwa; Kategoria; Adres; Telefon; Strona; Status; Technologia; Ocena; LiczbaOpinii; SzkicWiadomosci`.
+Kolumny: `Nazwa; Kategoria; Adres; Telefon; Strona; Status; Szansa; Technologia; Ocena; LiczbaOpinii; SzkicWiadomosci`.
 
 ## Architektura
 

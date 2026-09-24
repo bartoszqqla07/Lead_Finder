@@ -1,4 +1,5 @@
 using System.Globalization;
+using LeadFinder.Common;
 using LeadFinder.Models;
 
 namespace LeadFinder.Services;
@@ -456,22 +457,11 @@ public sealed class MessageDrafter
 
         var ratingText = lead.Place.Rating!.Value.ToString("0.0", Polish);
         var count = lead.Place.UserRatingCount!.Value;
-        return $"Widzę świetne opinie w Google ({ratingText}★, {count} {PluralizeReviews(count)}) – gratulacje! ";
+        return $"Widzę świetne opinie w Google ({ratingText}★, {count} {PolishPlural.Reviews(count)}) – gratulacje! ";
     }
 
     private static bool HasGoodReviews(Lead lead) =>
         lead.Place is { Rating: >= 4.5, UserRatingCount: >= 10 };
-
-    /// <summary>Polska odmiana: 1 opinia, 2–4 opinie, 5–21 opinii, 22–24 opinie…</summary>
-    private static string PluralizeReviews(int count)
-    {
-        if (count == 1)
-            return "opinia";
-
-        var lastDigit = count % 10;
-        var lastTwoDigits = count % 100;
-        return lastDigit is >= 2 and <= 4 && lastTwoDigits is < 12 or > 14 ? "opinie" : "opinii";
-    }
 
     private static string OrDefault(string? value, string fallback) =>
         string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();

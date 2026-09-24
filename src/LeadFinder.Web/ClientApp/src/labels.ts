@@ -1,4 +1,4 @@
-import type { Lead, LeadStatus, OutreachStage, SearchRunState } from './types';
+import type { Lead, LeadStatus, OutreachStage, ScoreTier, SearchRunState } from './types';
 
 /** Grupy statusów w kolejności priorytetu (jak sortowanie w CSV). */
 export type StatusGroup = 'hot' | 'wordpress' | 'other';
@@ -11,6 +11,12 @@ export const statusBadge: Record<LeadStatus, { label: string; tone: 'hot' | 'war
   WebsiteDown: { label: 'Strona nie działa', tone: 'hot' },
   WordPress: { label: 'WordPress', tone: 'warm' },
   HasWebsite: { label: 'Ma stronę', tone: 'neutral' },
+};
+
+export const scoreTierLabel: Record<ScoreTier, string> = {
+  High: 'Wysoka szansa',
+  Medium: 'Średnia szansa',
+  Low: 'Niska szansa',
 };
 
 export const stages: { value: OutreachStage; label: string }[] = [

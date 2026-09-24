@@ -1,7 +1,7 @@
 import type { SortKey, SortState } from '../filters';
 import { formatDate, formatRating, websiteHost } from '../labels';
 import type { Lead } from '../types';
-import { StageBadge, StatusBadge } from './Badges';
+import { ScoreBadge, StageBadge, StatusBadge } from './Badges';
 import { LeadCards } from './LeadCards';
 import { useIsMobile } from '../hooks/useMediaQuery';
 
@@ -61,6 +61,7 @@ export function LeadsTable({ leads, isLoading, hasAnyLeads, sort, onSort, select
         <thead>
           <tr>
             {header('name', 'Firma')}
+            {header('score', 'Szansa', 'num')}
             {header('priority', 'Status')}
             <th>Strona</th>
             {header('rating', 'Ocena', 'num')}
@@ -84,6 +85,9 @@ export function LeadsTable({ leads, isLoading, hasAnyLeads, sort, onSort, select
                   <div className="cell-sub">
                     {lead.categoryName} · {lead.address ?? lead.city}
                   </div>
+                </td>
+                <td className="num">
+                  <ScoreBadge score={lead.score} />
                 </td>
                 <td>
                   <StatusBadge status={lead.status} />

@@ -17,10 +17,12 @@ public sealed class PlacesApiClient
     /// <summary>
     /// Pola, które Google ma zwrócić. Od nich zależy cena zapytania (SKU), więc prosimy tylko o potrzebne.
     /// Pole "nextPageToken" też musi tu być: bez niego Google nie zwróci tokenu kolejnej strony.
+    /// businessStatus należy do tańszego SKU niż websiteUri/rating, więc nie podnosi ceny zapytania
+    /// (płaci się za najdroższe pole z maski).
     /// </summary>
     private const string FieldMask =
         "places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber," +
-        "places.websiteUri,places.rating,places.userRatingCount,nextPageToken";
+        "places.websiteUri,places.rating,places.userRatingCount,places.businessStatus,nextPageToken";
 
     /// <summary>Maksymalny rozmiar strony w Text Search.</summary>
     private const int PageSize = 20;
@@ -153,7 +155,8 @@ public sealed class PlacesApiClient
                 Phone: dto.NationalPhoneNumber,
                 WebsiteUri: dto.WebsiteUri,
                 Rating: dto.Rating,
-                UserRatingCount: dto.UserRatingCount);
+                UserRatingCount: dto.UserRatingCount,
+                BusinessStatus: dto.BusinessStatus);
 
     // --- Kształty JSON żądania i odpowiedzi (camelCase przez JsonSerializerDefaults.Web) ---
 
@@ -169,7 +172,8 @@ public sealed class PlacesApiClient
         string? NationalPhoneNumber,
         string? WebsiteUri,
         double? Rating,
-        int? UserRatingCount);
+        int? UserRatingCount,
+        string? BusinessStatus);
 
     private sealed record LocalizedText(string? Text, string? LanguageCode);
 }

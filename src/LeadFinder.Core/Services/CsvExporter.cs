@@ -24,7 +24,7 @@ public sealed class CsvExporter
 
     private static readonly string[] Header =
     [
-        "Nazwa", "Kategoria", "Adres", "Telefon", "Strona", "Status",
+        "Nazwa", "Kategoria", "Adres", "Telefon", "Strona", "Status", "Szansa",
         "Technologia", "Ocena", "LiczbaOpinii", "SzkicWiadomosci",
     ];
 
@@ -41,12 +41,12 @@ public sealed class CsvExporter
 
     /// <summary>
     /// Sortuje leady: najpierw gorące (brak strony / strona nie działa), potem WordPress, na końcu reszta.
-    /// W obrębie grupy wyżej trafiają biznesy z większą liczbą opinii, bo są większe i bardziej aktywne.
+    /// W obrębie grupy wyżej trafiają leady z większą szansą (<see cref="LeadScorer"/>).
     /// </summary>
     public static IReadOnlyList<Lead> SortByPriority(IEnumerable<Lead> leads) =>
         leads
             .OrderBy(lead => lead.Status.SortPriority())
-            .ThenByDescending(lead => lead.Place.UserRatingCount ?? 0)
+            .ThenByDescending(lead => LeadScorer.Score(lead).Value)
             .ThenBy(lead => lead.Place.Name, StringComparer.Create(PolishCulture, ignoreCase: true))
             .ToList();
 
@@ -67,6 +67,7 @@ public sealed class CsvExporter
                 place.Phone ?? string.Empty,
                 place.WebsiteUri ?? string.Empty,
                 lead.Status.ToLabel(),
+                LeadScorer.Score(lead).Value.ToString(CultureInfo.InvariantCulture),
                 lead.WebsiteCheck?.Note ?? "—",
                 place.Rating?.ToString("0.0", PolishCulture) ?? string.Empty,
                 place.UserRatingCount?.ToString(CultureInfo.InvariantCulture) ?? string.Empty,

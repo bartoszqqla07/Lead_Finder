@@ -840,6 +840,92 @@ code {
   color: var(--text-2);
 }
 
+/* ===== Szansa na zlecenie ===== */
+.score {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.score-high {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.score-medium {
+  background: var(--warm-soft);
+  color: var(--warm);
+}
+.score-low {
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.score-headline {
+  font-size: 13px;
+  font-weight: 700;
+}
+.score-text-high {
+  color: var(--ok);
+}
+.score-text-medium {
+  color: var(--warm);
+}
+.score-text-low {
+  color: var(--text-3);
+}
+.score-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.score-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+.score-fill-high {
+  background: var(--ok);
+}
+.score-fill-medium {
+  background: var(--warm);
+}
+.score-fill-low {
+  background: var(--text-3);
+}
+.score-factors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+.score-factors li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.score-points {
+  flex-shrink: 0;
+  min-width: 34px;
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.score-points.plus {
+  color: var(--ok);
+}
+.score-points.minus {
+  color: var(--danger);
+}
+.score-points.zero {
+  color: var(--text-3);
+}
+
 .stage {
   display: inline-flex;
   align-items: center;
@@ -1206,26 +1292,6 @@ code {
 .toast-error {
   background: var(--danger);
   color: #fff;
-}
-
-/* ===== Logowanie ===== */
-.login {
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding: 24px 16px;
-}
-.login-card {
-  width: min(380px, 100%);
-  gap: 18px;
-  padding: 28px 24px;
-}
-
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 /* ===== Karty leadów (telefon) ===== */

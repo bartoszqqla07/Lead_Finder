@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { api, setUnauthorizedHandler } from './api';
-import { LoginScreen } from './components/LoginScreen';
-import { useIsMobile } from './hooks/useMediaQuery';
+import { api } from './api';
 import { FilterBar } from './components/FilterBar';
 import { LeadDrawer } from './components/LeadDrawer';
 import { LeadsTable } from './components/LeadsTable';
@@ -13,44 +11,12 @@ import { SummaryStrip } from './components/SummaryStrip';
 import { Toast, useToast } from './components/Toast';
 import { defaultFilters, defaultSort, filterLeads, sortLeads, type LeadFilters, type SortState } from './filters';
 import { useHashSelection } from './hooks/useHashSelection';
+import { useIsMobile } from './hooks/useMediaQuery';
 import { useSearchJob } from './hooks/useSearchJob';
 import { plural } from './labels';
 import type { Category, Lead, LeadChanges, SearchRun, Settings } from './types';
 
-type AuthState = 'checking' | 'login' | 'ready';
-
-/**
- * Bramka logowania. Właściwy widok (Workspace) montuje się dopiero po zalogowaniu,
- * więc jego efekty (pobranie leadów, podłączenie do trwającego wyszukiwania) nie trafiają w 401.
- */
-export function App() {
-  const [authState, setAuthState] = useState<AuthState>('checking');
-  const [authRequired, setAuthRequired] = useState(false);
-
-  useEffect(() => {
-    setUnauthorizedHandler(() => setAuthState('login'));
-    api
-      .getAuthStatus()
-      .then((status) => {
-        setAuthRequired(status.authRequired);
-        setAuthState(status.authRequired && !status.authenticated ? 'login' : 'ready');
-      })
-      // Brak odpowiedzi – pokaż aplikację; jej własne zapytania wyświetlą czytelny błąd.
-      .catch(() => setAuthState('ready'));
-    return () => setUnauthorizedHandler(null);
-  }, []);
-
-  const logout = async () => {
-    await api.logout().catch(() => undefined);
-    setAuthState('login');
-  };
-
-  if (authState === 'checking') return null;
-  if (authState === 'login') return <LoginScreen onLoggedIn={() => setAuthState('ready')} />;
-  return <Workspace authRequired={authRequired} onLogout={logout} />;
-}
-
-/** Na telefonie zamienia panel w zwijaną sekcję, żeby lista leadów była od razu pod ręką. */
+/** W wąskim oknie zamienia panel w zwijaną sekcję, żeby lista leadów była od razu pod ręką. */
 function MobileSection({
   enabled,
   title,
@@ -71,7 +37,7 @@ function MobileSection({
   );
 }
 
-function Workspace({ authRequired, onLogout }: { authRequired: boolean; onLogout: () => void }) {
+export function App() {
   const isMobile = useIsMobile();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [runs, setRuns] = useState<SearchRun[]>([]);
@@ -170,23 +136,16 @@ function Workspace({ authRequired, onLogout }: { authRequired: boolean; onLogout
           <span className="brand-name">LeadFinder</span>
           <span className="brand-tagline">lokalne biznesy bez dobrej strony</span>
         </div>
-        <div className="topbar-actions">
-          <button className="button button-ghost" onClick={() => setSettingsOpen(true)} aria-label="Ustawienia">
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-              <path
-                fill="currentColor"
-                d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.3 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.3 2.5h4l.3-2.5a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
-                transform="translate(-1)"
-              />
-            </svg>
-            <span className="hide-mobile">Ustawienia</span>
-          </button>
-          {authRequired && (
-            <button className="button button-ghost" onClick={onLogout}>
-              Wyloguj
-            </button>
-          )}
-        </div>
+        <button className="button button-ghost" onClick={() => setSettingsOpen(true)} aria-label="Ustawienia">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.3 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.3 2.5h4l.3-2.5a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
+              transform="translate(-1)"
+            />
+          </svg>
+          <span className="hide-mobile">Ustawienia</span>
+        </button>
       </header>
 
       {settings && !settings.hasApiKey && (

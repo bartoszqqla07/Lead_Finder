@@ -128,17 +128,25 @@ public sealed class WebsiteChecker
 
             var html = await ReadHtmlPrefixAsync(response.Content, cancellationToken);
             var technology = TechnologyDetector.Detect(html, response.Headers);
+            var signals = PageSignals.Detect(html);
             var finalUri = response.RequestMessage?.RequestUri ?? currentUri;
 
             return new WebsiteCheckResult(
                 Reachable: true,
                 IsWordPress: technology.IsWordPress,
-                Note: BuildSuccessNote(response.StatusCode, technology, uri, finalUri),
-                Technology: technology.Name);
+                Note: BuildSuccessNote(response.StatusCode, technology, signals, uri, finalUri),
+                Technology: technology.Name,
+                IsMobileFriendly: signals.IsMobileFriendly,
+                CopyrightYear: signals.CopyrightYear,
+                UsesHttps: finalUri.Scheme == Uri.UriSchemeHttps);
         }
     }
 
-    private static string BuildSuccessNote(HttpStatusCode status, TechnologyInfo technology, Uri requested, Uri final)
+    /// <summary>Stopka starsza niż tyle lat to sygnał, że nikt nie zajmuje się stroną.</summary>
+    public const int OutdatedCopyrightYears = 3;
+
+    private static string BuildSuccessNote(
+        HttpStatusCode status, TechnologyInfo technology, PageSignals signals, Uri requested, Uri final)
     {
         var parts = new List<string> { $"HTTP {(int)status}" };
 
@@ -155,6 +163,12 @@ public sealed class WebsiteChecker
 
         if (final.Scheme == Uri.UriSchemeHttp)
             parts.Add("brak HTTPS");
+
+        if (!signals.IsMobileFriendly)
+            parts.Add("brak wersji na telefon");
+
+        if (signals.CopyrightYear is { } year && year <= DateTime.Now.Year - OutdatedCopyrightYears)
+            parts.Add($"stopka © {year}");
 
         return string.Join(" · ", parts);
     }

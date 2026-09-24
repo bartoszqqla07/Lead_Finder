@@ -33,7 +33,18 @@ export interface Lead {
   firstSearchRunId: number;
   lastSearchRunId: number;
   drafts: MessageDraft[];
+  score: LeadScore;
+  businessStatus: string | null;
   googleMapsUrl: string;
+}
+
+export type ScoreTier = 'Low' | 'Medium' | 'High';
+
+/** Szacunek szansy 0–100 z listą składników (LeadScorer.cs). */
+export interface LeadScore {
+  value: number;
+  tier: ScoreTier;
+  factors: { label: string; points: number }[];
 }
 
 export type DraftKind = 'ProblemNotice' | 'DirectMessage' | 'Email' | 'Letter' | 'Proposal' | 'FollowUp';

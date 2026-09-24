@@ -1,11 +1,12 @@
 import { statusGroupOf, type StatusGroup } from './labels';
-import type { Lead, OutreachStage } from './types';
+import type { Lead, OutreachStage, ScoreTier } from './types';
 
 export interface LeadFilters {
   query: string;
   city: string; // '' = wszystkie
   categoryId: string; // '' = wszystkie
   statusGroup: StatusGroup | 'all';
+  scoreTier: ScoreTier | 'all';
   /** 'open' = wszystko poza "Klient" i "Odpada"; 'inContact' = "Skontaktowany" + "Odpowiedział". */
   stage: OutreachStage | 'all' | 'open' | 'inContact';
   /** Tylko leady, które pojawiły się po raz pierwszy w tym wyszukiwaniu. */
@@ -17,17 +18,19 @@ export const defaultFilters: LeadFilters = {
   city: '',
   categoryId: '',
   statusGroup: 'all',
+  scoreTier: 'all',
   stage: 'all',
   searchRunId: null,
 };
 
-export type SortKey = 'priority' | 'name' | 'rating' | 'reviews' | 'firstSeen';
+export type SortKey = 'score' | 'priority' | 'name' | 'rating' | 'reviews' | 'firstSeen';
 export interface SortState {
   key: SortKey;
   direction: 'asc' | 'desc';
 }
 
-export const defaultSort: SortState = { key: 'priority', direction: 'asc' };
+/** Domyślnie: największa szansa na zlecenie na górze. */
+export const defaultSort: SortState = { key: 'score', direction: 'desc' };
 
 const collator = new Intl.Collator('pl', { sensitivity: 'base' });
 
@@ -46,6 +49,7 @@ export function filterLeads(leads: Lead[], filters: LeadFilters): Lead[] {
     if (filters.city && lead.city !== filters.city) return false;
     if (filters.categoryId && lead.categoryId !== filters.categoryId) return false;
     if (filters.statusGroup !== 'all' && statusGroupOf(lead.status) !== filters.statusGroup) return false;
+    if (filters.scoreTier !== 'all' && lead.score.tier !== filters.scoreTier) return false;
     if (filters.searchRunId !== null && lead.firstSearchRunId !== filters.searchRunId) return false;
     if (!matchesStage(lead.stage, filters.stage)) return false;
 
@@ -75,6 +79,7 @@ export function sortLeads(leads: Lead[], sort: SortState): Lead[] {
   const byReviews = (a: Lead, b: Lead) => (b.userRatingCount ?? 0) - (a.userRatingCount ?? 0);
 
   const compare: Record<SortKey, (a: Lead, b: Lead) => number> = {
+    score: (a, b) => factor * (a.score.value - b.score.value) || byReviews(a, b),
     // Jak w CSV: gorące → WordPress → reszta, w grupie więcej opinii wyżej.
     priority: (a, b) => factor * (a.priority - b.priority) || byReviews(a, b),
     name: (a, b) => factor * collator.compare(a.name, b.name),

@@ -33,6 +33,7 @@ export function FilterBar({
     filters.city !== defaultFilters.city,
     filters.categoryId !== defaultFilters.categoryId,
     filters.statusGroup !== defaultFilters.statusGroup,
+    filters.scoreTier !== defaultFilters.scoreTier,
     filters.stage !== defaultFilters.stage,
   ].filter(Boolean).length;
 
@@ -97,6 +98,18 @@ export function FilterBar({
               <option value="hot">Gorące (brak / nie działa)</option>
               <option value="wordpress">WordPress</option>
               <option value="other">Ma stronę</option>
+            </select>
+
+            <select
+              className="select"
+              value={filters.scoreTier}
+              onChange={(e) => set('scoreTier', e.target.value as LeadFilters['scoreTier'])}
+              aria-label="Szansa na zlecenie"
+            >
+              <option value="all">Każda szansa</option>
+              <option value="High">Wysoka szansa (65+)</option>
+              <option value="Medium">Średnia szansa (40–64)</option>
+              <option value="Low">Niska szansa (poniżej 40)</option>
             </select>
 
             <select

@@ -3,6 +3,7 @@ import { formatDateTime, formatRating, stages } from '../labels';
 import type { Lead, LeadChanges, MessageDraft, OutreachStage } from '../types';
 import { StatusBadge } from './Badges';
 import { OutreachPanel } from './OutreachPanel';
+import { ScoreBreakdown } from './ScoreBreakdown';
 import { useLatest } from '../hooks/useLatest';
 
 interface Props {
@@ -96,6 +97,8 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
             </div>
             {lead.checkNote && <p className="check-note">{lead.checkNote}</p>}
           </section>
+
+          <ScoreBreakdown score={lead.score} />
 
           <section className="drawer-section">
             <h3>Kontakt</h3>
