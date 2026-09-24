@@ -370,9 +370,10 @@ public sealed class MessageDrafter
             DraftKind.Preview,
             Title: "Podgląd (makieta)",
             Channel: "Tam, gdzie firma odpowiedziała",
-            Guidance: "Najskuteczniejsza pierwsza odpowiedź: obraz zamiast opisu. Zrób makietę strony głównej z ich nazwą i zdjęciami " +
-                      "z Instagrama (Figma, Canva albo Twój szablon startowy – 30–60 min) i wyślij jako screenshot. " +
-                      "Bez ceny – podaj ją, gdy zapytają albo gdy podgląd się spodoba (wtedy „Oferta – krótka”).",
+            Guidance: "Najskuteczniejsza pierwsza odpowiedź: obraz zamiast opisu. Zrób makietę w kreatorze podglądu " +
+                      "(ich nazwa, 3–4 zdjęcia z Instagrama, prawdziwe ceny z Booksy) i wklej obrazek w miejsce " +
+                      "[wstaw screenshot makiety]. Bez ceny – podaj ją, gdy zapytają albo gdy podgląd się spodoba " +
+                      "(wtedy „Oferta – krótka”).",
             Subject: null,
             Body: body,
             RequiresConsent: true);

@@ -20,13 +20,17 @@ function recommendedKind(lead: Lead): DraftKind {
   return 'DirectMessage';
 }
 
-const googleSearch = (query: string) => `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-
+/**
+ * Wiadomość do salonu – pokazuje tylko bieżący krok: przed zgodą prośby o zgodę, po zgodzie podgląd i ofertę.
+ * Wskazówki są zwinięte, a zgodę zaznacza się jednym przyciskiem pod wiadomością.
+ */
 export function OutreachPanel({ lead, onConsentChange, onMarkSent, onOpenStudio, onError }: Props) {
   const [kind, setKind] = useState<DraftKind>(() => recommendedKind(lead));
   const [copied, setCopied] = useState<'body' | 'subject' | null>(null);
-  const draft = lead.drafts.find((d) => d.kind === kind) ?? lead.drafts[0];
   const hasConsent = lead.consentGivenAt !== null;
+  const stepDrafts = lead.drafts.filter((d) => d.requiresConsent === hasConsent);
+  const draft = stepDrafts.find((d) => d.kind === kind) ?? stepDrafts[0];
+  const recommended = recommendedKind(lead);
 
   if (!draft) return null;
 
@@ -40,150 +44,94 @@ export function OutreachPanel({ lead, onConsentChange, onMarkSent, onOpenStudio,
     }
   };
 
-  const firstContact = lead.drafts.filter((d) => !d.requiresConsent);
-  const afterConsent = lead.drafts.filter((d) => d.requiresConsent);
-  const locked = draft.requiresConsent && !hasConsent;
+  const changeConsent = (given: boolean) => {
+    onConsentChange(given);
+    setKind(given ? 'Preview' : recommendedKind({ ...lead, consentGivenAt: null }));
+  };
 
   return (
     <section className="drawer-section">
       <div className="section-title-row">
-        <h3>Kontakt zdalny</h3>
-        <button className="link-button small" onClick={onOpenStudio}>
-          🎨 Kreator podglądu strony
+        <h3>Wiadomość</h3>
+        <span className={`step-pill ${hasConsent ? 'step-pill-done' : ''}`}>
+          {hasConsent ? 'Krok 2 · po zgodzie' : 'Krok 1 · prośba o zgodę'}
+        </span>
+      </div>
+
+      <div className="draft-tabs" role="tablist" aria-label="Rodzaj wiadomości">
+        {stepDrafts.map((d) => (
+          <button
+            key={d.kind}
+            role="tab"
+            aria-selected={d.kind === draft.kind}
+            className={`draft-tab ${d.kind === draft.kind ? 'active' : ''}`}
+            onClick={() => setKind(d.kind)}
+          >
+            {d.title}
+            {d.kind === recommended && (
+              <span className="recommended-dot" title="Polecane na teraz" aria-label="polecane" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      <details className="draft-tips">
+        <summary>
+          <strong>Gdzie:</strong> {draft.channel}
+          <span className="collapsible-hint">wskazówki</span>
+        </summary>
+        <p>{draft.guidance}</p>
+      </details>
+
+      {draft.kind === 'Preview' && (
+        <button className="button button-primary studio-cta" onClick={onOpenStudio}>
+          🎨 Stwórz podgląd strony dla tego salonu
+        </button>
+      )}
+
+      {draft.subject && (
+        <div className="subject-row">
+          <span className="muted">Temat:</span>
+          <span className="subject">{draft.subject}</span>
+          <button className="link-button small" onClick={() => void copy(draft.subject!, 'subject')}>
+            {copied === 'subject' ? 'skopiowano ✓' : 'kopiuj'}
+          </button>
+        </div>
+      )}
+
+      <pre className="draft">{draft.body}</pre>
+
+      <div className="button-row">
+        <button className="button button-small button-primary" onClick={() => void copy(draft.body, 'body')}>
+          {copied === 'body' ? 'Skopiowano ✓' : 'Kopiuj treść'}
+        </button>
+        {draft.kind === 'Letter' && (
+          <button className="button button-small" onClick={() => printLetter(draft.body, onError)}>
+            Drukuj list
+          </button>
+        )}
+        <button className="button button-small" onClick={() => onMarkSent(draft)}>
+          Oznacz jako wysłane
         </button>
       </div>
 
-      <div className="contact-finder">
-        <span className="muted">Znajdź kontakt:</span>
-        <a href={googleSearch(`site:instagram.com "${lead.name}" ${lead.city}`)} target="_blank" rel="noreferrer">
-          Instagram ↗
-        </a>
-        <a href={googleSearch(`site:facebook.com "${lead.name}" ${lead.city}`)} target="_blank" rel="noreferrer">
-          Facebook ↗
-        </a>
-        <a href={googleSearch(`"${lead.name}" ${lead.city} e-mail kontakt`)} target="_blank" rel="noreferrer">
-          e-mail ↗
-        </a>
-        {lead.profilePlatform && lead.websiteUri && (
-          <a href={lead.websiteUri} target="_blank" rel="noreferrer">
-            profil {lead.profilePlatform} ↗
-          </a>
-        )}
-      </div>
-
-      <label className={`consent ${hasConsent ? 'consent-on' : ''}`}>
-        <input
-          type="checkbox"
-          checked={hasConsent}
-          onChange={(e) => {
-            onConsentChange(e.target.checked);
-            setKind(e.target.checked ? 'Preview' : recommendedKind({ ...lead, consentGivenAt: null }));
-          }}
-        />
-        <span>
-          <strong>Firma zgodziła się na przesłanie oferty</strong>
-          <span className="muted">
-            {hasConsent
-              ? ` · ${formatDateTime(lead.consentGivenAt!)} – zachowaj też zrzut odpowiedzi jako dowód`
-              : ' · zaznacz, gdy odpiszą „tak” – odblokuje propozycję'}
-          </span>
-        </span>
-      </label>
-
-      <div className="draft-tabs" role="tablist" aria-label="Rodzaj wiadomości">
-        <span className="draft-group-label">Pierwszy kontakt</span>
-        {firstContact.map((d) => (
-          <DraftTab
-            key={d.kind}
-            draft={d}
-            active={d.kind === draft.kind}
-            recommended={d.kind === recommendedKind(lead)}
-            onSelect={setKind}
-          />
-        ))}
-        <span className="draft-group-label">Po zgodzie</span>
-        {afterConsent.map((d) => (
-          <DraftTab
-            key={d.kind}
-            draft={d}
-            active={d.kind === draft.kind}
-            recommended={d.kind === recommendedKind(lead)}
-            locked={!hasConsent}
-            onSelect={setKind}
-          />
-        ))}
-      </div>
-
-      <div className="draft-card">
-        <p className="draft-channel">
-          <strong>Gdzie:</strong> {draft.channel}
-        </p>
-        <p className={`guidance ${locked ? 'guidance-warning' : ''}`}>
-          {locked && <strong>Najpierw uzyskaj zgodę. </strong>}
-          {draft.guidance}
-        </p>
-
-        {draft.subject && (
-          <div className="subject-row">
-            <span className="muted">Temat:</span>
-            <span className="subject">{draft.subject}</span>
-            <button className="link-button small" onClick={() => void copy(draft.subject!, 'subject')}>
-              {copied === 'subject' ? 'skopiowano ✓' : 'kopiuj'}
-            </button>
-          </div>
-        )}
-
-        {draft.kind === 'Preview' && (
-          <button className="button button-primary studio-cta" onClick={onOpenStudio}>
-            🎨 Stwórz podgląd strony dla tego salonu
+      {hasConsent ? (
+        <p className="consent-status" title="Zachowaj też zrzut ekranu odpowiedzi jako dowód zgody">
+          <span className="consent-check">✓</span>
+          Zgoda od {formatDateTime(lead.consentGivenAt!)}
+          <button className="link-button small" onClick={() => changeConsent(false)}>
+            cofnij
           </button>
-        )}
-
-        <pre className="draft">{draft.body}</pre>
-
-        <div className="button-row">
-          <button className="button button-small button-primary" onClick={() => void copy(draft.body, 'body')}>
-            {copied === 'body' ? 'Skopiowano ✓' : 'Kopiuj treść'}
-          </button>
-          {draft.kind === 'Letter' && (
-            <button className="button button-small" onClick={() => printLetter(draft.body, onError)}>
-              Drukuj list
-            </button>
-          )}
-          <button className="button button-small" onClick={() => onMarkSent(draft)} disabled={locked}>
-            Oznacz jako wysłane
+        </p>
+      ) : (
+        <div className="consent-cta">
+          <span className="muted">Odpisali, że mogą dostać podgląd?</span>
+          <button className="button button-small button-ok" onClick={() => changeConsent(true)}>
+            ✓ Mam zgodę – dalej
           </button>
         </div>
-      </div>
+      )}
     </section>
-  );
-}
-
-function DraftTab({
-  draft,
-  active,
-  recommended,
-  locked = false,
-  onSelect,
-}: {
-  draft: MessageDraft;
-  active: boolean;
-  recommended: boolean;
-  locked?: boolean;
-  onSelect: (kind: DraftKind) => void;
-}) {
-  return (
-    <button
-      role="tab"
-      aria-selected={active}
-      className={`draft-tab ${active ? 'active' : ''} ${locked ? 'locked' : ''}`}
-      onClick={() => onSelect(draft.kind)}
-      title={locked ? 'Wymaga zgody firmy' : undefined}
-    >
-      {locked && <span aria-hidden="true">🔒 </span>}
-      {draft.title}
-      {recommended && <span className="recommended">polecane</span>}
-    </button>
   );
 }
 

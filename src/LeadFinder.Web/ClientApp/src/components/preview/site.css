@@ -1,0 +1,843 @@
+/* =====================================================================
+   Makieta strony salonu (sp-*). Układ zależy od szerokości kontenera, nie okna:
+   ten sam HTML w laptopie (1280 px) i w telefonie (390 px).
+   ===================================================================== */
+.sp {
+  --sp-bg: #fbf8f4;
+  --sp-surface: #f3ede6;
+  --sp-text: #231f1c;
+  --sp-muted: #756d65;
+  --sp-line: color-mix(in srgb, var(--sp-text) 12%, transparent);
+  --sp-heading: 'SP Cormorant', Georgia, serif;
+  --sp-body: 'SP Jost', system-ui, sans-serif;
+  --sp-radius: 16px;
+  --sp-btn-radius: 2px;
+  --sp-h1: 92px;
+  /* Średnia szerokość litery nagłówka (w em) – do dopasowania nazwy salonu, żeby się nie łamała w pół słowa. */
+  --sp-char: 0.5;
+  container-type: inline-size;
+  min-height: 100%;
+  background: var(--sp-bg);
+  color: var(--sp-text);
+  font: 400 16px/1.6 var(--sp-body);
+  -webkit-font-smoothing: antialiased;
+}
+.sp-dark {
+  --sp-bg: #0e0e10;
+  --sp-surface: #17171a;
+  --sp-text: #f3efe8;
+  --sp-muted: #a19a90;
+  --sp-heading: 'SP Oswald', 'Arial Narrow', sans-serif;
+  --sp-body: 'SP Inter', system-ui, sans-serif;
+  --sp-radius: 6px;
+  --sp-h1: 104px;
+  --sp-char: 0.62;
+}
+.sp-pastel {
+  --sp-bg: #fffafb;
+  --sp-surface: #fcedf2;
+  --sp-text: #3a2a32;
+  --sp-muted: #8c7480;
+  --sp-heading: 'SP DM Serif', Georgia, serif;
+  --sp-body: 'SP DM Sans', system-ui, sans-serif;
+  --sp-radius: 26px;
+  --sp-btn-radius: 999px;
+  --sp-h1: 84px;
+  --sp-char: 0.6;
+}
+.sp * {
+  box-sizing: border-box;
+}
+/* :where() = zerowa specyficzność, żeby reset nie nadpisywał marginesów konkretnych elementów. */
+:where(.sp) :where(h1, h2, h3, p, ul) {
+  margin: 0;
+}
+
+/* ----- Typografia nagłówków: każdy styl ma własny charakter ----- */
+.sp h1,
+.sp h2,
+.sp-logo {
+  font-family: var(--sp-heading);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.sp-dark h1,
+.sp-dark h2,
+.sp-dark .sp-logo {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.sp-light h1 {
+  font-weight: 500;
+  font-style: italic;
+}
+.sp-pastel h1,
+.sp-pastel h2 {
+  font-weight: 400;
+}
+
+.sp-icon {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ----- Nawigacja ----- */
+.sp-nav {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  padding: 26px 72px;
+  border-bottom: 1px solid var(--sp-line);
+  background: var(--sp-bg);
+}
+.sp-logo {
+  font-size: 26px;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+}
+.sp-dark .sp-logo {
+  font-size: 22px;
+  letter-spacing: 0.14em;
+}
+.sp-links {
+  display: flex;
+  gap: 34px;
+  margin-left: auto;
+  color: var(--sp-muted);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sp-burger {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: auto;
+}
+.sp-burger i {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--sp-text);
+}
+
+/* ----- Przyciski ----- */
+.sp-btn {
+  display: inline-block;
+  padding: 17px 34px;
+  border-radius: var(--sp-btn-radius);
+  background: var(--sp-accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 12px 30px -12px color-mix(in srgb, var(--sp-accent) 80%, transparent);
+}
+.sp-dark .sp-btn {
+  color: #0e0e10;
+  font-weight: 600;
+}
+.sp-pastel .sp-btn {
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 16px;
+  font-weight: 600;
+}
+.sp-btn-small {
+  padding: 12px 22px;
+  font-size: 12px;
+  box-shadow: none;
+}
+.sp-pastel .sp-btn-small {
+  font-size: 14px;
+}
+.sp .sp-btn-ghost {
+  background: transparent;
+  color: var(--sp-text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 55%, transparent);
+}
+.sp .sp-hero-photo .sp-btn-ghost {
+  color: #fff;
+}
+.sp .sp-btn-inverse {
+  background: var(--sp-bg);
+  color: var(--sp-text);
+  box-shadow: none;
+}
+
+/* ----- Nagłówek strony (hero) ----- */
+.sp-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 690px;
+  padding: 90px 72px;
+  overflow: hidden;
+  background: var(--sp-surface);
+}
+.sp-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sp-hero-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(8 8 10 / 0.86) 0%, rgb(8 8 10 / 0.55) 45%, rgb(8 8 10 / 0.1) 100%);
+}
+.sp-hero-photo .sp-hero-inner {
+  color: #fff;
+}
+/* Tło bez zdjęcia: poświata w kolorze salonu, delikatny wzór i okrąg – żeby nie było pustej plamy. */
+.sp-hero-art {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 78% 42%, color-mix(in srgb, var(--sp-accent) 38%, transparent), transparent 38%),
+    radial-gradient(circle at 10% 110%, color-mix(in srgb, var(--sp-accent) 18%, transparent), transparent 45%),
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--sp-text) 3%, transparent) 0 1px, transparent 1px 18px);
+}
+.sp-hero-art::before,
+.sp-hero-art::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 78%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--sp-accent) 45%, transparent);
+  transform: translate(-50%, -50%);
+}
+.sp-hero-art::before {
+  width: 440px;
+  height: 440px;
+}
+.sp-hero-art::after {
+  width: 600px;
+  height: 600px;
+  border-color: color-mix(in srgb, var(--sp-accent) 22%, transparent);
+}
+.sp-hero-inner {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  max-width: 660px;
+}
+.sp-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 26px;
+  color: var(--sp-accent);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+.sp-eyebrow::before {
+  content: '';
+  width: 42px;
+  height: 1px;
+  background: currentColor;
+}
+.sp-hero h1 {
+  --sp-fit: 640px;
+  margin-bottom: 26px;
+  font-size: min(var(--sp-h1), calc(var(--sp-fit) / (var(--sp-word, 8) * var(--sp-char))));
+  line-height: 0.98;
+  overflow-wrap: anywhere;
+}
+.sp-hero-split h1 {
+  --sp-fit: 540px;
+}
+.sp-hero-centered h1 {
+  --sp-fit: 800px;
+}
+.sp-tagline {
+  max-width: 520px;
+  margin-bottom: 42px;
+  font-size: 20px;
+  font-weight: 300;
+  opacity: 0.85;
+}
+.sp-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* Karta z oceną Google. */
+.sp-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 44px;
+  padding: 14px 22px 14px 18px;
+  border-radius: calc(var(--sp-radius) * 0.75);
+  background: color-mix(in srgb, var(--sp-bg) 92%, transparent);
+  color: var(--sp-text);
+  box-shadow: 0 20px 45px -18px rgb(0 0 0 / 0.45);
+  line-height: 1.25;
+}
+.sp-pastel .sp-rating {
+  border-radius: 20px;
+}
+.sp-rating > strong {
+  font-family: var(--sp-heading);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1;
+}
+.sp-rating > div {
+  display: grid;
+  font-size: 13px;
+  color: var(--sp-muted);
+}
+.sp-stars {
+  color: #f2b01e;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+
+/* Wariant "Obok zdjęcia". */
+.sp-hero-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 64px;
+}
+.sp-hero-media {
+  position: relative;
+  justify-self: end;
+  width: 100%;
+  max-width: 440px;
+}
+.sp-hero-frame {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: calc(var(--sp-radius) * 1.5) calc(var(--sp-radius) * 1.5) var(--sp-radius) calc(var(--sp-radius) * 6);
+  background:
+    radial-gradient(circle at 30% 25%, color-mix(in srgb, #fff 35%, transparent), transparent 45%),
+    linear-gradient(150deg, var(--sp-accent), color-mix(in srgb, var(--sp-accent) 55%, var(--sp-text)));
+}
+.sp-dark .sp-hero-frame {
+  border-radius: var(--sp-radius);
+}
+.sp-hero-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sp-hero-media::before {
+  content: '';
+  position: absolute;
+  inset: 26px -26px -26px 26px;
+  border: 1px solid color-mix(in srgb, var(--sp-accent) 70%, transparent);
+  border-radius: inherit;
+  border-radius: var(--sp-radius);
+}
+.sp-hero-small {
+  position: absolute;
+  left: -70px;
+  bottom: 90px;
+  width: 170px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 6px solid var(--sp-bg);
+  border-radius: var(--sp-radius);
+  box-shadow: 0 20px 40px -15px rgb(0 0 0 / 0.4);
+}
+.sp-hero-media .sp-rating {
+  position: absolute;
+  right: -24px;
+  bottom: -24px;
+  margin: 0;
+}
+.sp-monogram {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--sp-heading);
+  font-size: 220px;
+  font-style: italic;
+  color: rgb(255 255 255 / 0.9);
+}
+
+/* Wariant "Wyśrodkowany". */
+.sp-hero-centered {
+  justify-content: center;
+  text-align: center;
+}
+.sp-hero-centered .sp-hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 820px;
+}
+.sp-hero-centered .sp-eyebrow::after {
+  content: '';
+  width: 42px;
+  height: 1px;
+  background: currentColor;
+}
+.sp-hero-centered .sp-cta {
+  justify-content: center;
+}
+.sp-hero-centered.sp-hero-photo::after {
+  background: radial-gradient(ellipse at center, rgb(8 8 10 / 0.72), rgb(8 8 10 / 0.5));
+}
+.sp-hero-centered .sp-hero-art {
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--sp-accent) 26%, transparent), transparent 55%),
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--sp-text) 3%, transparent) 0 1px, transparent 1px 18px);
+}
+.sp-hero-centered .sp-hero-art::before,
+.sp-hero-centered .sp-hero-art::after {
+  left: 50%;
+}
+.sp-hero-centered .sp-hero-art::before {
+  width: 640px;
+  height: 640px;
+}
+.sp-hero-centered .sp-hero-art::after {
+  width: 860px;
+  height: 860px;
+}
+
+/* ----- Atuty pod nagłówkiem ----- */
+.sp-features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: 1px solid var(--sp-line);
+}
+.sp-feature {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 34px 40px 34px 72px;
+}
+.sp-feature + .sp-feature {
+  border-left: 1px solid var(--sp-line);
+  padding-left: 40px;
+}
+.sp-feature-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  flex: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sp-accent) 14%, transparent);
+  color: var(--sp-accent);
+}
+.sp-feature div {
+  display: grid;
+  gap: 2px;
+  line-height: 1.35;
+}
+.sp-feature strong {
+  font-size: 17px;
+  font-weight: 600;
+}
+.sp-feature span {
+  color: var(--sp-muted);
+  font-size: 14px;
+}
+
+/* ----- Sekcje ----- */
+.sp-section {
+  padding: 96px 72px;
+}
+.sp-kicker {
+  margin-bottom: 10px;
+  color: var(--sp-accent);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+.sp-section h2 {
+  margin-bottom: 44px;
+  font-size: 58px;
+  line-height: 1.05;
+}
+.sp-dark .sp-section h2 {
+  font-size: 50px;
+}
+
+.sp-pricing {
+  background: var(--sp-bg);
+}
+.sp-services {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 72px;
+}
+.sp-services li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--sp-line);
+  font-size: 18px;
+}
+.sp-dots {
+  flex: 1;
+  border-bottom: 1px dotted color-mix(in srgb, var(--sp-text) 30%, transparent);
+  transform: translateY(-5px);
+}
+.sp-services strong {
+  color: var(--sp-accent);
+  font-family: var(--sp-heading);
+  font-size: 22px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sp-gallery-section {
+  background: var(--sp-surface);
+}
+.sp-gallery {
+  display: grid;
+  gap: 18px;
+}
+.sp-gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--sp-radius);
+}
+.sp-gallery-1 img {
+  aspect-ratio: 21 / 9;
+}
+.sp-gallery-2 {
+  grid-template-columns: 1fr 1fr;
+}
+.sp-gallery-2 img {
+  aspect-ratio: 4 / 3;
+}
+/* Kolaż: duże zdjęcie po lewej, dwa mniejsze jedno nad drugim. */
+.sp-gallery-3 {
+  grid-template-columns: 1.4fr 1fr;
+  grid-template-rows: 250px 250px;
+}
+.sp-gallery-3 img:first-child {
+  grid-row: span 2;
+}
+
+/* ----- Pasek rezerwacji ----- */
+.sp-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 72px;
+  background:
+    radial-gradient(circle at 90% 0%, rgb(255 255 255 / 0.22), transparent 45%),
+    linear-gradient(120deg, var(--sp-accent), color-mix(in srgb, var(--sp-accent) 70%, #000));
+  color: #fff;
+}
+.sp-band h2 {
+  max-width: 700px;
+  font-size: 44px;
+  line-height: 1.1;
+}
+.sp-dark .sp-band {
+  color: #0e0e10;
+}
+
+/* ----- Kontakt z mapką ----- */
+.sp-contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 64px;
+  align-items: center;
+}
+.sp-contact h2 {
+  margin-bottom: 32px;
+}
+.sp-contact-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+  font-size: 17px;
+}
+.sp-contact-list li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sp-contact-list .sp-icon {
+  color: var(--sp-accent);
+}
+/* Stylizowana mapa – ulice z gradientów, bez zewnętrznych kafelków. */
+.sp-map {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  border-radius: var(--sp-radius);
+  background:
+    linear-gradient(28deg, transparent 47%, color-mix(in srgb, var(--sp-text) 9%, transparent) 47% 53%, transparent 53%),
+    linear-gradient(-62deg, transparent 30%, color-mix(in srgb, var(--sp-text) 7%, transparent) 30% 33%, transparent 33%),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--sp-text) 5%, transparent) 0 2px, transparent 2px 64px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--sp-text) 5%, transparent) 0 2px, transparent 2px 82px),
+    radial-gradient(circle at 20% 80%, color-mix(in srgb, #6fae6f 22%, transparent), transparent 22%),
+    var(--sp-surface);
+}
+.sp-map-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  background: var(--sp-accent);
+  color: #fff;
+  box-shadow:
+    0 0 0 12px color-mix(in srgb, var(--sp-accent) 25%, transparent),
+    0 0 0 26px color-mix(in srgb, var(--sp-accent) 12%, transparent);
+}
+
+.sp-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px 72px;
+  border-top: 1px solid var(--sp-line);
+  color: var(--sp-muted);
+  font-size: 13px;
+}
+
+/* =====================================================================
+   Wersja telefonu (kontener węższy niż 600 px)
+   ===================================================================== */
+@container (max-width: 600px) {
+  .sp {
+    --sp-h1: 50px;
+  }
+  .sp-dark {
+    --sp-h1: 54px;
+  }
+  .sp-pastel {
+    --sp-h1: 46px;
+  }
+  .sp-nav {
+    padding: 18px 22px;
+    gap: 12px;
+  }
+  .sp-logo {
+    font-size: 22px;
+    max-width: 280px;
+  }
+  .sp-dark .sp-logo {
+    font-size: 17px;
+  }
+  .sp-links,
+  .sp-nav-cta {
+    display: none;
+  }
+  .sp-burger {
+    display: flex;
+  }
+  .sp-hero {
+    min-height: 600px;
+    padding: 56px 24px 48px;
+    align-items: flex-end;
+  }
+  .sp-hero-photo::after {
+    background: linear-gradient(0deg, rgb(8 8 10 / 0.9) 0%, rgb(8 8 10 / 0.55) 55%, rgb(8 8 10 / 0.15) 100%);
+  }
+  .sp-hero-art::before {
+    top: 26%;
+    left: 70%;
+    width: 280px;
+    height: 280px;
+  }
+  .sp-hero-art::after {
+    top: 26%;
+    left: 70%;
+    width: 400px;
+    height: 400px;
+  }
+  .sp-eyebrow {
+    margin-bottom: 18px;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+  }
+  .sp-eyebrow::before,
+  .sp-hero-centered .sp-eyebrow::after {
+    width: 26px;
+  }
+  .sp-hero h1 {
+    --sp-fit: calc(100cqw - 48px);
+    margin-bottom: 18px;
+  }
+  .sp-hero-inner {
+    width: 100%;
+  }
+  .sp-tagline {
+    margin-bottom: 30px;
+    font-size: 17px;
+  }
+  .sp-cta {
+    width: 100%;
+  }
+  .sp-cta .sp-btn {
+    flex: 1;
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .sp-rating {
+    margin-top: 28px;
+  }
+  .sp-rating > strong {
+    font-size: 32px;
+  }
+
+  .sp-hero-split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 60px;
+    min-height: 0;
+    padding-top: 32px;
+  }
+  .sp-hero-media {
+    order: -1;
+    justify-self: stretch;
+    max-width: none;
+    padding-right: 18px;
+  }
+  .sp-hero-frame {
+    aspect-ratio: 1 / 1;
+  }
+  .sp-hero-media::before {
+    inset: 18px 0 -18px 18px;
+  }
+  .sp-hero-small {
+    display: none;
+  }
+  .sp-hero-media .sp-rating {
+    right: 0;
+    bottom: -30px;
+  }
+  .sp-monogram {
+    font-size: 150px;
+  }
+
+  .sp-hero-centered .sp-hero-art::before {
+    top: 32%;
+    left: 50%;
+    width: 320px;
+    height: 320px;
+  }
+  .sp-hero-centered .sp-hero-art::after {
+    top: 32%;
+    left: 50%;
+    width: 460px;
+    height: 460px;
+  }
+
+  .sp-features {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 8px 24px;
+  }
+  .sp-feature,
+  .sp-feature + .sp-feature {
+    padding: 18px 0;
+    border-left: none;
+  }
+  .sp-feature + .sp-feature {
+    border-top: 1px solid var(--sp-line);
+  }
+  .sp-feature-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .sp-section {
+    padding: 60px 24px;
+  }
+  .sp-section h2,
+  .sp-dark .sp-section h2 {
+    margin-bottom: 26px;
+    font-size: 40px;
+  }
+  .sp-kicker {
+    font-size: 11px;
+  }
+  .sp-services {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sp-services li {
+    padding: 16px 0;
+    font-size: 16px;
+  }
+  .sp-services strong {
+    font-size: 19px;
+  }
+  .sp-gallery {
+    gap: 10px;
+  }
+  .sp-gallery-2 {
+    grid-template-columns: 1fr;
+  }
+  .sp-gallery-3 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 220px 150px;
+  }
+  .sp-gallery-3 img:first-child {
+    grid-row: auto;
+    grid-column: span 2;
+  }
+  .sp-band {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+    padding: 48px 24px;
+  }
+  .sp-band h2 {
+    font-size: 32px;
+  }
+  .sp-band .sp-btn {
+    text-align: center;
+  }
+  .sp-contact {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+  .sp-map {
+    height: 220px;
+  }
+  .sp-footer {
+    flex-direction: column;
+    gap: 4px;
+    padding: 24px;
+  }
+}
+
+/* Cormorant domyślnie rysuje cyfry "nautyczne" (110 wygląda jak ııo) – w cenach i ocenie chcemy zwykłe. */
+.sp {
+  font-variant-numeric: lining-nums;
+}

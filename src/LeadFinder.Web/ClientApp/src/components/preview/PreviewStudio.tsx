@@ -2,7 +2,13 @@ import { toBlob, toPng } from 'html-to-image';
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type Ref } from 'react';
 import { useLatest } from '../../hooks/useLatest';
 import type { Lead } from '../../types';
-import { initialPreviewData, servicesToText, textToServices, type PreviewData, type PreviewStyle } from './presets';
+import {
+  featuresToText,
+  initialPreviewData,
+  servicesToText,
+  textToFeatures,
+  textToServices,
+  type HeroLayout, type PreviewData, type PreviewStyle } from './presets';
 import { SitePreview } from './SitePreview';
 import './preview.css';
 
@@ -12,7 +18,20 @@ interface Props {
   onError: (message: string) => void;
 }
 
-type Layout = 'combo' | 'phone';
+type Layout = 'combo' | 'desktop' | 'phone' | 'phones';
+
+const LAYOUTS: { value: Layout; label: string }[] = [
+  { value: 'combo', label: 'Laptop + telefon' },
+  { value: 'desktop', label: 'Laptop' },
+  { value: 'phone', label: 'Telefon' },
+  { value: 'phones', label: '2 telefony' },
+];
+
+const HEROES: { value: HeroLayout; label: string }[] = [
+  { value: 'overlay', label: 'Zdjęcie w tle' },
+  { value: 'split', label: 'Obok zdjęcia' },
+  { value: 'centered', label: 'Wyśrodkowany' },
+];
 
 const STYLES: { value: PreviewStyle; label: string }[] = [
   { value: 'dark', label: 'Ciemny' },
@@ -23,10 +42,15 @@ const STYLES: { value: PreviewStyle; label: string }[] = [
 const SWATCHES = ['#c8a165', '#b08968', '#c48b8b', '#d9779f', '#7d8f6e', '#5f93a8', '#d64545', '#4f46e5'];
 
 /** Szerokość płótna w pikselach – eksport ma zawsze ten sam rozmiar, niezależnie od okna. */
-const CANVAS_WIDTH: Record<Layout, number> = { combo: 1000, phone: 520 };
+const CANVAS_SIZE: Record<Layout, { width: number; height: number }> = {
+  combo: { width: 1000, height: 620 },
+  desktop: { width: 1000, height: 720 },
+  phone: { width: 520, height: 900 },
+  phones: { width: 880, height: 900 },
+};
 
 /** Tekstowe pola makiety zapamiętane per lead (bez zdjęć – te są tylko w pamięci przeglądarki). */
-const storageKey = (leadId: number) => `leadfinder.preview.${leadId}`;
+const storageKey = (leadId: number) => `leadfinder.preview.v2.${leadId}`;
 
 // Bez cacheBust: doklejany "?czas" psuje adresy blob: wgranych zdjęć i eksport kończy się błędem.
 const EXPORT_OPTIONS = { pixelRatio: 2 } as const;
@@ -38,6 +62,7 @@ const EXPORT_OPTIONS = { pixelRatio: 2 } as const;
 export function PreviewStudio({ lead, onClose, onError }: Props) {
   const [data, setData] = useState<PreviewData>(() => loadSaved(lead) ?? initialPreviewData(lead));
   const [servicesText, setServicesText] = useState(() => servicesToText(data.services));
+  const [featuresText, setFeaturesText] = useState(() => featuresToText(data.features));
   const [layout, setLayout] = useState<Layout>('combo');
   const [busy, setBusy] = useState<'download' | 'copy' | null>(null);
   const [copied, setCopied] = useState(false);
@@ -73,11 +98,11 @@ export function PreviewStudio({ lead, onClose, onError }: Props) {
     const stage = stageRef.current;
     if (!stage) return;
     const update = () => {
-      const byWidth = (stage.clientWidth - 32) / CANVAS_WIDTH[layout];
+      const byWidth = (stage.clientWidth - 32) / CANVAS_SIZE[layout].width;
       // Na szerokim ekranie scena ma własny scroll i stałą wysokość – mieścimy płótno też na wysokość
       // (pasek narzędzi + podpowiedź + odstępy ≈ 120 px). Na wąskim scena rośnie z treścią, więc tylko szerokość.
       const fixedHeight = getComputedStyle(stage).overflowY === 'auto';
-      const byHeight = fixedHeight ? (stage.clientHeight - 120) / canvasHeight(layout) : Infinity;
+      const byHeight = fixedHeight ? (stage.clientHeight - 120) / CANVAS_SIZE[layout].height : Infinity;
       setStageScale(Math.max(0.2, Math.min(1, byWidth, byHeight)));
     };
     update();
@@ -163,14 +188,36 @@ export function PreviewStudio({ lead, onClose, onError }: Props) {
             </label>
 
             <label className="field">
-              <span className="field-label">Napis nad nazwą</span>
+              <span className="field-label">Podpis nad nazwą</span>
               <input
                 className="input"
-                value={data.badge}
-                onChange={(e) => set('badge', e.target.value)}
-                placeholder="np. ★ 4,9 · 312 opinii w Google"
+                value={data.eyebrow}
+                onChange={(e) => set('eyebrow', e.target.value)}
+                placeholder="np. Barbershop · Katowice"
               />
             </label>
+
+            <div className="field-grid">
+              <label className="field">
+                <span className="field-label">Ocena Google</span>
+                <input
+                  className="input"
+                  value={data.rating}
+                  onChange={(e) => set('rating', e.target.value)}
+                  placeholder="np. 4,9"
+                />
+              </label>
+              <label className="field">
+                <span className="field-label">Liczba opinii</span>
+                <input
+                  className="input"
+                  value={data.reviews}
+                  onChange={(e) => set('reviews', e.target.value)}
+                  placeholder="np. 312"
+                />
+              </label>
+            </div>
+            <span className="hint studio-hint-tight">Puste pole oceny = bez karty z opiniami.</span>
 
             <div className="field">
               <span className="field-label">Styl</span>
@@ -185,6 +232,24 @@ export function PreviewStudio({ lead, onClose, onError }: Props) {
                     onClick={() => set('style', s.value)}
                   >
                     {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="field">
+              <span className="field-label">Układ strony</span>
+              <div className="segmented" role="radiogroup" aria-label="Układ nagłówka strony">
+                {HEROES.map((h) => (
+                  <button
+                    key={h.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={data.hero === h.value}
+                    className={data.hero === h.value ? 'active' : ''}
+                    onClick={() => set('hero', h.value)}
+                  >
+                    {h.label}
                   </button>
                 ))}
               </div>
@@ -238,9 +303,16 @@ export function PreviewStudio({ lead, onClose, onError }: Props) {
                   </label>
                 )}
               </div>
-              <span className="hint">
-                Zapisz 3–4 zdjęcia z Instagrama salonu i wgraj tutaj. Makieta jest tylko do wysłania im prywatnie.
-              </span>
+              {data.photos.length === 0 ? (
+                <span className="hint warning">
+                  Zdjęcia robią największe wrażenie – zapisz 3–4 z Instagrama salonu (wnętrze, efekty pracy) i wgraj
+                  tutaj. Salon od razu rozpozna swoje miejsce.
+                </span>
+              ) : (
+                <span className="hint">
+                  Pierwsze to tło nagłówka, kolejne trafiają do galerii. Makieta jest tylko do wysłania im prywatnie.
+                </span>
+              )}
             </div>
 
             <label className="field">
@@ -257,6 +329,25 @@ export function PreviewStudio({ lead, onClose, onError }: Props) {
               <span className="hint warning">
                 Ceny są przykładowe – wpisz prawdziwe z ich Booksy/Instagrama albo usuń linie.
               </span>
+            </label>
+
+            <label className="field">
+              <span className="field-label">Atuty (tytuł | opis, max 3)</span>
+              <textarea
+                className="input textarea"
+                rows={3}
+                value={featuresText}
+                onChange={(e) => {
+                  setFeaturesText(e.target.value);
+                  set('features', textToFeatures(e.target.value));
+                }}
+              />
+              <span className="hint">Jeśli salon czymś się wyróżnia (np. na Instagramie), wpisz to tutaj.</span>
+            </label>
+
+            <label className="field">
+              <span className="field-label">Hasło w pasku rezerwacji</span>
+              <input className="input" value={data.ctaTitle} onChange={(e) => set('ctaTitle', e.target.value)} />
             </label>
 
             <label className="field">
@@ -281,6 +372,7 @@ export function PreviewStudio({ lead, onClose, onError }: Props) {
                 const fresh = { ...initialPreviewData(lead), photos: data.photos };
                 setData(fresh);
                 setServicesText(servicesToText(fresh.services));
+                setFeaturesText(featuresToText(fresh.features));
               }}
             >
               Przywróć ustawienia startowe
@@ -289,25 +381,19 @@ export function PreviewStudio({ lead, onClose, onError }: Props) {
 
           <section className="studio-stage" ref={stageRef}>
             <div className="studio-toolbar">
-              <div className="segmented segmented-2" role="radiogroup" aria-label="Układ obrazka">
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={layout === 'combo'}
-                  className={layout === 'combo' ? 'active' : ''}
-                  onClick={() => setLayout('combo')}
-                >
-                  Laptop + telefon
-                </button>
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={layout === 'phone'}
-                  className={layout === 'phone' ? 'active' : ''}
-                  onClick={() => setLayout('phone')}
-                >
-                  Tylko telefon
-                </button>
+              <div className="segmented segmented-4" role="radiogroup" aria-label="Układ obrazka">
+                {LAYOUTS.map((l) => (
+                  <button
+                    key={l.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={layout === l.value}
+                    className={layout === l.value ? 'active' : ''}
+                    onClick={() => setLayout(l.value)}
+                  >
+                    {l.label}
+                  </button>
+                ))}
               </div>
               <div className="button-row">
                 <button className="button button-small" onClick={() => void copyImage()} disabled={busy !== null}>
@@ -323,7 +409,7 @@ export function PreviewStudio({ lead, onClose, onError }: Props) {
               </div>
             </div>
 
-            <div className="studio-canvas-holder" style={{ height: canvasHeight(layout) * stageScale }}>
+            <div className="studio-canvas-holder" style={{ height: CANVAS_SIZE[layout].height * stageScale }}>
               <div style={{ transform: `scale(${stageScale})`, transformOrigin: 'top left' }}>
                 <PreviewCanvas ref={canvasRef} data={data} layout={layout} />
               </div>
@@ -338,17 +424,15 @@ export function PreviewStudio({ lead, onClose, onError }: Props) {
   );
 }
 
-const canvasHeight = (layout: Layout) => (layout === 'combo' ? 620 : 900);
-
 /** Płótno eksportu: tło w kolorze salonu + ramki urządzeń z makietą w środku. */
 function PreviewCanvas({ data, layout, ref }: { data: PreviewData; layout: Layout; ref: Ref<HTMLDivElement> }) {
   return (
     <div
       ref={ref}
       className={`pv-canvas pv-layout-${layout} pv-bg-${data.style}`}
-      style={{ '--sp-accent': data.accent, width: CANVAS_WIDTH[layout], height: canvasHeight(layout) } as CSSProperties}
+      style={{ '--sp-accent': data.accent, ...CANVAS_SIZE[layout] } as CSSProperties}
     >
-      {layout === 'combo' && (
+      {(layout === 'combo' || layout === 'desktop') && (
         <div className="pv-laptop">
           <div className="pv-laptop-bar">
             <i />
@@ -362,11 +446,18 @@ function PreviewCanvas({ data, layout, ref }: { data: PreviewData; layout: Layou
           </div>
         </div>
       )}
-      <div className="pv-phone">
-        <div className="pv-phone-screen">
-          <div className="pv-scale pv-scale-phone">
-            <SitePreview data={data} />
-          </div>
+      {layout !== 'desktop' && <PhoneFrame data={data} from="top" />}
+      {layout === 'phones' && <PhoneFrame data={data} from="services" />}
+    </div>
+  );
+}
+
+function PhoneFrame({ data, from }: { data: PreviewData; from: 'top' | 'services' }) {
+  return (
+    <div className="pv-phone">
+      <div className="pv-phone-screen">
+        <div className="pv-scale pv-scale-phone">
+          <SitePreview data={data} from={from} />
         </div>
       </div>
     </div>

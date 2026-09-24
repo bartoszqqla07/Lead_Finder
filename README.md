@@ -150,11 +150,17 @@ i informacja o problemie bez oferty niosą najmniejsze ryzyko. To nie jest porad
 ### 🎨 Kreator podglądu strony
 
 Gdy salon zgodzi się na podgląd, nie trzeba mieć gotowych makiet. Przycisk **„Kreator podglądu strony”** w panelu leada
-składa w kilka minut obrazek „tak mogłaby wyglądać Wasza strona” (laptop + telefon albo sam telefon):
+składa w kilka minut obrazek „tak mogłaby wyglądać Wasza strona”. Obrazek ma cztery układy: laptop + telefon,
+sam laptop, sam telefon albo dwa telefony (strona główna i cennik):
 
-- nazwa, hasło i telefon podstawiają się z danych leada; przy dobrej ocenie w Google pojawia się napis
-  „★ 4,9 · 312 opinii w Google”;
+- makieta wygląda jak gotowa strona: nagłówek ze zdjęciem, karta z oceną Google (przy dobrej ocenie),
+  atuty salonu z ikonami, cennik, galeria, pasek rezerwacji i kontakt z mapką;
+- każdy styl ma własne czcionki (dołączone do aplikacji, działają offline i trafiają do PNG), a wielkość nazwy
+  dopasowuje się do jej długości;
+- nazwa, telefon, adres i ocena podstawiają się z danych leada, a teksty (atuty, hasła) dobierają się do branży;
 - styl (ciemny / jasny / pastelowy), kolor przewodni i przykładowy cennik dobierają się do branży. Wszystko można edytować;
+- układ strony: zdjęcie w tle, tekst obok zdjęcia albo wszystko wyśrodkowane. Ta sama treść wygląda wtedy zupełnie
+  inaczej, więc łatwo pokazać, że strona nie jest z szablonu;
 - zdjęcia (do 4) wgrywasz z Instagrama salonu. Zostają tylko w przeglądarce i znikają po zamknięciu kreatora.
   Makieta służy wyłącznie do prywatnego wysłania salonowi, nie do publikacji;
 - **„Kopiuj obraz”** wkleja się (Ctrl+V) prosto w wiadomość na Instagramie lub Messengerze, **„Pobierz PNG”** zapisuje plik.

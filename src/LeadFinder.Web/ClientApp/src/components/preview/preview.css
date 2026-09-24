@@ -45,6 +45,13 @@
 .studio-toolbar .segmented {
   min-width: 280px;
 }
+.studio-toolbar .segmented-4 {
+  grid-template-columns: repeat(4, auto);
+  min-width: 0;
+}
+.segmented-4 button {
+  padding-inline: 12px;
+}
 .studio-canvas-holder {
   overflow: hidden;
   border-radius: 12px;
@@ -175,7 +182,7 @@
 /* Laptop: strona w szerokości 1280 px pomniejszona do ekranu 704×440 (skala 0,55). */
 .pv-laptop {
   position: absolute;
-  left: 40px;
+  left: 32px;
   top: 60px;
   width: 720px;
   padding: 0 8px 8px;
@@ -201,15 +208,44 @@
   border-radius: 4px;
   background: #fff;
 }
+/* Podstawa laptopa w tym samym grafitowym kolorze co obudowa – jasna wyglądała jak biała kreska na ciemnym tle. */
 .pv-laptop::after {
   content: '';
   position: absolute;
-  left: -34px;
-  right: -34px;
-  bottom: -16px;
-  height: 16px;
-  border-radius: 0 0 14px 14px;
-  background: linear-gradient(#cfd0d4, #9c9da3);
+  left: -24px;
+  right: -24px;
+  bottom: -14px;
+  height: 14px;
+  border-radius: 2px 2px 14px 14px;
+  background: linear-gradient(#34343b, #1b1b20 60%, #101013);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+/* Wcięcie na otwieranie klapy. */
+.pv-laptop::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: -14px;
+  width: 120px;
+  height: 5px;
+  margin-left: -60px;
+  border-radius: 0 0 8px 8px;
+  background: #0b0b0d;
+}
+
+/* Sam laptop – większy ekran (strona 1280 px w skali 0,6875). */
+.pv-layout-desktop .pv-laptop {
+  left: 52px;
+  top: 56px;
+  width: 896px;
+}
+.pv-layout-desktop .pv-laptop-screen {
+  width: 880px;
+  height: 550px;
+}
+.pv-layout-desktop .pv-scale-desktop {
+  transform: scale(0.6875);
 }
 
 /* Telefon: strona w szerokości 390 px pomniejszona do ekranu 234×506 (skala 0,6). */
@@ -221,7 +257,7 @@
   box-shadow: 0 30px 60px rgb(0 0 0 / 0.4);
 }
 .pv-layout-combo .pv-phone {
-  right: 40px;
+  right: 20px;
   bottom: 36px;
 }
 .pv-phone-screen {
@@ -251,16 +287,31 @@
 }
 
 /* Sam telefon – większy, do wklejenia w wiadomość (wysoki obrazek dobrze wygląda na Instagramie). */
-.pv-layout-phone {
+.pv-layout-phone,
+.pv-layout-phones {
   display: grid;
   place-items: center;
 }
-.pv-layout-phone .pv-phone {
+.pv-layout-phone .pv-phone,
+.pv-layout-phones .pv-phone {
   position: relative;
 }
-.pv-layout-phone .pv-phone-screen {
+.pv-layout-phone .pv-phone-screen,
+.pv-layout-phones .pv-phone-screen {
   width: 351px;
   height: 760px;
+}
+/* Dwa telefony: strona główna i ta sama strona przewinięta do cennika, lekko przesunięte względem siebie. */
+.pv-layout-phones {
+  grid-template-columns: repeat(2, auto);
+  justify-content: center;
+  gap: 36px;
+}
+.pv-layout-phones .pv-phone:first-child {
+  transform: translateY(-24px);
+}
+.pv-layout-phones .pv-phone:last-child {
+  transform: translateY(24px);
 }
 
 .pv-scale {
@@ -274,311 +325,13 @@
   width: 390px;
   transform: scale(0.6);
 }
-.pv-layout-phone .pv-scale-phone {
+.pv-layout-phone .pv-scale-phone,
+.pv-layout-phones .pv-scale-phone {
   transform: scale(0.9);
 }
 
-/* =====================================================================
-   Makieta strony (sp-*). Układ zależy od szerokości kontenera, nie okna.
-   ===================================================================== */
-.sp {
-  --sp-bg: #ffffff;
-  --sp-surface: #f6f3ef;
-  --sp-text: #1d1b19;
-  --sp-muted: #6f6962;
-  --sp-heading: Georgia, 'Times New Roman', serif;
-  --sp-radius: 6px;
-  container-type: inline-size;
-  min-height: 100%;
-  background: var(--sp-bg);
-  color: var(--sp-text);
-  font: 16px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-.sp-dark {
-  --sp-bg: #121214;
-  --sp-surface: #1c1c20;
-  --sp-text: #f2efe9;
-  --sp-muted: #a39d94;
-  --sp-heading: 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
-  --sp-radius: 2px;
-}
-.sp-pastel {
-  --sp-bg: #fffafc;
-  --sp-surface: #fbeef3;
-  --sp-text: #3b2b33;
-  --sp-muted: #8a7580;
-  --sp-heading: 'Segoe UI', system-ui, sans-serif;
-  --sp-radius: 999px;
-}
-.sp * {
-  box-sizing: border-box;
-}
 
-.sp-nav {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  padding: 22px 56px;
-  border-bottom: 1px solid color-mix(in srgb, var(--sp-text) 10%, transparent);
-}
-.sp-logo {
-  font-family: var(--sp-heading);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 360px;
-}
-.sp-dark .sp-logo {
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-.sp-links {
-  display: flex;
-  gap: 28px;
-  margin-left: auto;
-  color: var(--sp-muted);
-  font-size: 15px;
-}
-.sp-burger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  margin-left: auto;
-}
-.sp-burger i {
-  display: block;
-  width: 24px;
-  height: 2px;
-  background: var(--sp-text);
-}
-
-.sp-btn {
-  display: inline-block;
-  padding: 14px 28px;
-  border-radius: var(--sp-radius);
-  background: var(--sp-accent);
-  color: #fff;
-  font-weight: 600;
-  font-size: 16px;
-  white-space: nowrap;
-}
-.sp-dark .sp-btn {
-  color: #121214;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 14px;
-}
-.sp-btn-small {
-  padding: 10px 20px;
-  font-size: 14px;
-}
-.sp-btn-ghost {
-  background: transparent;
-  color: var(--sp-text);
-  box-shadow: inset 0 0 0 1.5px currentColor;
-}
-.sp-hero-photo .sp-btn-ghost {
-  color: #fff;
-}
-
-.sp-hero {
-  position: relative;
-  min-height: 560px;
-  display: flex;
-  align-items: center;
-  padding: 80px 56px;
-  overflow: hidden;
-  background: radial-gradient(circle at 75% 30%, color-mix(in srgb, var(--sp-accent) 45%, transparent), transparent 60%),
-    var(--sp-surface);
-}
-.sp-hero-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.sp-hero-photo::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.25) 70%, rgb(0 0 0 / 0.1));
-}
-.sp-hero-inner {
-  position: relative;
-  z-index: 1;
-  max-width: 640px;
-}
-.sp-hero-photo .sp-hero-inner {
-  color: #fff;
-}
-.sp-badge {
-  display: inline-block;
-  margin: 0 0 18px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--sp-accent) 22%, transparent);
-  font-size: 14px;
-  font-weight: 600;
-}
-.sp-hero h1 {
-  margin: 0 0 16px;
-  font-family: var(--sp-heading);
-  font-size: 64px;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-}
-.sp-dark .sp-hero h1 {
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.sp-light .sp-hero h1 {
-  font-style: italic;
-  font-weight: 500;
-}
-.sp-tagline {
-  margin: 0 0 32px;
-  font-size: 20px;
-  opacity: 0.85;
-}
-.sp-cta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-}
-
-.sp-section {
-  padding: 72px 56px;
-}
-.sp-section h2 {
-  margin: 0 0 28px;
-  font-family: var(--sp-heading);
-  font-size: 36px;
-}
-.sp-dark .sp-section h2 {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 30px;
-}
-.sp-section h2::after {
-  content: '';
-  display: block;
-  width: 48px;
-  height: 3px;
-  margin-top: 10px;
-  background: var(--sp-accent);
-}
-.sp-services {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 56px;
-}
-.sp-services li {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  font-size: 17px;
-}
-.sp-dots {
-  flex: 1;
-  border-bottom: 1.5px dotted color-mix(in srgb, var(--sp-text) 30%, transparent);
-  transform: translateY(-4px);
-}
-.sp-services strong {
-  color: var(--sp-accent);
-  white-space: nowrap;
-}
-.sp-gallery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-.sp-gallery img {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  border-radius: 8px;
-}
-.sp-pastel .sp-gallery img {
-  border-radius: 20px;
-}
-.sp-footer {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 32px;
-  padding: 48px 56px;
-  background: var(--sp-surface);
-  font-size: 15px;
-}
-.sp-footer h3 {
-  margin: 0 0 10px;
-  font-family: var(--sp-heading);
-  font-size: 18px;
-}
-.sp-footer p {
-  margin: 0 0 4px;
-  color: var(--sp-muted);
-}
-
-/* Wersja telefonu (kontener węższy niż 600 px). */
-@container (max-width: 600px) {
-  .sp-nav {
-    padding: 16px 20px;
-    gap: 12px;
-  }
-  .sp-logo {
-    font-size: 18px;
-    max-width: 260px;
-  }
-  .sp-links,
-  .sp-nav-cta {
-    display: none;
-  }
-  .sp-burger {
-    display: flex;
-  }
-  .sp-hero {
-    min-height: 520px;
-    padding: 48px 22px;
-    align-items: flex-end;
-  }
-  .sp-hero-photo::after {
-    background: linear-gradient(0deg, rgb(0 0 0 / 0.8), rgb(0 0 0 / 0.2) 75%);
-  }
-  .sp-hero h1 {
-    font-size: 40px;
-  }
-  .sp-tagline {
-    font-size: 17px;
-    margin-bottom: 24px;
-  }
-  .sp-cta .sp-btn {
-    flex: 1;
-    text-align: center;
-  }
-  .sp-section {
-    padding: 44px 22px;
-  }
-  .sp-section h2 {
-    font-size: 28px;
-  }
-  .sp-services {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
-  .sp-gallery {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-  .sp-footer {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 20px;
-    padding: 36px 22px;
-  }
+.studio-hint-tight {
+  margin-top: -8px;
+  margin-bottom: 12px;
 }

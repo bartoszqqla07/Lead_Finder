@@ -975,12 +975,14 @@ code {
   color: var(--text-3);
 }
 .score-track {
+  display: block;
   height: 6px;
   border-radius: 999px;
   background: var(--surface-2);
   overflow: hidden;
 }
 .score-fill {
+  display: block;
   height: 100%;
   border-radius: inherit;
 }
@@ -1171,16 +1173,6 @@ code {
   gap: 10px;
   font-size: 13px;
 }
-.check-note {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text-2);
-  background: var(--surface-2);
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-}
-
 .details {
   display: grid;
   grid-template-columns: 80px 1fr;
@@ -1256,47 +1248,11 @@ code {
 }
 
 /* ===== Kontakt zdalny ===== */
-.contact-finder {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  font-size: 13px;
-}
-
-.consent {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 13px;
-}
-.consent input {
-  margin-top: 3px;
-  accent-color: var(--ok);
-}
-.consent-on {
-  border-style: solid;
-  border-color: var(--ok);
-  background: var(--ok-soft);
-}
-
 .draft-tabs {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-}
-.draft-group-label {
-  width: 100%;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-3);
-  margin-top: 4px;
 }
 .draft-tab {
   font: inherit;
@@ -1320,42 +1276,6 @@ code {
   color: var(--accent-text);
   font-weight: 600;
 }
-.draft-tab.locked:not(.active) {
-  opacity: 0.65;
-}
-.recommended {
-  font-size: 10.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: var(--ok-soft);
-  color: var(--ok);
-}
-
-.draft-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.draft-channel {
-  margin: 0;
-  font-size: 13px;
-}
-.guidance {
-  margin: 0;
-  padding: 9px 11px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  border-left: 3px solid var(--info);
-  background: var(--info-soft);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-.guidance-warning {
-  border-left-color: var(--hot);
-  background: var(--hot-soft);
-}
 .subject-row {
   display: flex;
   flex-wrap: wrap;
@@ -1365,6 +1285,123 @@ code {
 }
 .subject {
   font-weight: 600;
+}
+
+/* Zielona kropka przy wiadomości polecanej na teraz. */
+.recommended-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+.step-pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.step-pill-done {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+/* Sekcje zwijane (<details>): szansa na zlecenie, wskazówki do wiadomości. */
+.score-details > summary,
+.draft-tips > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.score-details > summary::-webkit-details-marker,
+.draft-tips > summary::-webkit-details-marker {
+  display: none;
+}
+.score-details > summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.score-details[open] > summary {
+  margin-bottom: 12px;
+}
+.score-details > .hint {
+  margin-top: 10px;
+}
+.collapsible-hint {
+  font-size: 12px;
+  color: var(--accent-text);
+}
+.collapsible-hint::after {
+  content: ' ▾';
+}
+details[open] > summary .collapsible-hint::after {
+  content: ' ▴';
+}
+.draft-tips {
+  font-size: 13px;
+}
+.draft-tips > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+}
+.draft-tips > summary .collapsible-hint {
+  margin-left: auto;
+}
+.draft-tips p {
+  margin: 8px 0 0;
+  padding: 9px 11px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+
+.consent-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+.consent-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--ok);
+}
+.consent-check {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: var(--surface);
+  font-size: 11px;
+}
+.button-ok {
+  background: var(--ok-soft);
+  border-color: var(--ok);
+  color: var(--ok);
+  font-weight: 600;
+}
+.button-ok:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.search-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
 }
 
 /* ===== Toast ===== */

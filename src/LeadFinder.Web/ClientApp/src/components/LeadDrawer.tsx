@@ -31,6 +31,17 @@ function DueHint({ date }: { date: string }) {
           : `Za ${diffDays} dni`;
   return <p className={`hint ${diffDays <= 0 ? 'due-now' : ''}`}>{text}</p>;
 }
+const googleSearch = (query: string) => `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+
+/** "booksy.com" zamiast długiego adresu profilu – pełny adres jest w podpowiedzi i pod linkiem. */
+function shortUrl(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www[.]/, '');
+  } catch {
+    return url;
+  }
+}
+
 const today = () =>
   new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
 
@@ -126,7 +137,7 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
                 </span>
               )}
             </div>
-            {lead.checkNote && <p className="check-note">{lead.checkNote}</p>}
+            {lead.checkNote && <p className="hint">{lead.checkNote}</p>}
           </section>
 
           <ScoreBreakdown score={lead.score} />
@@ -143,15 +154,27 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
                   mapa ↗
                 </a>
               </dd>
-              <dt>Strona</dt>
-              <dd className="break">
+              <dt>{lead.profilePlatform ? 'Profil' : 'Strona'}</dt>
+              <dd>
                 {lead.websiteUri ? (
-                  <a href={lead.websiteUri} target="_blank" rel="noreferrer">
-                    {lead.websiteUri}
+                  <a href={lead.websiteUri} target="_blank" rel="noreferrer" title={lead.websiteUri}>
+                    {shortUrl(lead.websiteUri)} ↗
                   </a>
                 ) : (
                   '—'
                 )}
+              </dd>
+              <dt>Szukaj</dt>
+              <dd className="search-links">
+                <a href={googleSearch(`site:instagram.com "${lead.name}" ${lead.city}`)} target="_blank" rel="noreferrer">
+                  Instagram ↗
+                </a>
+                <a href={googleSearch(`site:facebook.com "${lead.name}" ${lead.city}`)} target="_blank" rel="noreferrer">
+                  Facebook ↗
+                </a>
+                <a href={googleSearch(`"${lead.name}" ${lead.city} e-mail kontakt`)} target="_blank" rel="noreferrer">
+                  e-mail ↗
+                </a>
               </dd>
             </dl>
           </section>
