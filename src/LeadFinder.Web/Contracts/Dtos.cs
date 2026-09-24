@@ -18,6 +18,7 @@ public sealed record LeadDto(
     string City,
     string CategoryId,
     string CategoryName,
+    string CategoryTone,
     LeadStatus Status,
     string StatusLabel,
     int Priority,
@@ -119,6 +120,10 @@ public sealed record SettingsDto(
     string Signature,
     string ContactEmail,
     string PostalAddress,
+    string PortfolioUrl,
+    string OfferPrice,
+    string CarePlan,
+    string DeliveryTime,
     int FreeMonthlyRequests,
     string DefaultSenderName,
     string DefaultSignature,
@@ -131,6 +136,10 @@ public sealed record UpdateSettingsRequest(
     string? Signature,
     string? ContactEmail,
     string? PostalAddress,
+    string? PortfolioUrl,
+    string? OfferPrice,
+    string? CarePlan,
+    string? DeliveryTime,
     int? FreeMonthlyRequests);
 
 public sealed record VerifyApiKeyResultDto(bool Ok, string Message);

@@ -18,6 +18,8 @@ export interface Lead {
   city: string;
   categoryId: string;
   categoryName: string;
+  /** Ton branży z categories.json: barber, hair, beauty, nails, spa, tattoo, cosmetology… */
+  categoryTone: string;
   status: LeadStatus;
   statusLabel: string;
   priority: number;
@@ -49,7 +51,16 @@ export interface LeadScore {
   factors: { label: string; points: number }[];
 }
 
-export type DraftKind = 'ProblemNotice' | 'DirectMessage' | 'Email' | 'Letter' | 'Proposal' | 'FollowUp';
+export type DraftKind =
+  | 'ProblemNotice'
+  | 'DirectMessage'
+  | 'Email'
+  | 'Letter'
+  | 'Preview'
+  | 'OfferShort'
+  | 'Proposal'
+  | 'PriceReply'
+  | 'FollowUp';
 
 export interface MessageDraft {
   kind: DraftKind;
@@ -133,6 +144,10 @@ export interface Settings {
   signature: string;
   contactEmail: string;
   postalAddress: string;
+  portfolioUrl: string;
+  offerPrice: string;
+  carePlan: string;
+  deliveryTime: string;
   freeMonthlyRequests: number;
   defaultSenderName: string;
   defaultSignature: string;
@@ -145,6 +160,10 @@ export interface UpdateSettings {
   signature?: string;
   contactEmail?: string;
   postalAddress?: string;
+  portfolioUrl?: string;
+  offerPrice?: string;
+  carePlan?: string;
+  deliveryTime?: string;
   freeMonthlyRequests?: number;
 }
 

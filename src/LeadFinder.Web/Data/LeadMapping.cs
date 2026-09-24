@@ -69,6 +69,7 @@ public static class LeadMapping
             entity.City,
             entity.CategoryId,
             entity.CategoryQuery,
+            entity.CategoryTone,
             entity.Status,
             entity.Status.ToLabel(),
             entity.Status.SortPriority(),

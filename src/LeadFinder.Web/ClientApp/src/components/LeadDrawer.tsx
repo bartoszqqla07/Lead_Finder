@@ -5,6 +5,7 @@ import type { Lead, LeadChanges, MessageDraft, OutreachStage } from '../types';
 import { StatusBadge } from './Badges';
 import { OutreachPanel } from './OutreachPanel';
 import { ScoreBreakdown } from './ScoreBreakdown';
+import { PreviewStudio } from './preview/PreviewStudio';
 import { useLatest } from '../hooks/useLatest';
 
 interface Props {
@@ -37,6 +38,9 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
   const [notes, setNotes] = useState(lead.notes);
   const [notesState, setNotesState] = useState<'saved' | 'dirty' | 'saving'>('saved');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [studioOpen, setStudioOpen] = useState(false);
+  // Escape w otwartym kreatorze zamyka tylko kreator, nie cały panel leada.
+  const studioOpenRef = useLatest(studioOpen);
   const closeRef = useRef<HTMLButtonElement>(null);
   // Callbacki z App zmieniają tożsamość przy każdym renderze (np. przy zdarzeniach SSE),
   // więc efekty czytają je z refów – inaczej debounce notatek i fokus resetowałyby się w kółko.
@@ -61,10 +65,10 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
 
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && callbacks.current.onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && !studioOpenRef.current && callbacks.current.onClose();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [callbacks]);
+  }, [callbacks, studioOpenRef]);
 
   const setStage = (stage: OutreachStage) => {
     onUpdate(lead.id, { stage }).catch((e: Error) => onError(e.message));
@@ -91,7 +95,8 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
     onUpdate(lead.id, {
       notes: updatedNotes,
       stage: lead.stage === 'New' ? 'Contacted' : undefined,
-      nextActionDate: draft.kind === 'Proposal' ? addDaysIso(7) : undefined,
+      // Po ofercie (krótkiej albo pełnej) – przypomnienie za tydzień, na jedno dozwolone "Przypomnienie".
+      nextActionDate: draft.kind === 'Proposal' || draft.kind === 'OfferShort' ? addDaysIso(7) : undefined,
     }).catch((e: Error) => onError(e.message));
   };
 
@@ -151,7 +156,13 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
             </dl>
           </section>
 
-          <OutreachPanel lead={lead} onConsentChange={setConsent} onMarkSent={markSent} onError={onError} />
+          <OutreachPanel
+            lead={lead}
+            onConsentChange={setConsent}
+            onMarkSent={markSent}
+            onOpenStudio={() => setStudioOpen(true)}
+            onError={onError}
+          />
 
           <section className="drawer-section">
             <h3>Etap</h3>
@@ -243,6 +254,8 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
           )}
         </footer>
       </aside>
+
+      {studioOpen && <PreviewStudio lead={lead} onClose={() => setStudioOpen(false)} onError={onError} />}
     </>
   );
 }

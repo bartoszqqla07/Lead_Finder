@@ -6,22 +6,23 @@ interface Props {
   lead: Lead;
   onConsentChange: (given: boolean) => void;
   onMarkSent: (draft: MessageDraft) => void;
+  onOpenStudio: () => void;
   onError: (message: string) => void;
 }
 
 /**
- * Który szkic pokazać na start: po zgodzie – propozycja; przy niedziałającej stronie – sama informacja
+ * Który szkic pokazać na start: po zgodzie – podgląd (makieta); przy niedziałającej stronie – sama informacja
  * o problemie; w pozostałych przypadkach – DM na Instagramie (tam salony odpowiadają najszybciej).
  */
 function recommendedKind(lead: Lead): DraftKind {
-  if (lead.consentGivenAt) return 'Proposal';
+  if (lead.consentGivenAt) return 'Preview';
   if (lead.drafts.some((d) => d.kind === 'ProblemNotice') && lead.stage === 'New') return 'ProblemNotice';
   return 'DirectMessage';
 }
 
 const googleSearch = (query: string) => `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 
-export function OutreachPanel({ lead, onConsentChange, onMarkSent, onError }: Props) {
+export function OutreachPanel({ lead, onConsentChange, onMarkSent, onOpenStudio, onError }: Props) {
   const [kind, setKind] = useState<DraftKind>(() => recommendedKind(lead));
   const [copied, setCopied] = useState<'body' | 'subject' | null>(null);
   const draft = lead.drafts.find((d) => d.kind === kind) ?? lead.drafts[0];
@@ -45,7 +46,12 @@ export function OutreachPanel({ lead, onConsentChange, onMarkSent, onError }: Pr
 
   return (
     <section className="drawer-section">
-      <h3>Kontakt zdalny</h3>
+      <div className="section-title-row">
+        <h3>Kontakt zdalny</h3>
+        <button className="link-button small" onClick={onOpenStudio}>
+          🎨 Kreator podglądu strony
+        </button>
+      </div>
 
       <div className="contact-finder">
         <span className="muted">Znajdź kontakt:</span>
@@ -71,7 +77,7 @@ export function OutreachPanel({ lead, onConsentChange, onMarkSent, onError }: Pr
           checked={hasConsent}
           onChange={(e) => {
             onConsentChange(e.target.checked);
-            setKind(e.target.checked ? 'Proposal' : recommendedKind({ ...lead, consentGivenAt: null }));
+            setKind(e.target.checked ? 'Preview' : recommendedKind({ ...lead, consentGivenAt: null }));
           }}
         />
         <span>
@@ -87,7 +93,13 @@ export function OutreachPanel({ lead, onConsentChange, onMarkSent, onError }: Pr
       <div className="draft-tabs" role="tablist" aria-label="Rodzaj wiadomości">
         <span className="draft-group-label">Pierwszy kontakt</span>
         {firstContact.map((d) => (
-          <DraftTab key={d.kind} draft={d} active={d.kind === draft.kind} recommended={d.kind === recommendedKind(lead)} onSelect={setKind} />
+          <DraftTab
+            key={d.kind}
+            draft={d}
+            active={d.kind === draft.kind}
+            recommended={d.kind === recommendedKind(lead)}
+            onSelect={setKind}
+          />
         ))}
         <span className="draft-group-label">Po zgodzie</span>
         {afterConsent.map((d) => (
@@ -119,6 +131,12 @@ export function OutreachPanel({ lead, onConsentChange, onMarkSent, onError }: Pr
               {copied === 'subject' ? 'skopiowano ✓' : 'kopiuj'}
             </button>
           </div>
+        )}
+
+        {draft.kind === 'Preview' && (
+          <button className="button button-primary studio-cta" onClick={onOpenStudio}>
+            🎨 Stwórz podgląd strony dla tego salonu
+          </button>
         )}
 
         <pre className="draft">{draft.body}</pre>

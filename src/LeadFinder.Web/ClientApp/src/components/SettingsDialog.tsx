@@ -15,6 +15,10 @@ export function SettingsDialog({ settings, onClose, onSaved }: Props) {
   const [contactEmail, setContactEmail] = useState(settings.contactEmail);
   const [postalAddress, setPostalAddress] = useState(settings.postalAddress);
   const [freeLimit, setFreeLimit] = useState(String(settings.freeMonthlyRequests));
+  const [portfolioUrl, setPortfolioUrl] = useState(settings.portfolioUrl);
+  const [offerPrice, setOfferPrice] = useState(settings.offerPrice);
+  const [carePlan, setCarePlan] = useState(settings.carePlan);
+  const [deliveryTime, setDeliveryTime] = useState(settings.deliveryTime);
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
@@ -35,6 +39,10 @@ export function SettingsDialog({ settings, onClose, onSaved }: Props) {
         signature,
         contactEmail,
         postalAddress,
+        portfolioUrl,
+        offerPrice,
+        carePlan,
+        deliveryTime,
         freeMonthlyRequests: Number.parseInt(freeLimit, 10) || 0,
       });
       onSaved(saved);
@@ -164,6 +172,52 @@ export function SettingsDialog({ settings, onClose, onSaved }: Props) {
             <p className="hint">
               E-mail i adres trafiają do listów papierowych i klauzuli RODO. Administrator danych musi podać, jak się z
               nim skontaktować.
+            </p>
+          </section>
+
+          <section className="drawer-section">
+            <h3>Oferta (wiadomości po zgodzie klienta)</h3>
+            <label className="field">
+              <span className="field-label">Link do portfolio</span>
+              <input
+                className="input"
+                value={portfolioUrl}
+                onChange={(e) => setPortfolioUrl(e.target.value)}
+                placeholder="np. twojastrona.pl/projekty"
+              />
+            </label>
+            <div className="field-grid">
+              <label className="field">
+                <span className="field-label">Cena wykonania</span>
+                <input
+                  className="input"
+                  value={offerPrice}
+                  onChange={(e) => setOfferPrice(e.target.value)}
+                  placeholder="np. od 1500 zł"
+                />
+              </label>
+              <label className="field">
+                <span className="field-label">Czas realizacji</span>
+                <input
+                  className="input"
+                  value={deliveryTime}
+                  onChange={(e) => setDeliveryTime(e.target.value)}
+                  placeholder="np. 2–3 tygodnie"
+                />
+              </label>
+            </div>
+            <label className="field">
+              <span className="field-label">Opieka / hosting (opcjonalnie)</span>
+              <input
+                className="input"
+                value={carePlan}
+                onChange={(e) => setCarePlan(e.target.value)}
+                placeholder="np. 100–150 zł miesięcznie"
+              />
+            </label>
+            <p className="hint">
+              Trafiają do „Oferty – krótkiej”, „Oferty – pełnej”, „Odpowiedzi: cena” i listu. Nigdy do pierwszej
+              wiadomości elektronicznej – ta zawiera tylko prośbę o zgodę.
             </p>
           </section>
 

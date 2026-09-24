@@ -49,7 +49,8 @@ public sealed class SettingsService(LeadFinderDbContext db, AppPaths paths)
     {
         var settings = await GetEntityAsync(cancellationToken);
         return new MessageDrafter(new SenderProfile(
-            settings.SenderName, settings.Signature, settings.ContactEmail, settings.PostalAddress));
+            settings.SenderName, settings.Signature, settings.ContactEmail, settings.PostalAddress,
+            settings.PortfolioUrl, settings.OfferPrice, settings.CarePlan, settings.DeliveryTime));
     }
 
     public async Task<SettingsDto> GetDtoAsync(CancellationToken cancellationToken = default)
@@ -65,6 +66,10 @@ public sealed class SettingsService(LeadFinderDbContext db, AppPaths paths)
             Signature: settings.Signature ?? string.Empty,
             ContactEmail: settings.ContactEmail ?? string.Empty,
             PostalAddress: settings.PostalAddress ?? string.Empty,
+            PortfolioUrl: settings.PortfolioUrl ?? string.Empty,
+            OfferPrice: settings.OfferPrice ?? string.Empty,
+            CarePlan: settings.CarePlan ?? string.Empty,
+            DeliveryTime: settings.DeliveryTime ?? string.Empty,
             FreeMonthlyRequests: settings.FreeMonthlyRequests ?? DefaultFreeMonthlyRequests,
             DefaultSenderName: MessageDrafter.DefaultSenderName,
             DefaultSignature: MessageDrafter.DefaultSignature,
@@ -87,6 +92,14 @@ public sealed class SettingsService(LeadFinderDbContext db, AppPaths paths)
             settings.FreeMonthlyRequests = Math.Clamp(limit, 0, 1_000_000);
         if (request.PostalAddress is not null)
             settings.PostalAddress = NullIfEmpty(request.PostalAddress.Replace("\r\n", "\n"));
+        if (request.PortfolioUrl is not null)
+            settings.PortfolioUrl = NullIfEmpty(request.PortfolioUrl);
+        if (request.OfferPrice is not null)
+            settings.OfferPrice = NullIfEmpty(request.OfferPrice);
+        if (request.CarePlan is not null)
+            settings.CarePlan = NullIfEmpty(request.CarePlan);
+        if (request.DeliveryTime is not null)
+            settings.DeliveryTime = NullIfEmpty(request.DeliveryTime);
 
         await db.SaveChangesAsync(cancellationToken);
         return await GetDtoAsync(cancellationToken);

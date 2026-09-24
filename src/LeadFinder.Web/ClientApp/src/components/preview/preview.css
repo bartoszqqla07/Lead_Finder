@@ -1,0 +1,584 @@
+/* =====================================================================
+   Kreator podglądu – okno, formularz, scena
+   ===================================================================== */
+.studio {
+  position: fixed;
+  z-index: 50;
+  inset: 24px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.studio-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+}
+.studio-form {
+  overflow-y: auto;
+  padding: 16px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-right: 1px solid var(--border);
+}
+.studio-stage {
+  overflow: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--surface-2);
+}
+.studio-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.studio-toolbar .segmented {
+  min-width: 280px;
+}
+.studio-canvas-holder {
+  overflow: hidden;
+  border-radius: 12px;
+}
+@media (max-width: 900px) {
+  .studio {
+    inset: 0;
+    border-radius: 0;
+  }
+  .studio-body {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+  }
+  .studio-form {
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .studio-stage {
+    overflow: visible;
+  }
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--border-strong);
+  cursor: pointer;
+}
+.swatch.active {
+  box-shadow: 0 0 0 2px var(--text);
+}
+.swatch-picker {
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.photo-thumb,
+.photo-add {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.photo-thumb.main {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.photo-actions {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: flex;
+  gap: 3px;
+}
+.photo-actions button {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+.photo-add {
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed var(--border-strong);
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+}
+.photo-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.photo-add input {
+  display: none;
+}
+
+/* =====================================================================
+   Płótno eksportu i ramki urządzeń
+   ===================================================================== */
+.pv-canvas {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+.pv-bg-dark {
+  background: radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--sp-accent) 35%, transparent), transparent 55%),
+    linear-gradient(135deg, #17171b, #2a2a31);
+}
+.pv-bg-light {
+  background: radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--sp-accent) 30%, transparent), transparent 55%),
+    linear-gradient(135deg, #f7f2ec, #ebe3da);
+}
+.pv-bg-pastel {
+  background: radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--sp-accent) 35%, transparent), transparent 55%),
+    linear-gradient(135deg, #fdf1f5, #f3e6f7);
+}
+
+/* Laptop: strona w szerokości 1280 px pomniejszona do ekranu 704×440 (skala 0,55). */
+.pv-laptop {
+  position: absolute;
+  left: 40px;
+  top: 60px;
+  width: 720px;
+  padding: 0 8px 8px;
+  border-radius: 14px 14px 6px 6px;
+  background: #0f0f12;
+  box-shadow: 0 30px 60px rgb(0 0 0 / 0.35);
+}
+.pv-laptop-bar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 4px;
+}
+.pv-laptop-bar i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #3a3a42;
+}
+.pv-laptop-screen {
+  width: 704px;
+  height: 440px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #fff;
+}
+.pv-laptop::after {
+  content: '';
+  position: absolute;
+  left: -34px;
+  right: -34px;
+  bottom: -16px;
+  height: 16px;
+  border-radius: 0 0 14px 14px;
+  background: linear-gradient(#cfd0d4, #9c9da3);
+}
+
+/* Telefon: strona w szerokości 390 px pomniejszona do ekranu 234×506 (skala 0,6). */
+.pv-phone {
+  position: absolute;
+  padding: 10px;
+  border-radius: 40px;
+  background: #0f0f12;
+  box-shadow: 0 30px 60px rgb(0 0 0 / 0.4);
+}
+.pv-layout-combo .pv-phone {
+  right: 40px;
+  bottom: 36px;
+}
+.pv-phone-screen {
+  position: relative;
+  width: 234px;
+  height: 506px;
+  overflow: hidden;
+  border-radius: 30px;
+  background: #fff;
+}
+/* Wycięcie na kamerę. */
+.pv-phone-screen::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  left: 50%;
+  width: 64px;
+  height: 16px;
+  margin-left: -32px;
+  border-radius: 999px;
+  background: #0f0f12;
+}
+/* Pasek statusu pod wycięciem – bez tego kamera zasłania logo w nawigacji. */
+.pv-phone-screen .sp-nav {
+  padding-top: 44px;
+}
+
+/* Sam telefon – większy, do wklejenia w wiadomość (wysoki obrazek dobrze wygląda na Instagramie). */
+.pv-layout-phone {
+  display: grid;
+  place-items: center;
+}
+.pv-layout-phone .pv-phone {
+  position: relative;
+}
+.pv-layout-phone .pv-phone-screen {
+  width: 351px;
+  height: 760px;
+}
+
+.pv-scale {
+  transform-origin: top left;
+}
+.pv-scale-desktop {
+  width: 1280px;
+  transform: scale(0.55);
+}
+.pv-scale-phone {
+  width: 390px;
+  transform: scale(0.6);
+}
+.pv-layout-phone .pv-scale-phone {
+  transform: scale(0.9);
+}
+
+/* =====================================================================
+   Makieta strony (sp-*). Układ zależy od szerokości kontenera, nie okna.
+   ===================================================================== */
+.sp {
+  --sp-bg: #ffffff;
+  --sp-surface: #f6f3ef;
+  --sp-text: #1d1b19;
+  --sp-muted: #6f6962;
+  --sp-heading: Georgia, 'Times New Roman', serif;
+  --sp-radius: 6px;
+  container-type: inline-size;
+  min-height: 100%;
+  background: var(--sp-bg);
+  color: var(--sp-text);
+  font: 16px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+.sp-dark {
+  --sp-bg: #121214;
+  --sp-surface: #1c1c20;
+  --sp-text: #f2efe9;
+  --sp-muted: #a39d94;
+  --sp-heading: 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --sp-radius: 2px;
+}
+.sp-pastel {
+  --sp-bg: #fffafc;
+  --sp-surface: #fbeef3;
+  --sp-text: #3b2b33;
+  --sp-muted: #8a7580;
+  --sp-heading: 'Segoe UI', system-ui, sans-serif;
+  --sp-radius: 999px;
+}
+.sp * {
+  box-sizing: border-box;
+}
+
+.sp-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 22px 56px;
+  border-bottom: 1px solid color-mix(in srgb, var(--sp-text) 10%, transparent);
+}
+.sp-logo {
+  font-family: var(--sp-heading);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+}
+.sp-dark .sp-logo {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.sp-links {
+  display: flex;
+  gap: 28px;
+  margin-left: auto;
+  color: var(--sp-muted);
+  font-size: 15px;
+}
+.sp-burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  margin-left: auto;
+}
+.sp-burger i {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--sp-text);
+}
+
+.sp-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: var(--sp-radius);
+  background: var(--sp-accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  white-space: nowrap;
+}
+.sp-dark .sp-btn {
+  color: #121214;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 14px;
+}
+.sp-btn-small {
+  padding: 10px 20px;
+  font-size: 14px;
+}
+.sp-btn-ghost {
+  background: transparent;
+  color: var(--sp-text);
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.sp-hero-photo .sp-btn-ghost {
+  color: #fff;
+}
+
+.sp-hero {
+  position: relative;
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  padding: 80px 56px;
+  overflow: hidden;
+  background: radial-gradient(circle at 75% 30%, color-mix(in srgb, var(--sp-accent) 45%, transparent), transparent 60%),
+    var(--sp-surface);
+}
+.sp-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sp-hero-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.25) 70%, rgb(0 0 0 / 0.1));
+}
+.sp-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+}
+.sp-hero-photo .sp-hero-inner {
+  color: #fff;
+}
+.sp-badge {
+  display: inline-block;
+  margin: 0 0 18px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sp-accent) 22%, transparent);
+  font-size: 14px;
+  font-weight: 600;
+}
+.sp-hero h1 {
+  margin: 0 0 16px;
+  font-family: var(--sp-heading);
+  font-size: 64px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.sp-dark .sp-hero h1 {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.sp-light .sp-hero h1 {
+  font-style: italic;
+  font-weight: 500;
+}
+.sp-tagline {
+  margin: 0 0 32px;
+  font-size: 20px;
+  opacity: 0.85;
+}
+.sp-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.sp-section {
+  padding: 72px 56px;
+}
+.sp-section h2 {
+  margin: 0 0 28px;
+  font-family: var(--sp-heading);
+  font-size: 36px;
+}
+.sp-dark .sp-section h2 {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 30px;
+}
+.sp-section h2::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin-top: 10px;
+  background: var(--sp-accent);
+}
+.sp-services {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 56px;
+}
+.sp-services li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 17px;
+}
+.sp-dots {
+  flex: 1;
+  border-bottom: 1.5px dotted color-mix(in srgb, var(--sp-text) 30%, transparent);
+  transform: translateY(-4px);
+}
+.sp-services strong {
+  color: var(--sp-accent);
+  white-space: nowrap;
+}
+.sp-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.sp-gallery img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.sp-pastel .sp-gallery img {
+  border-radius: 20px;
+}
+.sp-footer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  padding: 48px 56px;
+  background: var(--sp-surface);
+  font-size: 15px;
+}
+.sp-footer h3 {
+  margin: 0 0 10px;
+  font-family: var(--sp-heading);
+  font-size: 18px;
+}
+.sp-footer p {
+  margin: 0 0 4px;
+  color: var(--sp-muted);
+}
+
+/* Wersja telefonu (kontener węższy niż 600 px). */
+@container (max-width: 600px) {
+  .sp-nav {
+    padding: 16px 20px;
+    gap: 12px;
+  }
+  .sp-logo {
+    font-size: 18px;
+    max-width: 260px;
+  }
+  .sp-links,
+  .sp-nav-cta {
+    display: none;
+  }
+  .sp-burger {
+    display: flex;
+  }
+  .sp-hero {
+    min-height: 520px;
+    padding: 48px 22px;
+    align-items: flex-end;
+  }
+  .sp-hero-photo::after {
+    background: linear-gradient(0deg, rgb(0 0 0 / 0.8), rgb(0 0 0 / 0.2) 75%);
+  }
+  .sp-hero h1 {
+    font-size: 40px;
+  }
+  .sp-tagline {
+    font-size: 17px;
+    margin-bottom: 24px;
+  }
+  .sp-cta .sp-btn {
+    flex: 1;
+    text-align: center;
+  }
+  .sp-section {
+    padding: 44px 22px;
+  }
+  .sp-section h2 {
+    font-size: 28px;
+  }
+  .sp-services {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .sp-gallery {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .sp-footer {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 36px 22px;
+  }
+}

@@ -133,6 +133,12 @@ public sealed class AppSettingsEntity
     /// <summary>Adres nadawcy – w nagłówku listu papierowego.</summary>
     public string? PostalAddress { get; set; }
 
+    // Dane do ofert (po zgodzie klienta) i listów – wstawiane do szkiców zamiast placeholderów.
+    public string? PortfolioUrl { get; set; }
+    public string? OfferPrice { get; set; }
+    public string? CarePlan { get; set; }
+    public string? DeliveryTime { get; set; }
+
     /// <summary>Darmowy miesięczny limit zapytań Text Search (do licznika); null = domyślny.</summary>
     public int? FreeMonthlyRequests { get; set; }
 }

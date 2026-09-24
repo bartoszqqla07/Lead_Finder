@@ -132,7 +132,9 @@ zakazuje też *Prawo komunikacji elektronicznej* (art. 398). Dotyczy to równie�
 | | **DM – prośba o zgodę** (Instagram / Facebook) | Salony beauty najszybciej odpowiadają na IG. Tylko pytanie o zgodę, bez cen i opisu usług. |
 | | **E-mail – prośba o zgodę** | Jak DM, plus temat i informacja, skąd masz kontakt. |
 | | **List papierowy – z ofertą** | Nie jest komunikacją elektroniczną, więc zakazy z UŚUDE i PKE go nie obejmują. Może zawierać ofertę. Ma klauzulę RODO (art. 14) i przycisk „Drukuj”. |
-| Po zgodzie | **Propozycja**, potem jedno **przypomnienie** | Odblokowane dopiero po zaznaczeniu „Firma zgodziła się na przesłanie oferty”. Data zgody zapisuje się jako dowód. |
+| Po zgodzie | **Podgląd (makieta)** | Pierwsza odpowiedź na „możesz podesłać”: screenshot makiety ich strony, bez ceny. Obraz sprzedaje lepiej niż opis. |
+| | **Oferta – krótka** / **Oferta – pełna** | Na komunikator albo e-mail: co dostają, dlaczego strona robiona od zera zamiast szablonu, proces współpracy, cena i czas. Dane uzupełniasz raz w Ustawieniach. |
+| | **Odpowiedź: cena** i jedno **przypomnienie** | Gdy pytają o koszt; przypomnienie po tygodniu ustawia się samo po wysłaniu oferty. |
 
 - **Znajdź kontakt:** linki do wyszukania profilu firmy na Instagramie, Facebooku i jej adresu e-mail.
 - **„Oznacz jako wysłane”** dopisuje do notatek datę i rodzaj wiadomości, a etap zmienia na „Skontaktowany”.
@@ -144,6 +146,21 @@ zakazuje też *Prawo komunikacji elektronicznej* (art. 398). Dotyczy to równie�
 
 Prośba o zgodę wysłana e-mailem lub przez DM to według części interpretacji nadal szara strefa. List papierowy
 i informacja o problemie bez oferty niosą najmniejsze ryzyko. To nie jest porada prawna.
+
+### 🎨 Kreator podglądu strony
+
+Gdy salon zgodzi się na podgląd, nie trzeba mieć gotowych makiet. Przycisk **„Kreator podglądu strony”** w panelu leada
+składa w kilka minut obrazek „tak mogłaby wyglądać Wasza strona” (laptop + telefon albo sam telefon):
+
+- nazwa, hasło i telefon podstawiają się z danych leada; przy dobrej ocenie w Google pojawia się napis
+  „★ 4,9 · 312 opinii w Google”;
+- styl (ciemny / jasny / pastelowy), kolor przewodni i przykładowy cennik dobierają się do branży. Wszystko można edytować;
+- zdjęcia (do 4) wgrywasz z Instagrama salonu. Zostają tylko w przeglądarce i znikają po zamknięciu kreatora.
+  Makieta służy wyłącznie do prywatnego wysłania salonowi, nie do publikacji;
+- **„Kopiuj obraz”** wkleja się (Ctrl+V) prosto w wiadomość na Instagramie lub Messengerze, **„Pobierz PNG”** zapisuje plik.
+
+Ceny w cenniku są przykładowe. Podmień je na prawdziwe z Booksy lub profilu salonu albo usuń. Teksty makiety
+zapamiętują się dla każdego leada osobno.
 
 ## Klasyfikacja leadów
 

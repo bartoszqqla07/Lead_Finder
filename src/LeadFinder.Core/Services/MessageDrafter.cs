@@ -15,16 +15,20 @@ namespace LeadFinder.Services;
 /// <para>
 /// Zestaw szkiców odpowiada procesowi zgodnemu z polskimi przepisami:
 /// <list type="number">
-///   <item>Pierwszy kontakt elektroniczny (DM, e-mail) to wyłącznie prośba o zgodę – bez opisu oferty i cen.
+///   <item>Pierwszy kontakt elektroniczny (DM, e-mail) to wyłącznie prośba o zgodę – bez opisu oferty, cen i portfolio.
 ///         Niezamówiona informacja handlowa drogą elektroniczną jest zakazana (UŚUDE art. 10,
 ///         Prawo komunikacji elektronicznej art. 398).</item>
 ///   <item>Informacja o niedziałającej stronie – bez oferty i bez przedstawiania się jako twórca stron.</item>
 ///   <item>List papierowy – nie jest komunikacją elektroniczną, więc może zawierać ofertę; dostaje klauzulę
 ///         informacyjną RODO (art. 14), bo dane pochodzą z publicznej wizytówki, a nie od odbiorcy.</item>
-///   <item>Propozycja i przypomnienie – dopiero po wyrażeniu zgody.</item>
+///   <item>Po zgodzie: podgląd (makieta), oferta krótka i pełna, odpowiedź o cenę, jedno przypomnienie.</item>
 /// </list>
 /// </para>
-/// <para>Teksty są w czasie teraźniejszym ("trafiam", "widzę"), żeby pasowały niezależnie od płci nadawcy.</para>
+/// <para>
+/// Styl: forma "Wy" albo "Państwo" (zależna od branży) trzymana konsekwentnie w całej rozmowie; zamiast oficjalnej
+/// nazwy z Google – "Państwa salon", "Wasz barbershop"; czas teraźniejszy ("widzę", "przygotuję"), żeby teksty
+/// pasowały niezależnie od płci nadawcy.
+/// </para>
 /// </remarks>
 public sealed class MessageDrafter
 {
@@ -32,49 +36,71 @@ public sealed class MessageDrafter
     public const string DefaultSignature = "[Imię Nazwisko]\n[telefon] · [link do portfolio]";
     private const string DefaultEmail = "[Twój e-mail]";
     private const string DefaultPostalAddress = "[Imię Nazwisko]\n[ulica i numer]\n[kod pocztowy, miejscowość]";
+    private const string DefaultPortfolio = "[link do portfolio]";
+    private const string DefaultPrice = "[cena, np. od 1500 zł]";
+    private const string DefaultCarePlan = "[kwota, np. 100–150 zł miesięcznie]";
+    private const string DefaultDeliveryTime = "[czas realizacji, np. 2–3 tygodnie]";
 
-    /// <summary>Ton wiadomości dla danej branży.</summary>
-    /// <param name="Informal">Na "Ty/Wy" (barber, tatuaż, paznokcie) czy na "Państwo".</param>
+    /// <summary>Ton i treści dopasowane do branży.</summary>
+    /// <param name="Informal">Na "Wy" (barber, tatuaż, paznokcie) czy na "Państwo".</param>
+    /// <param name="Audience">Dla kogo robisz strony: "robię strony internetowe dla {Audience}".</param>
     /// <param name="NicheInsight">Jedno zdanie pokazujące, że rozumiemy tę branżę.</param>
-    /// <param name="Offer">Co konkretnie możemy zrobić (dopełnienie po "Mogę przygotować…").</param>
-    private sealed record ToneProfile(bool Informal, string NicheInsight, string Offer);
+    /// <param name="Offer">Opis strony w jednym zdaniu (dopełnienie po "Mogę przygotować…").</param>
+    /// <param name="Features">Trzy najważniejsze elementy strony dla tej branży – do listy w ofercie.</param>
+    private sealed record ToneProfile(bool Informal, string Audience, string NicheInsight, string Offer, string[] Features);
 
     private static readonly ToneProfile DefaultTone = new(
         Informal: false,
+        Audience: "lokalnych firm usługowych",
         NicheInsight: "Coraz więcej klientów sprawdza firmę w internecie, zanim zadzwoni albo się zapisze.",
-        Offer: "nowoczesną stronę z ofertą, cennikiem i prostym kontaktem lub rezerwacją");
+        Offer: "nowoczesną stronę z ofertą, cennikiem i prostym kontaktem lub rezerwacją",
+        Features: ["oferta z cennikiem", "galeria realizacji", "kontakt i rezerwacja jednym kliknięciem"]);
 
     /// <summary>Klucze odpowiadają polu "tone" w Config/categories.json.</summary>
     private static readonly Dictionary<string, ToneProfile> Tones = new(StringComparer.OrdinalIgnoreCase)
     {
         ["barber"] = new(
             Informal: true,
+            Audience: "barbershopów",
             NicheInsight: "Do barbera ludzie zapisują się zwykle z telefonu, na szybko – wygrywa ten, u kogo od razu widać cennik, zdjęcia cięć i wolne terminy.",
-            Offer: "prostą, szybką stronę: cennik, galeria cięć, dojazd i przycisk rezerwacji (może być podpięty pod Booksy)"),
+            Offer: "prostą, szybką stronę: cennik, galeria cięć, dojazd i przycisk rezerwacji (może być podpięty pod Booksy)",
+            Features: ["cennik i galeria Waszych cięć", "przycisk rezerwacji – może być podpięty pod Booksy", "dojazd, godziny otwarcia i telefon jednym kliknięciem"]),
         ["hair"] = new(
             Informal: false,
+            Audience: "salonów fryzjerskich",
             NicheInsight: "Przed pierwszą wizytą klienci często oglądają zdjęcia metamorfoz i sprawdzają ceny – dobra strona robi tu dużą różnicę.",
-            Offer: "przejrzystą stronę z cennikiem, galerią metamorfoz, prezentacją zespołu i rezerwacją online"),
+            Offer: "przejrzystą stronę z cennikiem, galerią metamorfoz, prezentacją zespołu i rezerwacją online",
+            Features: ["cennik usług i galeria metamorfoz", "prezentacja zespołu", "rezerwacja online albo podpięcie Booksy"]),
         ["beauty"] = new(
             Informal: false,
+            Audience: "salonów beauty",
             NicheInsight: "Przy zabiegach kosmetycznych klienci chcą przed wizytą przeczytać, na czym polega zabieg, ile trwa i ile kosztuje.",
-            Offer: "stronę z opisami zabiegów, cennikiem i rezerwacją online"),
+            Offer: "stronę z opisami zabiegów, cennikiem i rezerwacją online",
+            Features: ["opisy zabiegów z cenami i czasem trwania", "galeria efektów", "rezerwacja online"]),
         ["nails"] = new(
             Informal: true,
+            Audience: "salonów paznokci",
             NicheInsight: "Przy stylizacji paznokci najlepiej sprzedają zdjęcia prac – galeria na stronie działa jak portfolio, które pracuje 24/7.",
-            Offer: "lekką stronę z galerią stylizacji, cennikiem i szybkim zapisem na wizytę"),
+            Offer: "lekką stronę z galerią stylizacji, cennikiem i szybkim zapisem na wizytę",
+            Features: ["galeria Waszych stylizacji", "przejrzysty cennik", "szybki zapis na wizytę"]),
         ["spa"] = new(
             Informal: false,
+            Audience: "salonów spa i beauty",
             NicheInsight: "W spa liczy się atmosfera – dobra strona pozwala ją poczuć jeszcze przed wizytą i ułatwia sprzedaż voucherów na prezent.",
-            Offer: "elegancką stronę z opisem rytuałów, voucherami podarunkowymi i rezerwacją online"),
+            Offer: "elegancką stronę z opisem rytuałów, voucherami podarunkowymi i rezerwacją online",
+            Features: ["opisy rytuałów i zabiegów", "vouchery podarunkowe", "rezerwacja online"]),
         ["tattoo"] = new(
             Informal: true,
+            Audience: "studiów tatuażu",
             NicheInsight: "Studio tatuażu wybiera się po portfolio i stylu artystów – dobrze ułożona galeria robi połowę roboty.",
-            Offer: "stronę-portfolio z pracami podzielonymi na style, profilami artystów i formularzem konsultacji"),
+            Offer: "stronę-portfolio z pracami podzielonymi na style, profilami artystów i formularzem konsultacji",
+            Features: ["portfolio prac podzielone na style", "profile artystów", "formularz konsultacji z możliwością dodania zdjęć"]),
         ["cosmetology"] = new(
             Informal: false,
+            Audience: "gabinetów kosmetologicznych",
             NicheInsight: "Przy zabiegach kosmetologicznych liczy się zaufanie: klienci szukają opisu zabiegów, przeciwwskazań i informacji o kwalifikacjach.",
-            Offer: "profesjonalną stronę z opisami zabiegów, informacjami o kwalifikacjach i rezerwacją online"),
+            Offer: "profesjonalną stronę z opisami zabiegów, informacjami o kwalifikacjach i rezerwacją online",
+            Features: ["opisy zabiegów z przeciwwskazaniami", "kwalifikacje i certyfikaty", "rezerwacja online"]),
     };
 
     private static readonly CultureInfo Polish = CultureInfo.GetCultureInfo("pl-PL");
@@ -83,6 +109,10 @@ public sealed class MessageDrafter
     private readonly string _signature;
     private readonly string _email;
     private readonly string _postalAddress;
+    private readonly string _portfolio;
+    private readonly string _price;
+    private readonly string _carePlan;
+    private readonly string _deliveryTime;
 
     /// <param name="sender">Dane nadawcy; brakujące pola zastępowane są placeholderami w nawiasach.</param>
     public MessageDrafter(SenderProfile? sender = null)
@@ -91,6 +121,10 @@ public sealed class MessageDrafter
         _signature = OrDefault(sender?.Signature, DefaultSignature);
         _email = OrDefault(sender?.Email, DefaultEmail);
         _postalAddress = OrDefault(sender?.PostalAddress, DefaultPostalAddress);
+        _portfolio = OrDefault(sender?.PortfolioUrl, DefaultPortfolio);
+        _price = OrDefault(sender?.Price, DefaultPrice);
+        _carePlan = OrDefault(sender?.CarePlan, DefaultCarePlan);
+        _deliveryTime = OrDefault(sender?.DeliveryTime, DefaultDeliveryTime);
     }
 
     /// <summary>
@@ -104,26 +138,31 @@ public sealed class MessageDrafter
     }
 
     /// <summary>
-    /// Wszystkie szkice dla leada: najpierw opcje pierwszego kontaktu (w kolejności rekomendacji),
-    /// potem wiadomości wymagające zgody odbiorcy.
+    /// Wszystkie szkice dla leada w kolejności użycia: najpierw pierwszy kontakt, potem ścieżka po zgodzie
+    /// (podgląd → oferta → odpowiedź o cenę → przypomnienie).
     /// </summary>
     public IReadOnlyList<MessageDraft> CreateDrafts(Lead lead)
     {
-        var context = new DraftContext(lead, Tones.GetValueOrDefault(lead.Category.Tone) ?? DefaultTone);
+        var c = new DraftContext(lead, Tones.GetValueOrDefault(lead.Category.Tone) ?? DefaultTone);
         var drafts = new List<MessageDraft>();
 
         if (lead.Status == LeadStatus.WebsiteDown)
-            drafts.Add(ProblemNotice(context));
+            drafts.Add(ProblemNotice(c));
 
-        drafts.Add(EmailDraft(context));
-        drafts.Add(DirectMessage(context));
-        drafts.Add(Letter(context));
-        drafts.Add(Proposal(context));
-        drafts.Add(FollowUp(context));
+        drafts.Add(EmailDraft(c));
+        drafts.Add(DirectMessage(c));
+        drafts.Add(Letter(c));
+        drafts.Add(Preview(c));
+        drafts.Add(OfferShort(c));
+        drafts.Add(Proposal(c));
+        drafts.Add(PriceReply(c));
+        drafts.Add(FollowUp(c));
         return drafts;
     }
 
-    // ---------- Pierwszy kontakt ----------
+    // =====================================================================
+    //  Pierwszy kontakt – bez oferty, cen i portfolio (tylko prośba o zgodę)
+    // =====================================================================
 
     private MessageDraft ProblemNotice(DraftContext c)
     {
@@ -154,8 +193,25 @@ public sealed class MessageDrafter
             Title: "Informacja o problemie",
             Channel: "Instagram / Facebook, formularz kontaktowy lub e-mail",
             Guidance: "Najbezpieczniejsza forma zdalna: czysta uprzejmość, nie reklama. Nie dopisuj oferty, portfolio ani tego, " +
-                      "że robisz strony – wtedy staje się informacją handlową. Jeśli odpiszą i zapytają o pomoc, możesz przedstawić ofertę.",
+                      "że robisz strony – wtedy staje się informacją handlową. Jeśli odpiszą i zapytają o pomoc, przejdź do „Podglądu”.",
             Subject: "Niedziałająca strona w wizytówce Google",
+            Body: body,
+            RequiresConsent: false);
+    }
+
+    private MessageDraft DirectMessage(DraftContext c)
+    {
+        var body = c.Informal
+            ? $"Cześć! Tu {_name}, robię strony internetowe dla {c.Tone.Audience}. {ShortHook(c)} Mogę podesłać krótki podgląd, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli nie – żaden problem, nie będę więcej pisać 🙂"
+            : $"Dzień dobry, nazywam się {_name} i tworzę strony internetowe dla {c.Tone.Audience}. {ShortHook(c)} Czy mogę przesłać krótki podgląd, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli temat Państwa nie interesuje, proszę zignorować wiadomość – nie będę więcej pisać.";
+
+        return new MessageDraft(
+            DraftKind.DirectMessage,
+            Title: "DM – prośba o zgodę",
+            Channel: "Instagram / Facebook – wiadomość prywatna do profilu firmy",
+            Guidance: "Salony najczęściej odpowiadają wieczorem, po pracy – daj im 2–3 dni. Pisz do profilu firmy, nie na prywatne konto. " +
+                      "Tylko prośba o zgodę: bez cen, opisu usług i linków. Wyślij raz – brak odpowiedzi traktuj jako „nie”.",
+            Subject: null,
             Body: body,
             RequiresConsent: false);
     }
@@ -166,11 +222,11 @@ public sealed class MessageDrafter
             ? $"""
               Cześć!
 
-              tu {_name} – robię strony internetowe dla lokalnych biznesów.
+              tu {_name} – robię strony internetowe dla {c.Tone.Audience}.
 
               {StatusHook(c)}
 
-              Czy mogę podesłać krótką propozycję, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli to nie temat dla Was – żaden problem, nie będę więcej pisać.
+              Mogę podesłać krótki podgląd, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli to nie temat dla Was – żaden problem, nie będę więcej pisać.
 
               Pozdrawiam,
               {_signature}
@@ -180,11 +236,11 @@ public sealed class MessageDrafter
             : $"""
               Dzień dobry,
 
-              nazywam się {_name} i tworzę strony internetowe dla lokalnych firm usługowych.
+              nazywam się {_name} i tworzę strony internetowe dla {c.Tone.Audience}.
 
               {StatusHook(c)}
 
-              Czy mogę przesłać krótką propozycję, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli temat Państwa nie interesuje, proszę po prostu zignorować tę wiadomość – nie będę więcej pisać.
+              Czy mogę przesłać krótki podgląd, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli temat Państwa nie interesuje, proszę po prostu zignorować tę wiadomość – nie będę więcej pisać.
 
               Pozdrawiam serdecznie,
               {_signature}
@@ -196,7 +252,7 @@ public sealed class MessageDrafter
             DraftKind.Email,
             Title: "E-mail – prośba o zgodę",
             Channel: "E-mail lub formularz kontaktowy na stronie firmy",
-            Guidance: "Tylko prośba o zgodę – bez cen i opisu usług. Wysyłaj ręcznie, pojedynczo, ze swojej skrzynki. " +
+            Guidance: "Tylko prośba o zgodę – bez cen, opisu usług i linków. Wysyłaj ręcznie, pojedynczo, ze swojej skrzynki. " +
                       "Google nie podaje e-maili: szukaj na stronie, Instagramie lub Facebooku firmy. Wyślij raz – brak odpowiedzi traktuj jako „nie”.",
             Subject: c.Lead.Status switch
             {
@@ -204,23 +260,6 @@ public sealed class MessageDrafter
                 LeadStatus.NoWebsite => $"Strona internetowa dla {c.OfYourPlace}?",
                 _ => "Pomysł na odświeżenie strony",
             },
-            Body: body,
-            RequiresConsent: false);
-    }
-
-    private MessageDraft DirectMessage(DraftContext c)
-    {
-        var body = c.Informal
-            ? $"Cześć! Tu {_name}, robię strony dla lokalnych biznesów. {ShortHook(c)} Mogę podesłać krótką propozycję, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli nie – żaden problem, nie będę więcej pisać 🙂"
-            : $"Dzień dobry, nazywam się {_name} i tworzę strony dla lokalnych firm. {ShortHook(c)} Czy mogę przesłać krótką propozycję, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli temat Państwa nie interesuje, proszę zignorować wiadomość – nie będę więcej pisać.";
-
-        return new MessageDraft(
-            DraftKind.DirectMessage,
-            Title: "DM – prośba o zgodę",
-            Channel: "Instagram / Facebook – wiadomość prywatna do profilu firmy",
-            Guidance: "Salony beauty najszybciej odpowiadają na Instagramie. Pisz do profilu firmy, nie na prywatne konto właściciela. " +
-                      "Tylko prośba o zgodę, bez cen i opisu usług. Wyślij raz – brak odpowiedzi traktuj jako „nie”.",
-            Subject: null,
             Body: body,
             RequiresConsent: false);
     }
@@ -242,13 +281,15 @@ public sealed class MessageDrafter
 
               Cześć!
 
-              tu {_name} – robię strony internetowe dla lokalnych biznesów.
+              tu {_name} – robię strony internetowe dla {c.Tone.Audience}.
 
               {StatusHook(c)}
 
               {c.Tone.NicheInsight}
 
-              Mogę zrobić {c.Tone.Offer}. Przykłady moich realizacji: [link lub kod QR do portfolio].
+              Mogę zrobić {c.Tone.Offer}. Każdą stronę projektuję i koduję sam, od zera – bez gotowych szablonów – więc wygląda dokładnie tak, jak chcecie, szybko działa na telefonie i jest Wasza na własność.
+
+              Przykłady moich realizacji: {_portfolio}
 
               Jeśli temat Was zainteresuje, napiszcie na {_email} albo zadzwońcie – chętnie opowiem więcej, bez zobowiązań.
 
@@ -266,13 +307,15 @@ public sealed class MessageDrafter
 
               Dzień dobry,
 
-              nazywam się {_name} i tworzę strony internetowe dla lokalnych firm usługowych.
+              nazywam się {_name} i tworzę strony internetowe dla {c.Tone.Audience}.
 
               {StatusHook(c)}
 
               {c.Tone.NicheInsight}
 
-              Mogę przygotować {c.Tone.Offer}. Przykłady moich realizacji: [link lub kod QR do portfolio].
+              Mogę przygotować {c.Tone.Offer}. Każdą stronę projektuję i koduję sam, od zera – bez gotowych szablonów – więc wygląda dokładnie tak, jak Państwo chcą, szybko działa na telefonie i jest Państwa własnością.
+
+              Przykłady moich realizacji: {_portfolio}
 
               Jeśli temat Państwa zainteresuje, zapraszam do kontaktu: {_email} lub telefonicznie – chętnie odpowiem na pytania, bez zobowiązań.
 
@@ -294,25 +337,142 @@ public sealed class MessageDrafter
             RequiresConsent: false);
     }
 
-    // ---------- Po zgodzie ----------
+    // =====================================================================
+    //  Po zgodzie – podgląd, oferta, cena, przypomnienie
+    // =====================================================================
 
-    private MessageDraft Proposal(DraftContext c)
+    private MessageDraft Preview(DraftContext c)
     {
         var body = c.Informal
             ? $"""
-              Cześć, dzięki za odpowiedź!
+              Hej, dzięki za odpowiedź! 🙌
 
-              Zgodnie z obietnicą podsyłam krótką propozycję strony dla {c.OfYourPlace}.
+              Wrzucam szybki podgląd, jak mogłaby wyglądać strona {c.OfYourPlace} 👇
 
-              {c.Tone.NicheInsight}
+              [wstaw screenshot makiety]
 
-              Mogę zrobić {c.Tone.Offer}.
+              To wstępny szkic – kolory, zdjęcia i układ dopasuję do Was. Co o tym myślicie?
+              """
+            : $"""
+              Dzień dobry, dziękuję za odpowiedź!
 
-              [2–3 zdania: zakres, czas realizacji, cena lub widełki]
+              Przesyłam wstępny podgląd, jak mogłaby wyglądać strona {c.OfYourPlace}:
 
-              Przykłady moich realizacji: [link do portfolio]
+              [wstaw screenshot makiety]
 
-              Pasuje Wam krótka rozmowa (15 min) w tym albo przyszłym tygodniu?
+              To pierwszy szkic – kolory, zdjęcia i układ dopasuję do Państwa. Co Państwo o tym sądzą?
+
+              Pozdrawiam,
+              {_name}
+              """;
+
+        return new MessageDraft(
+            DraftKind.Preview,
+            Title: "Podgląd (makieta)",
+            Channel: "Tam, gdzie firma odpowiedziała",
+            Guidance: "Najskuteczniejsza pierwsza odpowiedź: obraz zamiast opisu. Zrób makietę strony głównej z ich nazwą i zdjęciami " +
+                      "z Instagrama (Figma, Canva albo Twój szablon startowy – 30–60 min) i wyślij jako screenshot. " +
+                      "Bez ceny – podaj ją, gdy zapytają albo gdy podgląd się spodoba (wtedy „Oferta – krótka”).",
+            Subject: null,
+            Body: body,
+            RequiresConsent: true);
+    }
+
+    private MessageDraft OfferShort(DraftContext c)
+    {
+        var features = string.Join("\n", c.Tone.Features.Concat(c.CommonBenefits).Select(f => $"✔️ {f}"));
+
+        var body = c.Informal
+            ? $"""
+              Jasne, już opowiadam 🙂
+
+              Stronę robię sam, od zera – bez gotowych szablonów – więc będzie wyglądać dokładnie tak, jak chcecie, i szybko działać na telefonie.
+
+              Co dostajecie:
+              {features}
+
+              💰 {_price} jednorazowo
+              🛠️ opcjonalnie opieka (hosting, aktualizacje, drobne zmiany): {_carePlan}
+              ⏱️ czas realizacji: {_deliveryTime}
+
+              Moje realizacje: {_portfolio}
+
+              Pasuje Wam krótka rozmowa (10–15 min), żeby omówić szczegóły?
+              """
+            : $"""
+              Oczywiście, już opowiadam.
+
+              Stronę przygotowuję sam, od zera – bez gotowych szablonów – więc będzie wyglądać dokładnie tak, jak Państwo chcą, i szybko działać na telefonie.
+
+              Co Państwo otrzymują:
+              {features}
+
+              💰 {_price} jednorazowo
+              🛠️ opcjonalnie opieka (hosting, aktualizacje, drobne zmiany): {_carePlan}
+              ⏱️ czas realizacji: {_deliveryTime}
+
+              Moje realizacje: {_portfolio}
+
+              Czy pasowałaby Państwu krótka rozmowa (10–15 minut), żeby omówić szczegóły?
+
+              Pozdrawiam,
+              {_name}
+              """;
+
+        return new MessageDraft(
+            DraftKind.OfferShort,
+            Title: "Oferta – krótka",
+            Channel: "Instagram / Messenger – gdy chcą poznać szczegóły",
+            Guidance: "Zwięzła oferta na komunikator. Opiekę przedstawiaj jako opcję, nie obowiązek – stała opłata na start to częsta obiekcja. " +
+                      "Cenę, opiekę, czas i portfolio uzupełnisz raz w Ustawieniach.",
+            Subject: null,
+            Body: body,
+            RequiresConsent: true);
+    }
+
+    private MessageDraft Proposal(DraftContext c)
+    {
+        var features = string.Join("\n", c.Tone.Features.Concat(c.CommonBenefits).Select(f => $"• {f}"));
+        var profileNote = c.Lead.WebsiteCheck?.ProfilePlatform is { } platform
+            ? c.Informal
+                ? $" Profil {OnPlatform(platform)} zostaje – strona go uzupełnia i prowadzi do niego klientów."
+                : $" Profil {OnPlatform(platform)} zostaje – strona go uzupełnia i kieruje do niego klientów."
+            : string.Empty;
+
+        var body = c.Informal
+            ? $"""
+              Cześć!
+
+              dzięki za zainteresowanie! Poniżej krótko, co mogę przygotować dla {c.OfYourPlace}.
+
+              DLACZEGO WŁASNA STRONA
+              {c.Tone.NicheInsight} Własna strona sprawia też, że pojawiacie się w Google, gdy ktoś wpisze „{c.Lead.Category.Query} {c.Lead.City}” – a nie tylko w social mediach.{profileNote}
+
+              CO PRZYGOTUJĘ
+              {features}
+              • formularz kontaktowy i przyciski „Zadzwoń” / „Wyznacz trasę”
+
+              DLACZEGO NIE SZABLON
+              Każdą stronę projektuję i koduję sam, od zera. Dzięki temu:
+              • wygląda tak, jak chcecie – Wasze kolory, zdjęcia i klimat, a nie motyw, który ma sto innych firm,
+              • ładuje się szybko, co docenia i klient, i Google,
+              • nie płacicie co miesiąc za kreator stron – strona i domena są Wasze.
+
+              JAK WYGLĄDA WSPÓŁPRACA
+              1. Krótka rozmowa (15 min) – co ma być na stronie i jaki klimat lubicie.
+              2. Projekt – pokazuję wygląd strony, zanim zacznę kodować.
+              3. Poprawki – zmieniamy wszystko, co trzeba, aż będzie tak, jak chcecie.
+              4. Publikacja – podpinam domenę i uruchamiam stronę.
+              5. Opieka (opcjonalnie) – hosting, aktualizacje i drobne zmiany, żebyście niczym nie musieli się martwić.
+
+              KOSZT I CZAS
+              • wykonanie strony: {_price} (jednorazowo)
+              • opieka i hosting (opcjonalnie): {_carePlan}
+              • czas realizacji: {_deliveryTime}
+
+              Przykłady moich realizacji: {_portfolio}
+
+              Pasuje Wam krótka rozmowa w tym albo przyszłym tygodniu? Wystarczy odpisać z dogodnym terminem.
 
               Pozdrawiam,
               {_signature}
@@ -320,17 +480,36 @@ public sealed class MessageDrafter
             : $"""
               Dzień dobry,
 
-              dziękuję za odpowiedź! Zgodnie z obietnicą przesyłam krótką propozycję strony dla {c.OfYourPlace}.
+              dziękuję za zainteresowanie! Poniżej krótko, co mogę przygotować dla {c.OfYourPlace}.
 
-              {c.Tone.NicheInsight}
+              DLACZEGO WŁASNA STRONA
+              {c.Tone.NicheInsight} Dzięki własnej stronie będą Państwo widoczni w Google, gdy ktoś wpisze „{c.Lead.Category.Query} {c.Lead.City}” – a nie tylko w mediach społecznościowych.{profileNote}
 
-              Mogę przygotować {c.Tone.Offer}.
+              CO PRZYGOTUJĘ
+              {features}
+              • formularz kontaktowy i przyciski „Zadzwoń” / „Wyznacz trasę”
 
-              [2–3 zdania: zakres, czas realizacji, cena lub widełki]
+              DLACZEGO NIE SZABLON
+              Każdą stronę projektuję i koduję sam, od zera. Dzięki temu:
+              • wygląda tak, jak Państwo chcą – kolory, zdjęcia i klimat {c.OfYourPlace}, a nie motyw, który ma sto innych firm,
+              • ładuje się szybko, co docenia i klient, i Google,
+              • nie płacą Państwo co miesiąc za kreator stron – strona i domena są Państwa własnością.
 
-              Przykłady moich realizacji: [link do portfolio]
+              JAK WYGLĄDA WSPÓŁPRACA
+              1. Krótka rozmowa (15 min) – co ma być na stronie i jaki klimat Państwo lubią.
+              2. Projekt – pokazuję wygląd strony, zanim zacznę kodować.
+              3. Poprawki – zmieniamy wszystko, co trzeba, aż będzie tak, jak Państwo chcą.
+              4. Publikacja – podpinam domenę i uruchamiam stronę.
+              5. Opieka (opcjonalnie) – hosting, aktualizacje i drobne zmiany, żeby niczym nie musieli się Państwo martwić.
 
-              Czy pasowałaby Państwu krótka rozmowa (15 minut) w tym lub przyszłym tygodniu?
+              KOSZT I CZAS
+              • wykonanie strony: {_price} (jednorazowo)
+              • opieka i hosting (opcjonalnie): {_carePlan}
+              • czas realizacji: {_deliveryTime}
+
+              Przykłady moich realizacji: {_portfolio}
+
+              Czy pasowałaby Państwu krótka rozmowa w tym lub przyszłym tygodniu? Wystarczy odpisać z dogodnym terminem.
 
               Pozdrawiam serdecznie,
               {_signature}
@@ -338,11 +517,42 @@ public sealed class MessageDrafter
 
         return new MessageDraft(
             DraftKind.Proposal,
-            Title: "Propozycja",
-            Channel: "Tam, gdzie firma odpowiedziała",
-            Guidance: "Wysyłaj tylko po wyraźnej zgodzie („tak, proszę przesłać”). Zaznacz zgodę powyżej – data zapisze się jako dowód. " +
-                      "Uzupełnij fragmenty w [nawiasach].",
-            Subject: "Propozycja strony internetowej",
+            Title: "Oferta – pełna",
+            Channel: "E-mail (albo jako PDF w wiadomości)",
+            Guidance: "Pełna prezentacja – gdy firma chce „coś na maila” albo porównuje oferty. Najlepiej po podglądzie. " +
+                      "Po oznaczeniu jako wysłane przypomnienie ustawi się za tydzień.",
+            Subject: $"Propozycja strony internetowej dla {c.OfYourPlace}",
+            Body: body,
+            RequiresConsent: true);
+    }
+
+    private MessageDraft PriceReply(DraftContext c)
+    {
+        var body = c.Informal
+            ? $"""
+              Wykonanie strony to {_price} jednorazowo – w tym projekt, kodowanie i publikacja.
+
+              Jeśli chcecie, mogę potem zająć się hostingiem, aktualizacjami i drobnymi zmianami za {_carePlan} – ale to opcja, nie obowiązek.
+
+              Dokładną kwotę podam po krótkiej rozmowie, bo zależy od tego, ile podstron i funkcji potrzebujecie. Podesłać Wam podgląd, jak to mogłoby wyglądać u Was?
+              """
+            : $"""
+              Wykonanie strony to {_price} jednorazowo – w tym projekt, kodowanie i publikacja.
+
+              Jeśli Państwo zechcą, mogę potem zająć się hostingiem, aktualizacjami i drobnymi zmianami za {_carePlan} – to opcja, nie obowiązek.
+
+              Dokładną kwotę podam po krótkiej rozmowie, bo zależy od liczby podstron i funkcji. Czy przesłać podgląd, jak mogłoby to wyglądać u Państwa?
+
+              Pozdrawiam,
+              {_name}
+              """;
+
+        return new MessageDraft(
+            DraftKind.PriceReply,
+            Title: "Odpowiedź: cena",
+            Channel: "Gdy ktoś od razu pyta „ile to kosztuje?”",
+            Guidance: "Krótko i konkretnie, bez uciekania od pytania – ale z powrotem do podglądu, bo obraz sprzedaje lepiej niż cena.",
+            Subject: null,
             Body: body,
             RequiresConsent: true);
     }
@@ -351,17 +561,16 @@ public sealed class MessageDrafter
     {
         var body = c.Informal
             ? $"""
-              Cześć!
+              Hej! Wracam do strony dla {c.OfYourPlace} – udało się rzucić okiem na propozycję?
 
-              Wracam do propozycji strony. Udało się rzucić okiem? Chętnie odpowiem na pytania albo dopasuję zakres.
-
-              Pozdrawiam,
-              {_name}
+              Jeśli coś jest niejasne albo chcecie coś zmienić, dajcie znać. Mogę też podesłać szybki podgląd, jak to mogłoby wyglądać 🙂
               """
             : $"""
               Dzień dobry,
 
-              wracam do propozycji strony. Czy udało się ją przejrzeć? Chętnie odpowiem na pytania albo dopasuję zakres.
+              wracam do propozycji strony dla {c.OfYourPlace} – czy udało się ją przejrzeć?
+
+              Jeśli coś jest niejasne albo chcieliby Państwo coś zmienić, chętnie dopasuję. Mogę też przesłać podgląd, jak mogłoby to wyglądać.
 
               Pozdrawiam serdecznie,
               {_name}
@@ -370,14 +579,16 @@ public sealed class MessageDrafter
         return new MessageDraft(
             DraftKind.FollowUp,
             Title: "Przypomnienie",
-            Channel: "Tam, gdzie wysłana była propozycja",
-            Guidance: "Tylko do firm, które wyraziły zgodę i dostały propozycję. Jedno przypomnienie po około tygodniu – potem odpuść.",
-            Subject: "Re: Propozycja strony internetowej",
+            Channel: "Tam, gdzie wysłana była oferta",
+            Guidance: "Jedno przypomnienie po ok. tygodniu – potem odpuść. Najlepiej wysłać wieczorem, gdy salon kończy pracę.",
+            Subject: $"Re: Propozycja strony internetowej dla {c.OfYourPlace}",
             Body: body,
             RequiresConsent: true);
     }
 
-    // ---------- Wspólne fragmenty ----------
+    // =====================================================================
+    //  Wspólne fragmenty
+    // =====================================================================
 
     /// <summary>Otwarcie zależne od sytuacji firmy (e-mail, list).</summary>
     private static string StatusHook(DraftContext c)
@@ -525,6 +736,14 @@ public sealed class MessageDrafter
             LeadStatus.WebsiteDown => "nowa, działająca strona",
             _ => "odświeżona strona",
         };
+
+        /// <summary>Korzyści wspólne dla każdej branży – dopisywane do listy w ofertach.</summary>
+        public IEnumerable<string> CommonBenefits =>
+        [
+            "wersja dopracowana pod telefon – stamtąd wchodzi większość klientów",
+            $"widoczność w Google na „{Lead.Category.Query} {Lead.City}”",
+            "własna domena, a strona na własność – bez opłat za kreator",
+        ];
 
         /// <summary>Wynik sprawdzenia strony w nawiasie, np. "domena nie istnieje lub nie ma rekordów DNS".</summary>
         public string TechnicalNote => Lead.WebsiteCheck?.Note ?? "strona nie odpowiada";
