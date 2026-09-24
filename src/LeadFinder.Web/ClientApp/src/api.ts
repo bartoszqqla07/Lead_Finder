@@ -27,7 +27,7 @@ async function send(path: string, init?: RequestInit & { json?: unknown }): Prom
   try {
     response = await fetch(path, {
       ...rest,
-      headers: json !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+      headers: json !== undefined ? { 'Content-Type': 'application/json' } : rest.headers,
       body: json !== undefined ? JSON.stringify(json) : rest.body,
     });
   } catch {
@@ -70,6 +70,17 @@ export const api = {
     const fileName = /filename="?([^";]+)"?/.exec(disposition)?.[1] ?? 'leady.csv';
     return { blob: await response.blob(), fileName };
   },
+
+  /** Adres pliku z kopią całej bazy (leady, notatki, ustawienia) – do pobrania zwykłym linkiem. */
+  backupUrl: '/api/backup',
+
+  /** Zastępuje dane aplikacji plikiem kopii; obecne dane serwer zapisuje obok jako kopię bezpieczeństwa. */
+  restoreBackup: (file: File) =>
+    request<{ leadCount: number; safetyCopy: string }>('/api/backup/restore', {
+      method: 'POST',
+      body: file,
+      headers: { 'Content-Type': 'application/octet-stream' },
+    }),
 
   getCategories: () => request<Category[]>('/api/categories'),
 

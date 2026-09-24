@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { api } from '../api';
 import type { Settings } from '../types';
+import { BackupSection } from './BackupSection';
 
 interface Props {
   settings: Settings;
@@ -240,6 +241,8 @@ export function SettingsDialog({ settings, onClose, onSaved }: Props) {
               Console, jeśli używasz klucza gdzie indziej.
             </p>
           </section>
+
+          <BackupSection />
 
           <p className="hint">
             Dane aplikacji: <code>{settings.dataDirectory}</code>

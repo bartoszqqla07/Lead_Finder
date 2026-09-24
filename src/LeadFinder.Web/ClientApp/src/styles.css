@@ -1758,3 +1758,20 @@ details[open] > summary .collapsible-hint::after {
 .studio-cta {
   align-self: flex-start;
 }
+
+/* ===== Kopia zapasowa (Ustawienia) ===== */
+a.button,
+label.button {
+  text-decoration: none;
+  cursor: pointer;
+}
+.button.disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.hint.ok-text {
+  color: var(--ok);
+}
+.hint.error-text {
+  color: var(--danger);
+}

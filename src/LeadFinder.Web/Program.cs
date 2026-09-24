@@ -81,6 +81,7 @@ try
     app.MapLeadEndpoints();
     app.MapSearchEndpoints();
     app.MapSettingsEndpoints();
+    app.MapBackupEndpoints();
     app.MapFallback("/api/{**path}", () => Results.NotFound());
     app.MapFallbackToFile("index.html", staticFiles); // SPA: każdy inny adres obsługuje React
 

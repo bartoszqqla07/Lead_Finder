@@ -68,6 +68,33 @@ Tworzy `dist\LeadFinder.Web.exe`. Na docelowym komputerze wystarczy
 [.NET 8 Runtime (ASP.NET Core)](https://dotnet.microsoft.com/download/dotnet/8.0). Folder `dist` można przenieść
 w dowolne miejsce i zrobić skrót na pulpicie.
 
+## Przeniesienie na drugi komputer
+
+Kod przenosisz przez GitHuba, a dane (leady, notatki, etapy, historia, ustawienia z kluczem API) jednym plikiem kopii.
+Dane celowo nie trafiają do gita, bo to klucz API i dane firm.
+
+**Na komputerze, z którego przenosisz:** Ustawienia → *Przenoszenie na inny komputer* → **Pobierz kopię danych**.
+Powstanie plik `leadfinder-kopia-RRRR-MM-DD.db`.
+
+**Na nowym komputerze (pierwszy raz):**
+
+1. Zainstaluj [Git](https://git-scm.com/download/win), [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+   i [Node.js 20.19+](https://nodejs.org/) (LTS).
+2. Pobierz kod:
+   ```powershell
+   git clone https://github.com/bartoszqqla07/Lead_Finder.git
+   ```
+   Przy prywatnym repozytorium Git poprosi o zalogowanie do GitHuba w przeglądarce.
+3. Uruchom `LeadFinder.cmd` z pobranego folderu. Pierwsze uruchomienie trwa 1–2 minuty.
+4. Ustawienia → **Wczytaj kopię…** → wybierz plik kopii. Aplikacja odświeży się z Twoimi danymi.
+
+**Później, żeby zaktualizować kod:** `git pull` w folderze aplikacji i ponowne uruchomienie `LeadFinder.cmd`.
+Dane przenosisz kopią tylko wtedy, gdy pracowałeś na drugim komputerze.
+
+Wczytanie kopii zastępuje dane na tym komputerze. Poprzednie dane aplikacja zapisuje obok w folderze danych jako
+`leadfinder.przed-przywroceniem-*.db`, więc pomyłkę da się cofnąć. Najwygodniej pracować na jednym komputerze
+naraz i przenosić kopię przy zmianie, bo dwie bazy nie łączą się same.
+
 ## Jak zdobyć klucz API
 
 1. Wejdź na [Google Cloud Console](https://console.cloud.google.com/) i utwórz projekt.
