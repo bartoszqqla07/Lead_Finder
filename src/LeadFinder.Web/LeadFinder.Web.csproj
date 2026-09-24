@@ -25,7 +25,7 @@
     <Content Remove="$(ClientAppDir)**" />
     <None Remove="$(ClientAppDir)**" />
     <None Include="$(ClientAppDir)**" Exclude="$(ClientAppDir)node_modules\**" />
-    <ClientAppSource Include="$(ClientAppDir)src\**;$(ClientAppDir)index.html;$(ClientAppDir)package.json;$(ClientAppDir)vite.config.ts" />
+    <ClientAppSource Include="$(ClientAppDir)src\**;$(ClientAppDir)public\**;$(ClientAppDir)index.html;$(ClientAppDir)package.json;$(ClientAppDir)vite.config.ts" />
   </ItemGroup>
 
   <!--

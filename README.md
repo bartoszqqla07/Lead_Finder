@@ -54,6 +54,56 @@ Tworzy `dist\LeadFinder.Web.exe`. Na docelowym komputerze wystarczy
 [.NET 8 Runtime (ASP.NET Core)](https://dotnet.microsoft.com/download/dotnet/8.0). Folder `dist` można przenieść
 w dowolne miejsce i zrobić skrót na pulpicie.
 
+## Wersja w internecie i na telefonie (Azure)
+
+Ta sama aplikacja działa też na serwerze, więc jest dostępna z telefonu przez całą dobę, bez włączonego komputera.
+Na serwerze wymagane jest **hasło**: bez niego aplikacja w ogóle się nie uruchomi. Działa na **darmowym planie F1
+Azure App Service** z serwerem w Polsce lub Europie Zachodniej. Każdy `git push` do `main` wdraża nową wersję
+przez GitHub Actions ([.github/workflows/deploy-azure.yml](.github/workflows/deploy-azure.yml)).
+
+### Jednorazowa konfiguracja
+
+1. **Konto Azure:** [azure.microsoft.com/free](https://azure.microsoft.com/free). Karta służy tylko do weryfikacji.
+   Po 30 dniach Azure poprosi o przejście na „pay-as-you-go”. Plan F1 dalej kosztuje 0 zł, ale dla spokoju ustaw
+   [budżet z alertem](https://portal.azure.com/#view/Microsoft_Azure_CostManagement/Menu/~/budgets).
+2. **Utwórz aplikację:** Portal → *Create a resource* → **Web App**:
+   - *Name*: np. `leadfinder-bartosz` (adres: `https://leadfinder-bartosz.azurewebsites.net`)
+   - *Publish*: **Code**, *Runtime stack*: **.NET 8 (LTS)**, *Operating System*: **Windows**
+   - *Region*: **Poland Central**, a gdy F1 jest tam niedostępny, **West Europe**
+   - *Pricing plan*: nowy plan, **Free F1**
+   - zakładka *Monitoring*: Application Insights **wyłączone**
+3. **Ustawienia aplikacji** (Web App → *Settings → Environment variables → App settings*):
+   - `LeadFinder__Password` = długie hasło, którym będziesz się logować
+   - opcjonalnie `GOOGLE_PLACES_API_KEY`; klucz można też wpisać później w aplikacji, w Ustawieniach
+4. **Settings → Configuration → General settings:** włącz **HTTPS Only** oraz
+   **SCM Basic Auth Publishing Credentials** (potrzebne do wdrażania z GitHuba). Zapisz.
+5. **Overview → Download publish profile**, czyli pobierz plik `.PublishSettings`.
+6. **GitHub → repozytorium → Settings → Secrets and variables → Actions:**
+   - zakładka *Secrets*: `AZURE_WEBAPP_PUBLISH_PROFILE` = cała zawartość pobranego pliku
+   - zakładka *Variables*: `AZURE_WEBAPP_NAME` = nazwa aplikacji z punktu 2
+7. **`git push`**, a w zakładce *Actions* poczekaj, aż „Deploy to Azure” zakończy się sukcesem (ok. 3 minuty).
+
+### Na telefonie
+
+Otwórz adres aplikacji i zaloguj się. Sesja trwa 30 dni. Potem zainstaluj ją jak aplikację:
+- **Android (Chrome):** menu ⋮ → *Zainstaluj aplikację* / *Dodaj do ekranu głównego*
+- **iPhone (Safari):** *Udostępnij* → *Do ekranu początkowego*
+
+### Warto wiedzieć
+
+- **Pierwsze otwarcie po przerwie trwa 10–20 s.** Na planie F1 aplikacja „zasypia” po ok. 20 minutach bezczynności.
+- **Baza leży w `D:\home\data\LeadFinder`** i przetrwa restarty oraz wdrożenia. Kopię zapasową pobierzesz przez Kudu:
+  `https://<nazwa>.scm.azurewebsites.net` → *Debug console* → pobierz `leadfinder.db`.
+- **Przeniesienie lokalnych leadów na serwer:** zatrzymaj aplikację w Azure (*Stop*), wgraj przez Kudu swój plik
+  `%LOCALAPPDATA%\LeadFinder\leadfinder.db` do `D:\home\data\LeadFinder` i uruchom ją ponownie (*Start*).
+- **Bezpieczeństwo:**
+  - logowanie ma limit 5 prób na minutę;
+  - ciasteczko sesji ma flagi `HttpOnly`, `SameSite=Strict` i jest wysyłane tylko przez HTTPS;
+  - wszystkie dane (`/api`) wymagają zalogowania;
+  - klucz Google możesz dodatkowo ograniczyć do adresów wychodzących serwera
+    (*Web App → Properties → Outbound IP addresses* → w Google Cloud: *Application restrictions → IP addresses*).
+- **Lokalnie** (`LeadFinder.cmd`) aplikacja działa jak dotąd: bez hasła, tylko na `localhost`.
+
 ## Jak zdobyć klucz API
 
 1. Wejdź na [Google Cloud Console](https://console.cloud.google.com/) i utwórz projekt.

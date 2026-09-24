@@ -19,6 +19,12 @@ export class ApiError extends Error {
   }
 }
 
+/** Wywoływane, gdy serwer odpowie 401 (sesja wygasła) – aplikacja pokazuje wtedy ekran logowania. */
+let unauthorizedHandler: (() => void) | null = null;
+export const setUnauthorizedHandler = (handler: (() => void) | null) => {
+  unauthorizedHandler = handler;
+};
+
 async function send(path: string, init?: RequestInit & { json?: unknown }): Promise<Response> {
   const { json, ...rest } = init ?? {};
   let response: Response;
@@ -30,6 +36,11 @@ async function send(path: string, init?: RequestInit & { json?: unknown }): Prom
     });
   } catch {
     throw new ApiError('Brak połączenia z aplikacją. Czy okno LeadFindera nadal działa?', 0);
+  }
+
+  if (response.status === 401 && !path.startsWith('/api/auth/')) {
+    unauthorizedHandler?.();
+    throw new ApiError('Sesja wygasła – zaloguj się ponownie.', 401);
   }
 
   if (!response.ok) {
@@ -52,6 +63,12 @@ async function request<T>(path: string, init?: RequestInit & { json?: unknown })
 }
 
 export const api = {
+  getAuthStatus: () => request<{ authRequired: boolean; authenticated: boolean }>('/api/auth/status'),
+
+  login: (password: string) => request<void>('/api/auth/login', { method: 'POST', json: { password } }),
+
+  logout: () => request<void>('/api/auth/logout', { method: 'POST' }),
+
   getLeads: () => request<Lead[]>('/api/leads'),
 
   updateLead: (id: number, changes: LeadChanges) =>

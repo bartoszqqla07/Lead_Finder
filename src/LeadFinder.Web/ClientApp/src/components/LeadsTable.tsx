@@ -2,6 +2,8 @@ import type { SortKey, SortState } from '../filters';
 import { formatDate, formatRating, websiteHost } from '../labels';
 import type { Lead } from '../types';
 import { StageBadge, StatusBadge } from './Badges';
+import { LeadCards } from './LeadCards';
+import { useIsMobile } from '../hooks/useMediaQuery';
 
 interface Props {
   leads: Lead[];
@@ -14,13 +16,15 @@ interface Props {
 }
 
 export function LeadsTable({ leads, isLoading, hasAnyLeads, sort, onSort, selectedId, onSelect }: Props) {
+  const isMobile = useIsMobile();
+
   if (isLoading) return <div className="empty">Wczytuję leady…</div>;
 
   if (!hasAnyLeads) {
     return (
       <div className="empty">
         <p className="empty-title">Jeszcze nie ma leadów</p>
-        <p className="muted">Wpisz miasto po lewej i kliknij „Szukaj leadów”.</p>
+        <p className="muted">Wpisz miasto w „Nowe wyszukiwanie” i kliknij „Szukaj leadów”.</p>
       </div>
     );
   }
@@ -32,6 +36,9 @@ export function LeadsTable({ leads, isLoading, hasAnyLeads, sort, onSort, select
       </div>
     );
   }
+
+  // Na telefonie tabela z 6 kolumnami jest nieczytelna – karty pokazują to samo w pionie.
+  if (isMobile) return <LeadCards leads={leads} sort={sort} onSort={onSort} onSelect={onSelect} />;
 
   const header = (key: SortKey, label: string, className = '') => {
     const isActive = sort.key === key;

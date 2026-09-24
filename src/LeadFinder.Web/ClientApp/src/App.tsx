@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { api } from './api';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { api, setUnauthorizedHandler } from './api';
+import { LoginScreen } from './components/LoginScreen';
+import { useIsMobile } from './hooks/useMediaQuery';
 import { FilterBar } from './components/FilterBar';
 import { LeadDrawer } from './components/LeadDrawer';
 import { LeadsTable } from './components/LeadsTable';
@@ -15,7 +17,62 @@ import { useSearchJob } from './hooks/useSearchJob';
 import { plural } from './labels';
 import type { Category, Lead, LeadChanges, SearchRun, Settings } from './types';
 
+type AuthState = 'checking' | 'login' | 'ready';
+
+/**
+ * Bramka logowania. Właściwy widok (Workspace) montuje się dopiero po zalogowaniu,
+ * więc jego efekty (pobranie leadów, podłączenie do trwającego wyszukiwania) nie trafiają w 401.
+ */
 export function App() {
+  const [authState, setAuthState] = useState<AuthState>('checking');
+  const [authRequired, setAuthRequired] = useState(false);
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => setAuthState('login'));
+    api
+      .getAuthStatus()
+      .then((status) => {
+        setAuthRequired(status.authRequired);
+        setAuthState(status.authRequired && !status.authenticated ? 'login' : 'ready');
+      })
+      // Brak odpowiedzi – pokaż aplikację; jej własne zapytania wyświetlą czytelny błąd.
+      .catch(() => setAuthState('ready'));
+    return () => setUnauthorizedHandler(null);
+  }, []);
+
+  const logout = async () => {
+    await api.logout().catch(() => undefined);
+    setAuthState('login');
+  };
+
+  if (authState === 'checking') return null;
+  if (authState === 'login') return <LoginScreen onLoggedIn={() => setAuthState('ready')} />;
+  return <Workspace authRequired={authRequired} onLogout={logout} />;
+}
+
+/** Na telefonie zamienia panel w zwijaną sekcję, żeby lista leadów była od razu pod ręką. */
+function MobileSection({
+  enabled,
+  title,
+  defaultOpen,
+  children,
+}: {
+  enabled: boolean;
+  title: string;
+  defaultOpen: boolean;
+  children: ReactNode;
+}) {
+  if (!enabled) return <>{children}</>;
+  return (
+    <details className="card collapsible" open={defaultOpen}>
+      <summary>{title}</summary>
+      <div className="collapsible-body">{children}</div>
+    </details>
+  );
+}
+
+function Workspace({ authRequired, onLogout }: { authRequired: boolean; onLogout: () => void }) {
+  const isMobile = useIsMobile();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [runs, setRuns] = useState<SearchRun[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -42,11 +99,17 @@ export function App() {
   const search = useSearchJob((run) => {
     reload().catch((error: Error) => showToast(error.message, 'error'));
     if (run.state === 'Completed') {
-      showToast(`Gotowe: ${run.newCount} ${plural(run.newCount, 'nowy lead', 'nowe leady', 'nowych leadów')}.`, 'success');
+      showToast(
+        `Gotowe: ${run.newCount} ${plural(run.newCount, 'nowy lead', 'nowe leady', 'nowych leadów')}.`,
+        'success',
+      );
     }
   });
 
-  const cities = useMemo(() => [...new Set(leads.map((l) => l.city))].sort((a, b) => a.localeCompare(b, 'pl')), [leads]);
+  const cities = useMemo(
+    () => [...new Set(leads.map((l) => l.city))].sort((a, b) => a.localeCompare(b, 'pl')),
+    [leads],
+  );
   const visibleLeads = useMemo(() => sortLeads(filterLeads(leads, filters), sort), [leads, filters, sort]);
   const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
 
@@ -107,16 +170,23 @@ export function App() {
           <span className="brand-name">LeadFinder</span>
           <span className="brand-tagline">lokalne biznesy bez dobrej strony</span>
         </div>
-        <button className="button button-ghost" onClick={() => setSettingsOpen(true)}>
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-            <path
-              fill="currentColor"
-              d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.3 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.3 2.5h4l.3-2.5a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
-              transform="translate(-1)"
-            />
-          </svg>
-          Ustawienia
-        </button>
+        <div className="topbar-actions">
+          <button className="button button-ghost" onClick={() => setSettingsOpen(true)} aria-label="Ustawienia">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.3 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.3 2.5h4l.3-2.5a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
+                transform="translate(-1)"
+              />
+            </svg>
+            <span className="hide-mobile">Ustawienia</span>
+          </button>
+          {authRequired && (
+            <button className="button button-ghost" onClick={onLogout}>
+              Wyloguj
+            </button>
+          )}
+        </div>
       </header>
 
       {settings && !settings.hasApiKey && (
@@ -130,17 +200,21 @@ export function App() {
 
       <div className="layout">
         <aside className="sidebar">
-          <SearchPanel
-            categories={categories}
-            knownCities={cities}
-            isRunning={search.isRunning}
-            hasApiKey={settings?.hasApiKey ?? false}
-            onStart={search.start}
-          />
-          {search.run && (
-            <SearchProgressCard job={search} onShowNew={showNewFromRun} />
+          <MobileSection enabled={isMobile} title="Nowe wyszukiwanie" defaultOpen={!isLoading && leads.length === 0}>
+            <SearchPanel
+              categories={categories}
+              knownCities={cities}
+              isRunning={search.isRunning}
+              hasApiKey={settings?.hasApiKey ?? false}
+              onStart={search.start}
+            />
+          </MobileSection>
+          {search.run && <SearchProgressCard job={search} onShowNew={showNewFromRun} />}
+          {runs.length > 0 && (
+            <MobileSection enabled={isMobile} title="Historia wyszukiwań" defaultOpen={false}>
+              <SearchHistory runs={runs} activeRunId={filters.searchRunId} onSelect={showNewFromRun} />
+            </MobileSection>
           )}
-          <SearchHistory runs={runs} activeRunId={filters.searchRunId} onSelect={showNewFromRun} />
         </aside>
 
         <main className="main">

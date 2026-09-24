@@ -1208,6 +1208,197 @@ code {
   color: #fff;
 }
 
+/* ===== Logowanie ===== */
+.login {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+.login-card {
+  width: min(380px, 100%);
+  gap: 18px;
+  padding: 28px 24px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ===== Karty leadów (telefon) ===== */
+.lead-cards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mobile-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.mobile-sort .select {
+  flex: 1;
+}
+.lead-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lead-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.lead-card:active {
+  background: var(--surface-2);
+}
+.lead-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.lead-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 4px;
+  font-size: 13px;
+}
+.lead-card-meta .truncate {
+  max-width: 140px;
+}
+
+/* ===== Zwijane sekcje (telefon) ===== */
+.collapsible {
+  padding: 0;
+  gap: 0;
+}
+.collapsible > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  font-weight: 650;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+.collapsible > summary::after {
+  content: '▾';
+  color: var(--text-3);
+  transition: transform 0.15s;
+}
+.collapsible[open] > summary::after {
+  transform: rotate(180deg);
+}
+.collapsible-body {
+  padding: 0 16px 16px;
+}
+/* Karta w środku zwijanej sekcji – bez podwójnej ramki i powtórzonego tytułu. */
+.collapsible-body > .card {
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  background: none;
+}
+.collapsible-body > .card > .card-title:first-child {
+  display: none;
+}
+
+.filter-toggle.has-active {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+/* ===== Telefon ===== */
+@media (max-width: 720px) {
+  .hide-mobile {
+    display: none;
+  }
+  .topbar {
+    padding: 10px 16px;
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+  .banner {
+    padding: 10px 16px;
+  }
+  .layout {
+    gap: 12px;
+  }
+  .sidebar {
+    gap: 12px;
+  }
+  .summary {
+    gap: 8px;
+  }
+  .tile {
+    padding: 10px 12px;
+  }
+  .tile-count {
+    font-size: 22px;
+  }
+  .tile-hint {
+    display: none;
+  }
+  .search-input {
+    flex: 1 1 0;
+  }
+  .filter-row .select {
+    flex: 1 1 calc(50% - 8px);
+  }
+  .push-right {
+    margin-left: 0;
+  }
+  /* iOS powiększa stronę przy fokusie na polu z czcionką < 16 px. */
+  .input,
+  .select,
+  textarea {
+    font-size: 16px;
+  }
+  /* Wygodniejsze cele dotyku. */
+  .button,
+  .chip,
+  .draft-tab,
+  .stage-option {
+    min-height: 40px;
+  }
+  .drawer {
+    width: 100vw;
+    border-left: none;
+  }
+  .drawer-header {
+    padding-top: max(18px, env(safe-area-inset-top));
+  }
+  .drawer-footer {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  .toast {
+    bottom: max(24px, env(safe-area-inset-bottom));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
