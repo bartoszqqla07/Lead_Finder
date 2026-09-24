@@ -33,7 +33,8 @@ export function LeadsTable({ leads, isLoading, hasAnyLeads, sort, onSort, select
   if (leads.length === 0) {
     return (
       <div className="empty">
-        <p className="empty-title">Nic nie pasuje do filtrów</p>
+        <p className="empty-title">Brak leadów w tym widoku</p>
+        <p className="muted">Zmień zakładkę albo wyczyść filtry.</p>
       </div>
     );
   }

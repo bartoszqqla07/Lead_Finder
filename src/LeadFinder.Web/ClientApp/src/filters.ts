@@ -1,9 +1,28 @@
 import { statusGroupOf, type StatusGroup } from './labels';
 import type { Lead, OutreachStage, ScoreTier } from './types';
 
+/** Zakładki listy – każda odpowiada grupie etapów kontaktu. */
+export type LeadView = 'new' | 'contact' | 'later' | 'client' | 'rejected' | 'all';
+
+/** W której zakładce jest lead: zmiana etapu przenosi go między zakładkami. */
+export const viewOfStage = (stage: OutreachStage): Exclude<LeadView, 'all'> => {
+  switch (stage) {
+    case 'New':
+      return 'new';
+    case 'Later':
+      return 'later';
+    case 'Client':
+      return 'client';
+    case 'Rejected':
+      return 'rejected';
+    default:
+      return 'contact'; // Contacted, Replied
+  }
+};
+
 export interface LeadFilters {
-  /** Zakładka: główna lista albo odłożone "na później". */
-  view: 'main' | 'later';
+  /** Zakładka: "Nowe" to lista robocza, która maleje, gdy kontaktujesz się z salonami. */
+  view: LeadView;
   query: string;
   /** Puste = wszystkie. */
   cities: string[];
@@ -11,8 +30,6 @@ export interface LeadFilters {
   categoryIds: string[];
   statusGroup: StatusGroup | 'all';
   scoreTier: ScoreTier | 'all';
-  /** 'open' = wszystko poza "Klient" i "Odpada"; 'inContact' = "Skontaktowany" + "Odpowiedział". */
-  stage: OutreachStage | 'all' | 'open' | 'inContact';
   /** Tylko leady z przypomnieniem na dziś lub zaległym. */
   dueOnly: boolean;
   /** Tylko leady, które pojawiły się po raz pierwszy w tym wyszukiwaniu. */
@@ -20,13 +37,12 @@ export interface LeadFilters {
 }
 
 export const defaultFilters: LeadFilters = {
-  view: 'main',
+  view: 'new',
   query: '',
   cities: [],
   categoryIds: [],
   statusGroup: 'all',
   scoreTier: 'all',
-  stage: 'all',
   dueOnly: false,
   searchRunId: null,
 };
@@ -75,12 +91,11 @@ export function filterLeads(leads: Lead[], filters: LeadFilters): Lead[] {
     if (filters.cities.length > 0 && !filters.cities.includes(lead.city)) return false;
     if (filters.categoryIds.length > 0 && !filters.categoryIds.includes(lead.categoryId)) return false;
     if (filters.dueOnly && !isDue(lead, today)) return false;
-    // Odłożone "na później" mają osobną zakładkę. Wyjątek: przypomnienia, które przypadają na dziś.
-    if (!filters.dueOnly && (lead.stage === 'Later') !== (filters.view === 'later')) return false;
+    // Kafelek "Do zrobienia" pokazuje przypomnienia ze wszystkich zakładek.
+    if (!filters.dueOnly && filters.view !== 'all' && viewOfStage(lead.stage) !== filters.view) return false;
     if (filters.statusGroup !== 'all' && statusGroupOf(lead.status) !== filters.statusGroup) return false;
     if (filters.scoreTier !== 'all' && lead.score.tier !== filters.scoreTier) return false;
     if (filters.searchRunId !== null && lead.firstSearchRunId !== filters.searchRunId) return false;
-    if (!matchesStage(lead.stage, filters.stage)) return false;
 
     if (query) {
       const haystack = normalize([lead.name, lead.address, lead.phone, lead.websiteUri, lead.notes].join(' '));
@@ -88,19 +103,6 @@ export function filterLeads(leads: Lead[], filters: LeadFilters): Lead[] {
     }
     return true;
   });
-}
-
-function matchesStage(stage: OutreachStage, filter: LeadFilters['stage']): boolean {
-  switch (filter) {
-    case 'all':
-      return true;
-    case 'open':
-      return stage !== 'Client' && stage !== 'Rejected';
-    case 'inContact':
-      return stage === 'Contacted' || stage === 'Replied';
-    default:
-      return stage === filter;
-  }
 }
 
 export function sortLeads(leads: Lead[], sort: SortState): Lead[] {

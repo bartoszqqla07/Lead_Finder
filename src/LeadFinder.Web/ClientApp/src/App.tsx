@@ -9,8 +9,16 @@ import { SearchProgressCard } from './components/SearchProgressCard';
 import { SettingsDialog } from './components/SettingsDialog';
 import { SummaryStrip } from './components/SummaryStrip';
 import { Toast, useToast } from './components/Toast';
-import { ViewTabs } from './components/ViewTabs';
-import { defaultFilters, defaultSort, filterLeads, sortLeads, type LeadFilters, type SortState } from './filters';
+import { ViewTabs, viewLabel } from './components/ViewTabs';
+import {
+  defaultFilters,
+  defaultSort,
+  filterLeads,
+  sortLeads,
+  viewOfStage,
+  type LeadFilters,
+  type SortState,
+} from './filters';
 import { useHashSelection } from './hooks/useHashSelection';
 import { usePersistentState } from './hooks/usePersistentState';
 import { useIsMobile } from './hooks/useMediaQuery';
@@ -47,7 +55,7 @@ export function App() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // Filtry i sortowanie przetrwają zamknięcie aplikacji (localStorage).
-  const [filters, setFilters] = usePersistentState<LeadFilters>('leadfinder.filters.v2', defaultFilters);
+  const [filters, setFilters] = usePersistentState<LeadFilters>('leadfinder.filters.v3', defaultFilters);
   const [sort, setSort] = usePersistentState<SortState>('leadfinder.sort.v2', defaultSort);
   const [selectedId, setSelectedId] = useHashSelection();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -83,8 +91,14 @@ export function App() {
   const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
 
   const updateLead = async (id: number, changes: LeadChanges) => {
+    const previous = leads.find((l) => l.id === id);
     const updated = await api.updateLead(id, changes);
     setLeads((current) => current.map((l) => (l.id === id ? updated : l)));
+
+    // Zmiana etapu przenosi lead do innej zakładki – mówimy dokąd, żeby nie "zniknął" bez słowa.
+    if (previous && viewOfStage(previous.stage) !== viewOfStage(updated.stage)) {
+      showToast(`Przeniesiono do zakładki „${viewLabel[viewOfStage(updated.stage)]}”.`, 'success');
+    }
   };
 
   const deleteLead = async (id: number, block: boolean) => {
@@ -114,7 +128,8 @@ export function App() {
   };
 
   const showNewFromRun = (runId: number) => {
-    setFilters({ ...defaultFilters, searchRunId: runId });
+    // Wszystkie firmy z tego wyszukiwania – także te, z którymi już był kontakt.
+    setFilters({ ...defaultFilters, view: 'all', searchRunId: runId });
     setSort(defaultSort);
   };
 
@@ -188,7 +203,9 @@ export function App() {
           <SummaryStrip
             leads={filters.cities.length > 0 ? leads.filter((l) => filters.cities.includes(l.city)) : leads}
             filters={filters}
-            onFilter={(changes) => setFilters({ ...defaultFilters, cities: filters.cities, ...changes })}
+            onFilter={(changes) =>
+              setFilters({ ...defaultFilters, cities: filters.cities, view: filters.view, ...changes })
+            }
           />
           <FilterBar
             filters={filters}

@@ -1,4 +1,4 @@
-import { isDue, todayIso, type LeadFilters } from '../filters';
+import { isDue, todayIso, viewOfStage, type LeadFilters } from '../filters';
 import { statusGroupOf } from '../labels';
 import type { Lead } from '../types';
 
@@ -8,11 +8,13 @@ interface Props {
   onFilter: (changes: Partial<LeadFilters>) => void;
 }
 
-/** Kafelki z liczbami, które działają też jako szybkie filtry. */
+/**
+ * Kafelki z liczbami, które działają też jako szybkie filtry. "Gorące" i "WordPress" liczą się
+ * w bieżącej zakładce; "Do zrobienia" – ze wszystkich zakładek (przypomnienie nie może zginąć).
+ */
 export function SummaryStrip({ leads, filters, onFilter }: Props) {
-  const open = (l: Lead) => l.stage !== 'Client' && l.stage !== 'Rejected' && l.stage !== 'Later';
-
   const today = todayIso();
+  const inView = leads.filter((l) => filters.view === 'all' || viewOfStage(l.stage) === filters.view);
   const dueCount = leads.filter((l) => isDue(l, today)).length;
   const overdueCount = leads.filter((l) => isDue(l, today) && l.nextActionDate! < today).length;
 
@@ -29,33 +31,17 @@ export function SummaryStrip({ leads, filters, onFilter }: Props) {
       key: 'hot',
       label: 'Gorące leady',
       hint: 'brak strony / nie działa',
-      count: leads.filter((l) => statusGroupOf(l.status) === 'hot' && open(l)).length,
-      active: filters.statusGroup === 'hot' && filters.stage === 'open',
-      apply: { statusGroup: 'hot', stage: 'open' },
+      count: inView.filter((l) => statusGroupOf(l.status) === 'hot').length,
+      active: !filters.dueOnly && filters.statusGroup === 'hot',
+      apply: { statusGroup: 'hot' },
     },
     {
       key: 'wordpress',
       label: 'WordPress',
       hint: 'do odświeżenia',
-      count: leads.filter((l) => l.status === 'WordPress' && open(l)).length,
-      active: filters.statusGroup === 'wordpress' && filters.stage === 'open',
-      apply: { statusGroup: 'wordpress', stage: 'open' },
-    },
-    {
-      key: 'contact',
-      label: 'W kontakcie',
-      hint: 'skontaktowani + odpowiedzi',
-      count: leads.filter((l) => l.stage === 'Contacted' || l.stage === 'Replied').length,
-      active: filters.stage === 'inContact',
-      apply: { stage: 'inContact' },
-    },
-    {
-      key: 'client',
-      label: 'Klienci',
-      hint: 'wygrane',
-      count: leads.filter((l) => l.stage === 'Client').length,
-      active: filters.stage === 'Client',
-      apply: { stage: 'Client' },
+      count: inView.filter((l) => l.status === 'WordPress').length,
+      active: !filters.dueOnly && filters.statusGroup === 'wordpress',
+      apply: { statusGroup: 'wordpress' },
     },
   ] as const;
 

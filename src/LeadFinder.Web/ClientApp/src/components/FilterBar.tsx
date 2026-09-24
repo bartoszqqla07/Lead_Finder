@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { defaultFilters, type LeadFilters } from '../filters';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { MultiSelect } from './MultiSelect';
-import { formatDateTime, plural, stages } from '../labels';
+import { formatDateTime, plural } from '../labels';
 import type { Category, SearchRun } from '../types';
 
 interface Props {
@@ -29,13 +29,13 @@ export function FilterBar({
   const isMobile = useIsMobile();
   const [showFilters, setShowFilters] = useState(false);
   const set = <K extends keyof LeadFilters>(key: K, value: LeadFilters[K]) => onChange({ ...filters, [key]: value });
-  const isFiltered = JSON.stringify(filters) !== JSON.stringify(defaultFilters);
+  // Zakładka (etap) nie jest filtrem do czyszczenia – zostaje po "Wyczyść filtry".
+  const isFiltered = JSON.stringify({ ...filters, view: defaultFilters.view }) !== JSON.stringify(defaultFilters);
   const activeSelects = [
     filters.cities.length > 0,
     filters.categoryIds.length > 0,
     filters.statusGroup !== defaultFilters.statusGroup,
     filters.scoreTier !== defaultFilters.scoreTier,
-    filters.stage !== defaultFilters.stage,
   ].filter(Boolean).length;
 
   return (
@@ -100,22 +100,6 @@ export function FilterBar({
               <option value="Medium">Średnia szansa (40–64)</option>
               <option value="Low">Niska szansa (poniżej 40)</option>
             </select>
-
-            <select
-              className="select"
-              value={filters.stage}
-              onChange={(e) => set('stage', e.target.value as LeadFilters['stage'])}
-              aria-label="Etap kontaktu"
-            >
-              <option value="all">Każdy etap</option>
-              <option value="open">Otwarte (bez klientów i odrzuconych)</option>
-              <option value="inContact">W kontakcie</option>
-              {stages.map((stage) => (
-                <option key={stage.value} value={stage.value}>
-                  {stage.label}
-                </option>
-              ))}
-            </select>
           </>
         )}
       </div>
@@ -144,7 +128,7 @@ export function FilterBar({
         )}
 
         {isFiltered && (
-          <button className="link-button" onClick={() => onChange(defaultFilters)}>
+          <button className="link-button" onClick={() => onChange({ ...defaultFilters, view: filters.view })}>
             Wyczyść filtry
           </button>
         )}
