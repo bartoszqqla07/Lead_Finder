@@ -3,10 +3,12 @@ import type {
   CurrentSearch,
   Lead,
   LeadChanges,
+  Region,
   SearchRun,
   Settings,
   StartSearch,
   UpdateSettings,
+  Usage,
 } from './types';
 
 /** Błąd API z komunikatem z ProblemDetails (pole "detail") – gotowym do pokazania użytkownikowi. */
@@ -70,6 +72,10 @@ export const api = {
   },
 
   getCategories: () => request<Category[]>('/api/categories'),
+
+  getRegions: () => request<Region[]>('/api/regions'),
+
+  getUsage: () => request<Usage>('/api/usage'),
 
   getSettings: () => request<Settings>('/api/settings'),
 

@@ -43,6 +43,12 @@ public sealed class PlacesApiClient
     private readonly string _languageCode;
     private readonly string _regionCode;
 
+    /// <summary>
+    /// Ile płatnych zapytań (stron wyników Text Search) wysłał ten klient – do szacowania zużycia
+    /// darmowego limitu Google. Google nie udostępnia zużycia przez sam klucz API, więc liczymy sami.
+    /// </summary>
+    public int BillableRequestCount { get; private set; }
+
     /// <param name="httpClient">Współdzielony klient HTTP (czas życia zarządzany przez wywołującego).</param>
     /// <param name="apiKey">Klucz Google Places API.</param>
     /// <param name="languageCode">Język wyników, np. nazwy i adresy.</param>
@@ -114,7 +120,12 @@ public sealed class PlacesApiClient
             var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode)
+            {
+                // Płatne jest każde udane zapytanie z pełną maską pól (sprawdzenie klucza – maska places.id – jest darmowe).
+                if (fieldMask == FieldMask)
+                    BillableRequestCount++;
                 return JsonSerializer.Deserialize<SearchTextResponse>(json, JsonOptions) ?? new SearchTextResponse(null, null);
+            }
 
             // Token może jeszcze "nie dojrzeć" mimo odczekania 2s: jedna ponowna próba z dodatkowym opóźnieniem.
             // Pierwsza strona (bez tokenu) nigdy nie jest ponawiana, więc np. zły klucz zgłosi się od razu.

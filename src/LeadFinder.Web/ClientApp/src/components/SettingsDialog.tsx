@@ -14,6 +14,7 @@ export function SettingsDialog({ settings, onClose, onSaved }: Props) {
   const [signature, setSignature] = useState(settings.signature);
   const [contactEmail, setContactEmail] = useState(settings.contactEmail);
   const [postalAddress, setPostalAddress] = useState(settings.postalAddress);
+  const [freeLimit, setFreeLimit] = useState(String(settings.freeMonthlyRequests));
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
@@ -34,6 +35,7 @@ export function SettingsDialog({ settings, onClose, onSaved }: Props) {
         signature,
         contactEmail,
         postalAddress,
+        freeMonthlyRequests: Number.parseInt(freeLimit, 10) || 0,
       });
       onSaved(saved);
       setApiKey('');
@@ -160,8 +162,28 @@ export function SettingsDialog({ settings, onClose, onSaved }: Props) {
               />
             </label>
             <p className="hint">
-              E-mail i adres trafiają do listów papierowych i klauzuli RODO. Administrator danych musi podać, jak się z nim
-              skontaktować.
+              E-mail i adres trafiają do listów papierowych i klauzuli RODO. Administrator danych musi podać, jak się z
+              nim skontaktować.
+            </p>
+          </section>
+
+          <section className="drawer-section">
+            <h3>Darmowy limit Google</h3>
+            <label className="field">
+              <span className="field-label">Darmowych zapytań Text Search miesięcznie</span>
+              <input
+                className="input"
+                type="number"
+                min={0}
+                step={100}
+                value={freeLimit}
+                onChange={(e) => setFreeLimit(e.target.value)}
+              />
+            </label>
+            <p className="hint">
+              Domyślnie 1000 – tyle według cennika Google z marca 2025 obejmuje SKU Text Search Enterprise, z którego
+              korzysta LeadFinder. Licznik liczy zapytania wysłane z tej aplikacji; sprawdź zużycie w Google Cloud
+              Console, jeśli używasz klucza gdzie indziej.
             </p>
           </section>
 

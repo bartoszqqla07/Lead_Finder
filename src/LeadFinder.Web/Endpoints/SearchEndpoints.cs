@@ -1,4 +1,5 @@
 using System.Text.Json;
+using LeadFinder.Config;
 using LeadFinder.Models;
 using LeadFinder.Services;
 using LeadFinder.Web.Contracts;
@@ -8,7 +9,6 @@ using LeadFinder.Web.Settings;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using LeadFinder.Config;
 
 namespace LeadFinder.Web.Endpoints;
 
@@ -17,6 +17,9 @@ public static class SearchEndpoints
     /// <summary>Google zwraca maks. 60 wyników (3 strony) na frazę – więcej stron nic nie daje.</summary>
     private const int MaxPages = 3;
     private const int MaxCityLength = 100;
+
+    /// <summary>Górna granica miast w jednym skanie (cała Polska z regions.json to ok. 170).</summary>
+    private const int MaxCities = 300;
 
     public static void MapSearchEndpoints(this IEndpointRouteBuilder app)
     {
@@ -38,16 +41,27 @@ public static class SearchEndpoints
         StartSearchRequest body,
         CategoryCatalog catalog,
         SettingsService settings,
+        UsageService usage,
         SearchJobRunner runner,
         CancellationToken ct)
     {
-        var city = body.City?.Trim();
-        if (string.IsNullOrEmpty(city) || city.Length > MaxCityLength)
-            return Results.Problem("Podaj nazwę miasta.", statusCode: StatusCodes.Status400BadRequest);
+        var cities = (body.Cities ?? [])
+            .Select(c => c.Trim())
+            .Where(c => c.Length is > 0 and <= MaxCityLength)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (cities.Count == 0)
+            return Problem("Podaj miasto albo wybierz województwo.");
+        if (cities.Count > MaxCities)
+            return Problem($"Jednorazowo można przeszukać maks. {MaxCities} miast.");
 
         var pages = body.Pages ?? MaxPages;
         if (pages is < 1 or > MaxPages)
-            return Results.Problem($"Liczba stron musi być od 1 do {MaxPages}.", statusCode: StatusCodes.Status400BadRequest);
+            return Problem($"Liczba stron musi być od 1 do {MaxPages}.");
+
+        var minScore = body.MinScore ?? 0;
+        if (minScore is < 0 or > 100)
+            return Problem("Próg szansy musi być od 0 do 100.");
 
         IReadOnlyList<Category> categories;
         if (body.CategoryIds is null || body.CategoryIds.Count == 0)
@@ -58,7 +72,7 @@ public static class SearchEndpoints
         {
             var unknown = body.CategoryIds.Where(id => catalog.Categories.All(c => c.Id != id)).ToList();
             if (unknown.Count > 0)
-                return Results.Problem($"Nieznane kategorie: {string.Join(", ", unknown)}.", statusCode: StatusCodes.Status400BadRequest);
+                return Problem($"Nieznane kategorie: {string.Join(", ", unknown)}.");
 
             // Kolejność z pliku konfiguracyjnego, nie z kliknięć – o kategorii leada decyduje pierwsze trafienie.
             categories = catalog.Categories.Where(c => body.CategoryIds.Contains(c.Id)).ToList();
@@ -66,18 +80,33 @@ public static class SearchEndpoints
 
         var (apiKey, _) = await settings.GetApiKeyAsync(ct);
         if (apiKey is null)
-            return Results.Problem("Brak klucza Google Places API. Dodaj go w Ustawieniach.", statusCode: StatusCodes.Status400BadRequest);
+            return Problem("Brak klucza Google Places API. Dodaj go w Ustawieniach.");
 
+        // Bezpiecznik kosztów: bez wyraźnej zgody nie zaczynamy skanu, który może wyjść poza darmowy limit.
+        var maxRequests = cities.Count * categories.Count * pages;
+        var monthUsage = await usage.GetCurrentMonthAsync(ct);
+        if (maxRequests > monthUsage.Remaining && body.AcceptOverLimit != true)
+        {
+            return Problem(
+                $"To wyszukiwanie może wysłać do {maxRequests} płatnych zapytań, a w darmowym limicie zostało ok. " +
+                $"{monthUsage.Remaining}. Zmniejsz zakres albo potwierdź przekroczenie limitu.",
+                StatusCodes.Status409Conflict);
+        }
+
+        var label = string.IsNullOrWhiteSpace(body.Label) ? cities[0] : body.Label.Trim();
         try
         {
-            var run = await runner.StartAsync(new LeadSearchRequest(city, categories, pages), apiKey, ct);
+            var run = await runner.StartAsync(new RegionSearchRequest(label, cities, categories, pages, minScore), apiKey, ct);
             return Results.Accepted($"/api/searches/{run.Id}", run);
         }
         catch (SearchAlreadyRunningException ex)
         {
-            return Results.Problem(ex.Message, statusCode: StatusCodes.Status409Conflict);
+            return Problem(ex.Message, StatusCodes.Status409Conflict);
         }
     }
+
+    private static IResult Problem(string detail, int statusCode = StatusCodes.Status400BadRequest) =>
+        Results.Problem(detail, statusCode: statusCode);
 
     private static async Task<IResult> GetCurrentAsync(SearchJobRunner runner, LeadFinderDbContext db, CancellationToken ct)
     {

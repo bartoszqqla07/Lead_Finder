@@ -6,7 +6,11 @@ fryzjerów, barberów, salony paznokci, spa, studia tatuażu…) w podanym mieś
 
 ![Lista leadów](docs/screenshot-dark.png)
 
-- **Wyszukiwanie z postępem na żywo:** miasto i kategorie wybierasz w formularzu, postęp przychodzi przez Server-Sent Events.
+- **Wyszukiwanie z postępem na żywo:** miasto, całe województwo albo cała Polska (miasto po mieście, z progiem
+  szansy, np. tylko leady 65+). Postęp przychodzi przez Server-Sent Events, a przy skanie wielu miast wyniki
+  zapisują się po każdym mieście.
+- **Licznik darmowego limitu Google:** ile zapytań zostało w tym miesiącu, szacunek kosztu przed startem i blokada
+  skanu, który przekroczyłby limit bez Twojego potwierdzenia.
 - **Klasyfikacja leadów:** brak strony, strona nie działa, WordPress do odświeżenia, ma stronę.
 - **Szansa na zlecenie 0–100** z uzasadnieniem: stan strony (także brak wersji na telefon i stara stopka),
   ruch w salonie, ocena i branża. Lista jest posortowana od najlepszych leadów.
@@ -86,6 +90,12 @@ liczba kategorii × liczba stron = 8 × 3 = 24 zapytania na miasto
 ```
 
 Formularz pokazuje tę liczbę przed startem. Google zwraca maksymalnie 60 wyników (3 strony) na frazę.
+
+**Skan województwa lub Polski** to miasta × kategorie × strony, np. śląskie (30 miast) × 8 × 3 = do 720 zapytań.
+Lista miast jest w [src/LeadFinder.Core/Config/regions.json](src/LeadFinder.Core/Config/regions.json). Aplikacja
+**liczy wysłane płatne zapytania** i pokazuje, ile zostało z darmowego limitu (domyślnie 1000, do zmiany w
+Ustawieniach). Skan, który mógłby go przekroczyć, wymaga potwierdzenia. Licznik obejmuje tylko zapytania z tej
+aplikacji. Pełne zużycie klucza zobaczysz w Google Cloud Console.
 
 Od marca 2025 Google Maps Platform zamiast kredytu 200 USD daje **darmowe limity miesięczne na każdą
 usługę (SKU)**. Przykładowe limity to 5 000 zapytań Text Search Pro i 10 000 Place Details Essentials

@@ -10,11 +10,12 @@ interface Props {
 const stageTitle = {
   Searching: 'Etap 1/2 · wyszukiwanie w Google',
   CheckingWebsites: 'Etap 2/2 · sprawdzanie stron WWW',
+  Region: 'Skan miast',
 } as const;
 
 export function SearchProgressCard({ job, onShowNew }: Props) {
   const logRef = useRef<HTMLOListElement>(null);
-  const { run, events, isRunning, progress } = job;
+  const { run, events, isRunning, progress, regionProgress } = job;
   const finalEvent = events.find((e) => e.type !== 'progress');
 
   // Log przewija się do najnowszego wpisu.
@@ -38,6 +39,18 @@ export function SearchProgressCard({ job, onShowNew }: Props) {
         )}
       </div>
 
+      {isRunning && regionProgress && (
+        <div className="region-progress">
+          <strong>{regionProgress.message}</strong>
+          <div className="progress-track progress-track-thin">
+            <div
+              className="progress-fill"
+              style={{ width: `${Math.round((regionProgress.current / regionProgress.total) * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {isRunning && (
         <>
           <div className="progress-label">
@@ -59,8 +72,7 @@ export function SearchProgressCard({ job, onShowNew }: Props) {
           <p>{finalEvent.message}</p>
           {finishedRun && finalEvent.type === 'completed' && finishedRun.newCount > 0 && (
             <button className="button button-small" onClick={() => onShowNew(finishedRun.id)}>
-              Pokaż {finishedRun.newCount}{' '}
-              {plural(finishedRun.newCount, 'nowy lead', 'nowe leady', 'nowych leadów')}
+              Pokaż {finishedRun.newCount} {plural(finishedRun.newCount, 'nowy lead', 'nowe leady', 'nowych leadów')}
             </button>
           )}
         </div>

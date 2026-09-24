@@ -20,7 +20,14 @@ export function SearchHistory({ runs, activeRunId, onSelect }: Props) {
               className={`history-item ${run.id === activeRunId ? 'active' : ''}`}
               onClick={() => onSelect(run.id)}
               disabled={run.state !== 'Completed' || run.newCount === 0}
-              title={run.error ?? run.categories.join(', ')}
+              title={[
+                run.error,
+                run.categories.join(', '),
+                run.apiRequests !== null ? `${run.apiRequests} zapytań do Google` : null,
+                run.minScore > 0 ? `tylko szansa ${run.minScore}+` : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             >
               <span className="history-main">
                 <strong>{run.city}</strong>

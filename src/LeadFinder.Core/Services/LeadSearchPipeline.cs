@@ -2,11 +2,21 @@ using LeadFinder.Models;
 
 namespace LeadFinder.Services;
 
-/// <summary>Parametry jednego wyszukiwania.</summary>
+/// <summary>Parametry jednego wyszukiwania (jednego miasta).</summary>
+/// <param name="City">Miasto dopisywane do frazy: "{kategoria} {miasto}".</param>
+/// <param name="Categories">Kategorie do przeszukania.</param>
+/// <param name="MaxPagesPerCategory">Maks. stron wyników na kategorię (1 strona = 1 płatne zapytanie).</param>
+/// <param name="MinScore">Zwracaj tylko leady z szansą co najmniej tyle (0 = wszystkie).</param>
+/// <param name="SkipPlaceIds">
+/// Firmy już przetworzone (np. w poprzednim mieście tego samego skanu województwa) – pomijane,
+/// żeby nie sprawdzać drugi raz tej samej strony.
+/// </param>
 public sealed record LeadSearchRequest(
     string City,
     IReadOnlyList<Category> Categories,
-    int MaxPagesPerCategory);
+    int MaxPagesPerCategory,
+    int MinScore = 0,
+    IReadOnlySet<string>? SkipPlaceIds = null);
 
 /// <summary>
 /// Spina proces wyszukiwania: Google Places → deduplikacja → sprawdzanie stron → klasyfikacja.
@@ -39,6 +49,21 @@ public sealed class LeadSearchPipeline
         LeadSearchRequest request, IProgress<SearchProgress>? progress = null, CancellationToken cancellationToken = default)
     {
         var places = await CollectPlacesAsync(request, progress, cancellationToken);
+
+        if (request.SkipPlaceIds is { Count: > 0 } skip)
+            places.RemoveAll(p => skip.Contains(p.Place.Id));
+
+        // Próg szansy: firmy, które nawet w najlepszym razie nie przekroczą progu, odpadają przed
+        // sprawdzaniem stron – przy skanie województwa to oszczędza godziny.
+        if (request.MinScore > 0)
+        {
+            var before = places.Count;
+            places.RemoveAll(p => LeadScorer.PotentialScore(p.Place, p.Category) < request.MinScore);
+            progress?.Report(new SearchProgress(
+                SearchStage.Searching,
+                $"Próg szansy {request.MinScore}+: {before - places.Count} firm bez szans pominiętych, {places.Count} do sprawdzenia"));
+        }
+
         var websiteChecks = await CheckWebsitesAsync(places.Select(p => p.Place), progress, cancellationToken);
 
         return places
@@ -48,6 +73,7 @@ public sealed class LeadSearchPipeline
                 var status = LeadClassifier.Classify(found.Place, check);
                 return new Lead(found.Place, found.Category, request.City, status, check);
             })
+            .Where(lead => request.MinScore == 0 || LeadScorer.Score(lead).Value >= request.MinScore)
             .ToList();
     }
 

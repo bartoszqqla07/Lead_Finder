@@ -13,6 +13,11 @@ public static class SettingsEndpoints
         app.MapGet("/api/categories", (CategoryCatalog catalog) =>
             catalog.Categories.Select(c => new CategoryDto(c.Id, c.Query, c.EnglishName)));
 
+        app.MapGet("/api/regions", (RegionCatalog regions) =>
+            regions.Regions.Select(r => new RegionDto(r.Id, r.Name, r.Cities)));
+
+        app.MapGet("/api/usage", (UsageService usage, CancellationToken ct) => usage.GetCurrentMonthAsync(ct));
+
         var group = app.MapGroup("/api/settings");
         group.MapGet("", (SettingsService settings, CancellationToken ct) => settings.GetDtoAsync(ct));
         group.MapPut("", (UpdateSettingsRequest body, SettingsService settings, CancellationToken ct) => settings.UpdateAsync(body, ct));

@@ -24,7 +24,7 @@ import { usePersistentState } from './hooks/usePersistentState';
 import { useIsMobile } from './hooks/useMediaQuery';
 import { useSearchJob } from './hooks/useSearchJob';
 import { plural } from './labels';
-import type { Category, Lead, LeadChanges, SearchRun, Settings } from './types';
+import type { Category, Lead, LeadChanges, Region, SearchRun, Settings, Usage } from './types';
 
 /** W wąskim oknie zamienia panel w zwijaną sekcję, żeby lista leadów była od razu pod ręką. */
 function MobileSection({
@@ -52,6 +52,8 @@ export function App() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [runs, setRuns] = useState<SearchRun[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [usage, setUsage] = useState<Usage | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // Filtry i sortowanie przetrwają zamknięcie aplikacji (localStorage).
@@ -68,13 +70,27 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    Promise.all([reload(), api.getCategories().then(setCategories), api.getSettings().then(setSettings)])
+    Promise.all([
+      reload(),
+      api.getCategories().then(setCategories),
+      api.getRegions().then(setRegions),
+      api.getUsage().then(setUsage),
+      api.getSettings().then(setSettings),
+    ])
       .catch((error: Error) => showToast(error.message, 'error'))
       .finally(() => setIsLoading(false));
   }, [reload, showToast]);
 
+  const refreshUsage = useCallback(() => {
+    api
+      .getUsage()
+      .then(setUsage)
+      .catch(() => undefined);
+  }, []);
+
   const search = useSearchJob((run) => {
     reload().catch((error: Error) => showToast(error.message, 'error'));
+    refreshUsage();
     if (run.state === 'Completed') {
       showToast(
         `Gotowe: ${run.newCount} ${plural(run.newCount, 'nowy lead', 'nowe leady', 'nowych leadów')}.`,
@@ -135,6 +151,7 @@ export function App() {
 
   const handleSettingsSaved = (saved: Settings) => {
     setSettings(saved);
+    refreshUsage(); // limit mógł się zmienić
     // Podpis mógł się zmienić – szkice wiadomości generuje serwer, więc pobieramy je ponownie.
     reload().catch((error: Error) => showToast(error.message, 'error'));
   };
@@ -180,6 +197,8 @@ export function App() {
           <MobileSection enabled={isMobile} title="Nowe wyszukiwanie" defaultOpen={!isLoading && leads.length === 0}>
             <SearchPanel
               categories={categories}
+              regions={regions}
+              usage={usage}
               knownCities={cities}
               isRunning={search.isRunning}
               hasApiKey={settings?.hasApiKey ?? false}

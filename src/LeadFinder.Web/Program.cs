@@ -42,11 +42,14 @@ try
     var paths = new AppPaths(dataDirectory);
 
     var catalog = await CategoryCatalog.LoadAsync(CategoryCatalog.ResolveDefaultPath());
+    var regions = await RegionCatalog.LoadAsync(RegionCatalog.ResolveDefaultPath());
 
     builder.Services.AddSingleton(paths);
     builder.Services.AddSingleton(catalog);
+    builder.Services.AddSingleton(regions);
     builder.Services.AddDbContext<LeadFinderDbContext>(options => options.UseSqlite($"Data Source={paths.DatabasePath}"));
     builder.Services.AddScoped<SettingsService>();
+    builder.Services.AddScoped<UsageService>();
     builder.Services.AddSingleton(_ => new WebsiteChecker(WebsiteChecker.CreateHttpClient()));
     builder.Services.AddSingleton<SearchJobRunner>();
     builder.Services.AddHttpClient();

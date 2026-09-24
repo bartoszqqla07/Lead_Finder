@@ -93,6 +93,16 @@ public sealed class SearchRunEntity
     public required string Categories { get; set; }
 
     public int Pages { get; set; }
+
+    /// <summary>Liczba miast w skanie (1 = zwykłe wyszukiwanie miasta).</summary>
+    public int CityCount { get; set; } = 1;
+
+    /// <summary>Próg szansy: zapisywane były tylko leady z wynikiem co najmniej tyle (0 = wszystkie).</summary>
+    public int MinScore { get; set; }
+
+    /// <summary>Faktycznie wysłane płatne zapytania do Google; null dla wyszukiwań sprzed licznika (wtedy szacunek).</summary>
+    public int? ApiRequests { get; set; }
+
     public SearchRunState State { get; set; }
     public DateTime StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }
@@ -122,6 +132,9 @@ public sealed class AppSettingsEntity
 
     /// <summary>Adres nadawcy – w nagłówku listu papierowego.</summary>
     public string? PostalAddress { get; set; }
+
+    /// <summary>Darmowy miesięczny limit zapytań Text Search (do licznika); null = domyślny.</summary>
+    public int? FreeMonthlyRequests { get; set; }
 }
 
 /// <summary>

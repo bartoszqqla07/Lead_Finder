@@ -7,6 +7,9 @@ public enum SearchStage
 
     /// <summary>Sprawdzanie stron WWW.</summary>
     CheckingWebsites,
+
+    /// <summary>Skan wielu miast: przejście do kolejnego miasta.</summary>
+    Region,
 }
 
 /// <summary>Zdarzenie postępu wyszukiwania (do logu w konsoli albo paska postępu w UI).</summary>

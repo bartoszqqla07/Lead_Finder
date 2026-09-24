@@ -33,17 +33,43 @@ public static class LeadScorer
 
         var factors = new List<ScoreFactor>();
         AddNeedFactors(lead, factors);
+        AddContextFactors(place, lead.Category, factors);
+
+        var value = Math.Clamp(factors.Sum(f => f.Points), 0, 100);
+        var ordered = factors.OrderByDescending(f => f.Points).ToList();
+        return new LeadScore(value, TierOf(value), ordered);
+    }
+
+    /// <summary>Najwięcej punktów, jakie da się zdobyć za "potrzebę" (przestarzały WordPress ze wszystkimi sygnałami).</summary>
+    private const int MaxNeedPoints = 20 + 10 + 15 + 8 + 7;
+
+    /// <summary>
+    /// Najwyższy wynik, jaki firma może dostać, zanim sprawdzimy jej stronę. Pozwala pominąć (powolne)
+    /// sprawdzanie stron firm, które i tak nie przekroczą progu – np. przy skanie województwa z progiem 75+.
+    /// Dla firm bez strony to po prostu ich wynik.
+    /// </summary>
+    public static int PotentialScore(Place place, Category category)
+    {
+        if (string.IsNullOrWhiteSpace(place.WebsiteUri))
+            return Score(new Lead(place, category, string.Empty, LeadStatus.NoWebsite, null)).Value;
+        if (place.BusinessStatus == "CLOSED_PERMANENTLY")
+            return 0;
+
+        var factors = new List<ScoreFactor>();
+        AddContextFactors(place, category, factors);
+        return Math.Clamp(MaxNeedPoints + factors.Sum(f => f.Points), 0, 100);
+    }
+
+    /// <summary>Wszystko poza stanem strony: ruch, ocena, branża, kontakt, status firmy.</summary>
+    private static void AddContextFactors(Place place, Category category, List<ScoreFactor> factors)
+    {
         AddActivityFactors(place, factors);
-        AddCategoryFactor(lead.Category, factors);
+        AddCategoryFactor(category, factors);
 
         if (string.IsNullOrWhiteSpace(place.Phone))
             factors.Add(new("Brak telefonu w wizytówce – trudniej o kontakt", -5));
         if (place.BusinessStatus == "CLOSED_TEMPORARILY")
             factors.Add(new("Tymczasowo zamknięta (według Google)", -20));
-
-        var value = Math.Clamp(factors.Sum(f => f.Points), 0, 100);
-        var ordered = factors.OrderByDescending(f => f.Points).ToList();
-        return new LeadScore(value, TierOf(value), ordered);
     }
 
     public static ScoreTier TierOf(int value) => value switch

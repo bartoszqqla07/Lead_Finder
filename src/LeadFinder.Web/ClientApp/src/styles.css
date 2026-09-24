@@ -1623,3 +1623,91 @@ code {
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* ===== Limit Google i szacunek kosztu ===== */
+.usage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+.usage-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.usage-remaining {
+  white-space: nowrap;
+}
+.usage-ok {
+  color: var(--ok);
+}
+.usage-warn {
+  color: var(--warm);
+}
+.usage-danger {
+  color: var(--danger);
+}
+.usage-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+.usage-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+.usage-fill-ok {
+  background: var(--ok);
+}
+.usage-fill-warn {
+  background: var(--warm);
+}
+.usage-fill-danger {
+  background: var(--danger);
+}
+.estimate {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+.estimate p {
+  margin: 0;
+}
+.estimate-over {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.consent-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.consent-inline input {
+  accent-color: var(--danger);
+}
+.segmented-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.select-block {
+  width: 100%;
+}
+.region-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+.progress-track-thin {
+  height: 4px;
+}

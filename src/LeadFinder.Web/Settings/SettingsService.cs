@@ -10,6 +10,12 @@ public sealed class SettingsService(LeadFinderDbContext db, AppPaths paths)
 {
     public const string ApiKeyVariable = "GOOGLE_PLACES_API_KEY";
 
+    /// <summary>
+    /// Darmowy miesięczny limit dla SKU Text Search Enterprise (pola websiteUri, rating, telefon) według
+    /// cennika Google Maps Platform z marca 2025. Można go zmienić w Ustawieniach, gdy Google zmieni cennik.
+    /// </summary>
+    public const int DefaultFreeMonthlyRequests = 1000;
+
     /// <summary>Wiersz ustawień (tworzony, gdyby zniknął z bazy).</summary>
     public async Task<AppSettingsEntity> GetEntityAsync(CancellationToken cancellationToken = default)
     {
@@ -59,6 +65,7 @@ public sealed class SettingsService(LeadFinderDbContext db, AppPaths paths)
             Signature: settings.Signature ?? string.Empty,
             ContactEmail: settings.ContactEmail ?? string.Empty,
             PostalAddress: settings.PostalAddress ?? string.Empty,
+            FreeMonthlyRequests: settings.FreeMonthlyRequests ?? DefaultFreeMonthlyRequests,
             DefaultSenderName: MessageDrafter.DefaultSenderName,
             DefaultSignature: MessageDrafter.DefaultSignature,
             DataDirectory: paths.DataDirectory);
@@ -76,6 +83,8 @@ public sealed class SettingsService(LeadFinderDbContext db, AppPaths paths)
             settings.Signature = NullIfEmpty(request.Signature.Replace("\r\n", "\n"));
         if (request.ContactEmail is not null)
             settings.ContactEmail = NullIfEmpty(request.ContactEmail);
+        if (request.FreeMonthlyRequests is { } limit)
+            settings.FreeMonthlyRequests = Math.Clamp(limit, 0, 1_000_000);
         if (request.PostalAddress is not null)
             settings.PostalAddress = NullIfEmpty(request.PostalAddress.Replace("\r\n", "\n"));
 

@@ -8,6 +8,7 @@
     <!-- Plik trafia do bin/ każdego projektu, który referuje Core (CLI i Web).
          Po edycji wystarczy `dotnet run` – plik zostanie skopiowany, kod nie jest rekompilowany. -->
     <None Update="Config\categories.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Config\regions.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

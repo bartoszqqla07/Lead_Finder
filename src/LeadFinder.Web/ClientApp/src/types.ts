@@ -3,7 +3,7 @@
 export type LeadStatus = 'NoWebsite' | 'WebsiteDown' | 'WordPress' | 'HasWebsite';
 export type OutreachStage = 'New' | 'Later' | 'Contacted' | 'Replied' | 'Client' | 'Rejected';
 export type SearchRunState = 'Running' | 'Completed' | 'Failed' | 'Cancelled';
-export type SearchStage = 'Searching' | 'CheckingWebsites';
+export type SearchStage = 'Searching' | 'CheckingWebsites' | 'Region';
 export type ApiKeySource = 'None' | 'Environment' | 'App';
 
 export interface Lead {
@@ -74,6 +74,10 @@ export interface SearchRun {
   city: string;
   categories: string[];
   pages: number;
+  cityCount: number;
+  minScore: number;
+  /** Faktycznie wysłane płatne zapytania; null dla wyszukiwań sprzed licznika. */
+  apiRequests: number | null;
   state: SearchRunState;
   startedAt: string;
   finishedAt: string | null;
@@ -99,6 +103,22 @@ export interface SearchEvent {
   run: SearchRun | null;
 }
 
+export interface Region {
+  id: string;
+  name: string;
+  /** Pierwsze miasto to miasto wojewódzkie. */
+  cities: string[];
+}
+
+/** Szacunkowe zużycie darmowego limitu Google w bieżącym miesiącu (liczone przez aplikację). */
+export interface Usage {
+  month: string;
+  used: number;
+  limit: number;
+  remaining: number;
+  includesEstimates: boolean;
+}
+
 export interface Category {
   id: string;
   query: string;
@@ -113,6 +133,7 @@ export interface Settings {
   signature: string;
   contactEmail: string;
   postalAddress: string;
+  freeMonthlyRequests: number;
   defaultSenderName: string;
   defaultSignature: string;
   dataDirectory: string;
@@ -124,10 +145,15 @@ export interface UpdateSettings {
   signature?: string;
   contactEmail?: string;
   postalAddress?: string;
+  freeMonthlyRequests?: number;
 }
 
 export interface StartSearch {
-  city: string;
+  /** Nazwa do historii, np. "Katowice" albo "województwo śląskie". */
+  label: string;
+  cities: string[];
   categoryIds: string[];
   pages: number;
+  minScore: number;
+  acceptOverLimit: boolean;
 }

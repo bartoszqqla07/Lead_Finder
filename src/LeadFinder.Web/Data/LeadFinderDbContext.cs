@@ -24,6 +24,8 @@ public sealed class LeadFinderDbContext(DbContextOptions<LeadFinderDbContext> op
         modelBuilder.Entity<SearchRunEntity>(run =>
         {
             run.Property(r => r.State).HasConversion<string>().HasMaxLength(32);
+            // Wyszukiwania sprzed skanów regionalnych dotyczyły jednego miasta.
+            run.Property(r => r.CityCount).HasDefaultValue(1);
         });
 
         modelBuilder.Entity<BlockedPlaceEntity>().HasKey(b => b.PlaceId);

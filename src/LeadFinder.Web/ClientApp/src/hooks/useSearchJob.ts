@@ -9,6 +9,8 @@ export interface SearchJobState {
   isRunning: boolean;
   /** Ostatnie zdarzenie postępu – do paska postępu. */
   progress: SearchEvent | null;
+  /** Przy skanie wielu miast: bieżące miasto ("Miasto 3/30: Gliwice"). */
+  regionProgress: SearchEvent | null;
   start: (search: StartSearch) => Promise<void>;
   cancel: () => Promise<void>;
   dismiss: () => void;
@@ -101,7 +103,9 @@ export function useSearchJob(onFinished: (run: SearchRun) => void): SearchJobSta
     setEvents([]);
   }, [isRunning]);
 
-  const progress = [...events].reverse().find((e) => e.type === 'progress' && e.total > 0) ?? null;
+  const latestFirst = [...events].reverse();
+  const progress = latestFirst.find((e) => e.type === 'progress' && e.total > 0 && e.stage !== 'Region') ?? null;
+  const regionProgress = latestFirst.find((e) => e.stage === 'Region') ?? null;
 
-  return { run, events, isRunning, progress, start, cancel, dismiss };
+  return { run, events, isRunning, progress, regionProgress, start, cancel, dismiss };
 }

@@ -1,0 +1,24 @@
+// Województwa i miasta do skanów regionalnych. Pierwsze miasto na liście to miasto wojewódzkie
+// (wariant "tylko miasta wojewódzkie" bierze pierwsze miasto z każdego województwa).
+// Każde miasto × kategoria × strona = jedno płatne zapytanie do Google – listy celowo obejmują
+// tylko większe miasta. Dopisz albo usuń miasta według potrzeb; rekompilacja nie jest potrzebna.
+{
+  "regions": [
+    { "id": "dolnoslaskie", "name": "dolnośląskie", "cities": [ "Wrocław", "Wałbrzych", "Legnica", "Jelenia Góra", "Lubin", "Głogów", "Świdnica", "Bolesławiec", "Oleśnica", "Dzierżoniów", "Oława", "Zgorzelec" ] },
+    { "id": "kujawsko-pomorskie", "name": "kujawsko-pomorskie", "cities": [ "Bydgoszcz", "Toruń", "Włocławek", "Grudziądz", "Inowrocław", "Brodnica", "Świecie" ] },
+    { "id": "lubelskie", "name": "lubelskie", "cities": [ "Lublin", "Chełm", "Zamość", "Biała Podlaska", "Puławy", "Świdnik", "Kraśnik", "Łuków" ] },
+    { "id": "lubuskie", "name": "lubuskie", "cities": [ "Zielona Góra", "Gorzów Wielkopolski", "Nowa Sól", "Żary", "Żagań", "Świebodzin" ] },
+    { "id": "lodzkie", "name": "łódzkie", "cities": [ "Łódź", "Piotrków Trybunalski", "Pabianice", "Tomaszów Mazowiecki", "Bełchatów", "Zgierz", "Skierniewice", "Radomsko", "Kutno", "Zduńska Wola", "Sieradz" ] },
+    { "id": "malopolskie", "name": "małopolskie", "cities": [ "Kraków", "Tarnów", "Nowy Sącz", "Oświęcim", "Chrzanów", "Olkusz", "Nowy Targ", "Bochnia", "Gorlice", "Zakopane", "Wieliczka" ] },
+    { "id": "mazowieckie", "name": "mazowieckie", "cities": [ "Warszawa", "Radom", "Płock", "Siedlce", "Pruszków", "Legionowo", "Ostrołęka", "Piaseczno", "Otwock", "Ciechanów", "Żyrardów", "Mińsk Mazowiecki" ] },
+    { "id": "opolskie", "name": "opolskie", "cities": [ "Opole", "Kędzierzyn-Koźle", "Nysa", "Brzeg", "Kluczbork", "Prudnik" ] },
+    { "id": "podkarpackie", "name": "podkarpackie", "cities": [ "Rzeszów", "Przemyśl", "Stalowa Wola", "Mielec", "Tarnobrzeg", "Krosno", "Dębica", "Jarosław", "Sanok", "Jasło" ] },
+    { "id": "podlaskie", "name": "podlaskie", "cities": [ "Białystok", "Suwałki", "Łomża", "Augustów", "Bielsk Podlaski", "Zambrów" ] },
+    { "id": "pomorskie", "name": "pomorskie", "cities": [ "Gdańsk", "Gdynia", "Słupsk", "Tczew", "Wejherowo", "Rumia", "Sopot", "Starogard Gdański", "Chojnice", "Malbork", "Kwidzyn" ] },
+    { "id": "slaskie", "name": "śląskie", "cities": [ "Katowice", "Częstochowa", "Sosnowiec", "Gliwice", "Zabrze", "Bielsko-Biała", "Bytom", "Rybnik", "Ruda Śląska", "Tychy", "Dąbrowa Górnicza", "Chorzów", "Jaworzno", "Jastrzębie-Zdrój", "Mysłowice", "Siemianowice Śląskie", "Żory", "Będzin", "Tarnowskie Góry", "Piekary Śląskie", "Racibórz", "Świętochłowice", "Zawiercie", "Wodzisław Śląski", "Mikołów", "Knurów", "Czechowice-Dziedzice", "Cieszyn", "Czeladź", "Żywiec" ] },
+    { "id": "swietokrzyskie", "name": "świętokrzyskie", "cities": [ "Kielce", "Ostrowiec Świętokrzyski", "Starachowice", "Skarżysko-Kamienna", "Sandomierz", "Końskie", "Busko-Zdrój" ] },
+    { "id": "warminsko-mazurskie", "name": "warmińsko-mazurskie", "cities": [ "Olsztyn", "Elbląg", "Ełk", "Ostróda", "Iława", "Giżycko", "Kętrzyn", "Szczytno", "Bartoszyce", "Mrągowo" ] },
+    { "id": "wielkopolskie", "name": "wielkopolskie", "cities": [ "Poznań", "Kalisz", "Konin", "Piła", "Ostrów Wielkopolski", "Gniezno", "Leszno", "Swarzędz", "Luboń", "Śrem", "Września", "Krotoszyn" ] },
+    { "id": "zachodniopomorskie", "name": "zachodniopomorskie", "cities": [ "Szczecin", "Koszalin", "Stargard", "Kołobrzeg", "Świnoujście", "Szczecinek", "Police", "Wałcz", "Białogard", "Goleniów" ] }
+  ]
+}

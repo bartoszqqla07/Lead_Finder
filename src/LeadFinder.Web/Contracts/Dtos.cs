@@ -47,13 +47,26 @@ public sealed record UpdateLeadRequest(
 
 public sealed record ExportLeadsRequest(IReadOnlyList<int>? Ids, string? Label);
 
-public sealed record StartSearchRequest(string? City, IReadOnlyList<string>? CategoryIds, int? Pages);
+/// <summary>
+/// Wyszukiwanie w jednym albo wielu miastach (skan województwa / Polski). Label – nazwa do historii,
+/// np. "Katowice" albo "śląskie". AcceptOverLimit – zgoda na przekroczenie darmowego limitu Google.
+/// </summary>
+public sealed record StartSearchRequest(
+    string? Label,
+    IReadOnlyList<string>? Cities,
+    IReadOnlyList<string>? CategoryIds,
+    int? Pages,
+    int? MinScore,
+    bool? AcceptOverLimit);
 
 public sealed record SearchRunDto(
     int Id,
     string City,
     IReadOnlyList<string> Categories,
     int Pages,
+    int CityCount,
+    int MinScore,
+    int? ApiRequests,
     SearchRunState State,
     DateTime StartedAt,
     DateTime? FinishedAt,
@@ -83,6 +96,14 @@ public sealed record SearchEventDto(
 
 public sealed record CategoryDto(string Id, string Query, string EnglishName);
 
+public sealed record RegionDto(string Id, string Name, IReadOnlyList<string> Cities);
+
+/// <summary>
+/// Szacunkowe zużycie darmowego limitu Google w bieżącym miesiącu – liczone przez aplikację, bo Google
+/// nie udostępnia go przez sam klucz API. IncludesEstimates: część starszych wyszukiwań jest oszacowana.
+/// </summary>
+public sealed record UsageDto(string Month, int Used, int Limit, int Remaining, bool IncludesEstimates);
+
 public enum ApiKeySource
 {
     None,
@@ -98,12 +119,18 @@ public sealed record SettingsDto(
     string Signature,
     string ContactEmail,
     string PostalAddress,
+    int FreeMonthlyRequests,
     string DefaultSenderName,
     string DefaultSignature,
     string DataDirectory);
 
 /// <summary>Wszystkie pola: null = bez zmian. ApiKey "" = usuń klucz zapisany w aplikacji.</summary>
 public sealed record UpdateSettingsRequest(
-    string? ApiKey, string? SenderName, string? Signature, string? ContactEmail, string? PostalAddress);
+    string? ApiKey,
+    string? SenderName,
+    string? Signature,
+    string? ContactEmail,
+    string? PostalAddress,
+    int? FreeMonthlyRequests);
 
 public sealed record VerifyApiKeyResultDto(bool Ok, string Message);
