@@ -9,8 +9,10 @@ import { SearchProgressCard } from './components/SearchProgressCard';
 import { SettingsDialog } from './components/SettingsDialog';
 import { SummaryStrip } from './components/SummaryStrip';
 import { Toast, useToast } from './components/Toast';
+import { ViewTabs } from './components/ViewTabs';
 import { defaultFilters, defaultSort, filterLeads, sortLeads, type LeadFilters, type SortState } from './filters';
 import { useHashSelection } from './hooks/useHashSelection';
+import { usePersistentState } from './hooks/usePersistentState';
 import { useIsMobile } from './hooks/useMediaQuery';
 import { useSearchJob } from './hooks/useSearchJob';
 import { plural } from './labels';
@@ -44,8 +46,9 @@ export function App() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [filters, setFilters] = useState<LeadFilters>(defaultFilters);
-  const [sort, setSort] = useState<SortState>(defaultSort);
+  // Filtry i sortowanie przetrwają zamknięcie aplikacji (localStorage).
+  const [filters, setFilters] = usePersistentState<LeadFilters>('leadfinder.filters.v2', defaultFilters);
+  const [sort, setSort] = usePersistentState<SortState>('leadfinder.sort.v2', defaultSort);
   const [selectedId, setSelectedId] = useHashSelection();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { toast, showToast } = useToast();
@@ -99,7 +102,7 @@ export function App() {
     try {
       const { blob, fileName } = await api.exportLeads(
         visibleLeads.map((l) => l.id),
-        filters.city || 'wybrane',
+        filters.cities.length === 1 ? filters.cities[0]! : 'wybrane',
       );
       const url = URL.createObjectURL(blob);
       const link = Object.assign(document.createElement('a'), { href: url, download: fileName });
@@ -177,10 +180,15 @@ export function App() {
         </aside>
 
         <main className="main">
+          <ViewTabs
+            leads={leads}
+            view={filters.view}
+            onChange={(view) => setFilters({ ...filters, view, dueOnly: false })}
+          />
           <SummaryStrip
-            leads={filters.city ? leads.filter((l) => l.city === filters.city) : leads}
+            leads={filters.cities.length > 0 ? leads.filter((l) => filters.cities.includes(l.city)) : leads}
             filters={filters}
-            onFilter={(changes) => setFilters({ ...defaultFilters, city: filters.city, ...changes })}
+            onFilter={(changes) => setFilters({ ...defaultFilters, cities: filters.cities, ...changes })}
           />
           <FilterBar
             filters={filters}

@@ -56,13 +56,18 @@ public static class LeadEndpoints
             case true when lead.ConsentGivenAt is null:
                 lead.ConsentGivenAt = DateTime.UtcNow;
                 // Zgoda oznacza, że firma odpowiedziała – chyba że etap jest już dalej (np. "Klient").
-                if (lead.Stage is OutreachStage.New or OutreachStage.Contacted)
+                if (lead.Stage is OutreachStage.New or OutreachStage.Later or OutreachStage.Contacted)
                     SetStage(lead, OutreachStage.Replied);
                 break;
             case false:
                 lead.ConsentGivenAt = null;
                 break;
         }
+
+        if (body.ClearNextAction == true)
+            lead.NextActionDate = null;
+        else if (body.NextActionDate is { } nextAction)
+            lead.NextActionDate = nextAction;
 
         await db.SaveChangesAsync(ct);
         return Results.Ok(lead.ToDto(await settings.CreateMessageDrafterAsync(ct)));

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { defaultFilters, type LeadFilters } from '../filters';
 import { useIsMobile } from '../hooks/useMediaQuery';
+import { MultiSelect } from './MultiSelect';
 import { formatDateTime, plural, stages } from '../labels';
 import type { Category, SearchRun } from '../types';
 
@@ -30,8 +31,8 @@ export function FilterBar({
   const set = <K extends keyof LeadFilters>(key: K, value: LeadFilters[K]) => onChange({ ...filters, [key]: value });
   const isFiltered = JSON.stringify(filters) !== JSON.stringify(defaultFilters);
   const activeSelects = [
-    filters.city !== defaultFilters.city,
-    filters.categoryId !== defaultFilters.categoryId,
+    filters.cities.length > 0,
+    filters.categoryIds.length > 0,
     filters.statusGroup !== defaultFilters.statusGroup,
     filters.scoreTier !== defaultFilters.scoreTier,
     filters.stage !== defaultFilters.stage,
@@ -60,33 +61,21 @@ export function FilterBar({
 
         {(!isMobile || showFilters) && (
           <>
-            <select
-              className="select"
-              value={filters.city}
-              onChange={(e) => set('city', e.target.value)}
-              aria-label="Miasto"
-            >
-              <option value="">Wszystkie miasta</option>
-              {cities.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
+            <MultiSelect
+              allLabel="Wszystkie miasta"
+              pluralLabel="miasta"
+              options={cities.map((city) => ({ value: city, label: city }))}
+              selected={filters.cities}
+              onChange={(selected) => set('cities', selected)}
+            />
 
-            <select
-              className="select"
-              value={filters.categoryId}
-              onChange={(e) => set('categoryId', e.target.value)}
-              aria-label="Kategoria"
-            >
-              <option value="">Wszystkie kategorie</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.query}
-                </option>
-              ))}
-            </select>
+            <MultiSelect
+              allLabel="Wszystkie kategorie"
+              pluralLabel={plural(filters.categoryIds.length, 'kategoria', 'kategorie', 'kategorii')}
+              options={categories.map((category) => ({ value: category.id, label: category.query }))}
+              selected={filters.categoryIds}
+              onChange={(selected) => set('categoryIds', selected)}
+            />
 
             <select
               className="select"
@@ -140,6 +129,15 @@ export function FilterBar({
           <span className="pill">
             Nowe z wyszukiwania: {activeRun.city}, {formatDateTime(activeRun.startedAt)}
             <button onClick={() => set('searchRunId', null)} aria-label="Usuń filtr wyszukiwania">
+              ×
+            </button>
+          </span>
+        )}
+
+        {filters.dueOnly && (
+          <span className="pill">
+            Do zrobienia: dziś i zaległe
+            <button onClick={() => set('dueOnly', false)} aria-label="Usuń filtr przypomnień">
               ×
             </button>
           </span>

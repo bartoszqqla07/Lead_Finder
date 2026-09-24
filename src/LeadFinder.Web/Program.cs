@@ -58,15 +58,28 @@ try
 
     await InitializeDatabaseAsync(app.Services, isDemo);
 
+    // index.html zawsze sprawdzany z serwerem – po aktualizacji aplikacji przeglądarka nie pokaże starej wersji.
+    // Pliki z assets/ mają hash w nazwie, więc mogą być cache'owane bezterminowo.
+    var staticFiles = new StaticFileOptions
+    {
+        OnPrepareResponse = context =>
+        {
+            var isHashedAsset = context.Context.Request.Path.StartsWithSegments("/assets");
+            context.Context.Response.Headers.CacheControl = isHashedAsset
+                ? "public, max-age=31536000, immutable"
+                : "no-cache";
+        },
+    };
+
     app.UseExceptionHandler();
     app.UseDefaultFiles();
-    app.UseStaticFiles();
+    app.UseStaticFiles(staticFiles);
 
     app.MapLeadEndpoints();
     app.MapSearchEndpoints();
     app.MapSettingsEndpoints();
     app.MapFallback("/api/{**path}", () => Results.NotFound());
-    app.MapFallbackToFile("index.html"); // SPA: każdy inny adres obsługuje React
+    app.MapFallbackToFile("index.html", staticFiles); // SPA: każdy inny adres obsługuje React
 
     app.Lifetime.ApplicationStarted.Register(() =>
     {

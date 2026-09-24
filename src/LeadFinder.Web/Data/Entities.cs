@@ -6,6 +6,10 @@ namespace LeadFinder.Web.Data;
 public enum OutreachStage
 {
     New,
+
+    /// <summary>Odłożony na później – wróci przez przypomnienie "następny krok".</summary>
+    Later,
+
     Contacted,
     Replied,
     Client,
@@ -67,6 +71,9 @@ public sealed class LeadEntity
     /// administrator musi umieć wykazać zgodę). Null = brak zgody, więc tylko wiadomości pierwszego kontaktu.
     /// </summary>
     public DateTime? ConsentGivenAt { get; set; }
+
+    /// <summary>Kiedy wrócić do leada (przypomnienie ustawiane przez użytkownika); null = brak.</summary>
+    public DateOnly? NextActionDate { get; set; }
 
     public DateTime FirstSeenAt { get; set; }
     public DateTime LastSeenAt { get; set; }

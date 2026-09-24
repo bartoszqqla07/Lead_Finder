@@ -2,6 +2,7 @@ import type { SortState } from '../filters';
 import { formatRating, websiteHost } from '../labels';
 import type { Lead } from '../types';
 import { ScoreBadge, StageBadge, StatusBadge } from './Badges';
+import { NextActionDate } from './NextActionDate';
 
 interface Props {
   leads: Lead[];
@@ -66,6 +67,7 @@ export function LeadCards({ leads, sort, onSort, onSelect }: Props) {
                     </span>
                   )}
                   {host && <span className="muted truncate">{lead.profilePlatform ?? host}</span>}
+                  <NextActionDate lead={lead} />
                 </span>
               </button>
             </li>

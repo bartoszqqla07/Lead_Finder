@@ -1,4 +1,4 @@
-import type { LeadFilters } from '../filters';
+import { isDue, todayIso, type LeadFilters } from '../filters';
 import { statusGroupOf } from '../labels';
 import type { Lead } from '../types';
 
@@ -10,9 +10,21 @@ interface Props {
 
 /** Kafelki z liczbami, które działają też jako szybkie filtry. */
 export function SummaryStrip({ leads, filters, onFilter }: Props) {
-  const open = (l: Lead) => l.stage !== 'Client' && l.stage !== 'Rejected';
+  const open = (l: Lead) => l.stage !== 'Client' && l.stage !== 'Rejected' && l.stage !== 'Later';
+
+  const today = todayIso();
+  const dueCount = leads.filter((l) => isDue(l, today)).length;
+  const overdueCount = leads.filter((l) => isDue(l, today) && l.nextActionDate! < today).length;
 
   const tiles = [
+    {
+      key: 'due',
+      label: 'Do zrobienia',
+      hint: overdueCount > 0 ? `w tym ${overdueCount} zaległe` : 'przypomnienia na dziś',
+      count: dueCount,
+      active: filters.dueOnly,
+      apply: { dueOnly: true },
+    },
     {
       key: 'hot',
       label: 'Gorące leady',

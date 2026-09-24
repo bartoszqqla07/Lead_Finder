@@ -1,7 +1,7 @@
 // Kontrakty API – odpowiedniki rekordów z Contracts/Dtos.cs (enumy jako tekst).
 
 export type LeadStatus = 'NoWebsite' | 'WebsiteDown' | 'WordPress' | 'HasWebsite';
-export type OutreachStage = 'New' | 'Contacted' | 'Replied' | 'Client' | 'Rejected';
+export type OutreachStage = 'New' | 'Later' | 'Contacted' | 'Replied' | 'Client' | 'Rejected';
 export type SearchRunState = 'Running' | 'Completed' | 'Failed' | 'Cancelled';
 export type SearchStage = 'Searching' | 'CheckingWebsites';
 export type ApiKeySource = 'None' | 'Environment' | 'App';
@@ -28,6 +28,8 @@ export interface Lead {
   notes: string;
   stageChangedAt: string | null;
   consentGivenAt: string | null;
+  /** Data przypomnienia "następny krok" w formacie RRRR-MM-DD. */
+  nextActionDate: string | null;
   firstSeenAt: string;
   lastSeenAt: string;
   firstSearchRunId: number;
@@ -63,6 +65,8 @@ export interface LeadChanges {
   stage?: OutreachStage;
   notes?: string;
   consentGiven?: boolean;
+  nextActionDate?: string;
+  clearNextAction?: boolean;
 }
 
 export interface SearchRun {

@@ -10,7 +10,11 @@ fryzjerów, barberów, salony paznokci, spa, studia tatuażu…) w podanym mieś
 - **Klasyfikacja leadów:** brak strony, strona nie działa, WordPress do odświeżenia, ma stronę.
 - **Szansa na zlecenie 0–100** z uzasadnieniem: stan strony (także brak wersji na telefon i stara stopka),
   ruch w salonie, ocena i branża. Lista jest posortowana od najlepszych leadów.
-- **Mini-CRM:** etap kontaktu (nowy → skontaktowany → odpowiedział → klient / odpada) i notatki zapisywane automatycznie.
+- **Mini-CRM:** etap kontaktu (nowy → skontaktowany → odpowiedział → klient / odpada, plus „na później”) i notatki zapisywane automatycznie.
+- **Przypomnienia „następny krok”:** data przy leadzie, kafelek „Do zrobienia” z dzisiejszymi i zaległymi sprawami.
+  Po wysłaniu propozycji przypomnienie za tydzień ustawia się samo.
+- **Filtry wielokrotnego wyboru** (kilka miast i kategorii naraz). Filtry i sortowanie są zapamiętywane
+  między uruchomieniami.
 - **Pamięć między wyszukiwaniami:** ponowne przeszukanie miasta pokazuje, które firmy są nowe.
   Twoje etapy i notatki nie są nadpisywane.
 - **Kontakt zdalny zgodny z przepisami:** kilka wersji wiadomości (informacja o problemie, DM, e-mail, list papierowy,

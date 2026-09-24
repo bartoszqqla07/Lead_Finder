@@ -79,6 +79,7 @@ public static class LeadMapping
             entity.Notes,
             entity.StageChangedAt,
             entity.ConsentGivenAt,
+            entity.NextActionDate,
             entity.FirstSeenAt,
             entity.LastSeenAt,
             entity.FirstSearchRunId,

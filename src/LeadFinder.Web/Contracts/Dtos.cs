@@ -28,6 +28,7 @@ public sealed record LeadDto(
     string Notes,
     DateTime? StageChangedAt,
     DateTime? ConsentGivenAt,
+    DateOnly? NextActionDate,
     DateTime FirstSeenAt,
     DateTime LastSeenAt,
     int FirstSearchRunId,
@@ -39,9 +40,10 @@ public sealed record LeadDto(
 
 /// <summary>
 /// Częściowa aktualizacja: null = bez zmian. ConsentGiven=true zapisuje datę zgody
-/// (i przesuwa etap na "Odpowiedział"), false ją usuwa.
+/// (i przesuwa etap na "Odpowiedział"), false ją usuwa. ClearNextAction=true usuwa przypomnienie.
 /// </summary>
-public sealed record UpdateLeadRequest(OutreachStage? Stage, string? Notes, bool? ConsentGiven);
+public sealed record UpdateLeadRequest(
+    OutreachStage? Stage, string? Notes, bool? ConsentGiven, DateOnly? NextActionDate, bool? ClearNextAction);
 
 public sealed record ExportLeadsRequest(IReadOnlyList<int>? Ids, string? Label);
 

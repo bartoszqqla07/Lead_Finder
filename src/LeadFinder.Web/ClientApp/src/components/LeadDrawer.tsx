@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { formatDateTime, formatRating, stages } from '../labels';
+import { addDaysIso, todayIso } from '../filters';
+import { formatDateTime, formatRating, plural, stages } from '../labels';
 import type { Lead, LeadChanges, MessageDraft, OutreachStage } from '../types';
 import { StatusBadge } from './Badges';
 import { OutreachPanel } from './OutreachPanel';
@@ -15,7 +16,22 @@ interface Props {
 }
 
 const NOTES_SAVE_DELAY_MS = 700;
-const today = () => new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
+
+/** "Dziś", "Jutro", "Zaległe: 3 dni" albo "Za 5 dni" – czytelniej niż sama data. */
+function DueHint({ date }: { date: string }) {
+  const diffDays = Math.round((Date.parse(date) - Date.parse(todayIso())) / 86_400_000);
+  const text =
+    diffDays < 0
+      ? `Zaległe: ${-diffDays} ${plural(-diffDays, 'dzień', 'dni', 'dni')}`
+      : diffDays === 0
+        ? 'Na dziś'
+        : diffDays === 1
+          ? 'Jutro'
+          : `Za ${diffDays} dni`;
+  return <p className={`hint ${diffDays <= 0 ? 'due-now' : ''}`}>{text}</p>;
+}
+const today = () =>
+  new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
 
 export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props) {
   const [notes, setNotes] = useState(lead.notes);
@@ -58,7 +74,16 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
     onUpdate(lead.id, { consentGiven: given }).catch((e: Error) => onError(e.message));
   };
 
-  /** Dopisuje do notatek datę i kanał (historia kontaktu) i przesuwa etap z "Nowy" na "Skontaktowany". */
+  const setNextAction = (date: string | null) => {
+    onUpdate(lead.id, date ? { nextActionDate: date } : { clearNextAction: true }).catch((e: Error) =>
+      onError(e.message),
+    );
+  };
+
+  /**
+   * Dopisuje do notatek datę i kanał (historia kontaktu) i przesuwa etap z "Nowy" na "Skontaktowany".
+   * Po wysłaniu propozycji ustawia przypomnienie za tydzień – na jedno dozwolone przypomnienie.
+   */
   const markSent = (draft: MessageDraft) => {
     const entry = `${today()} – wysłano: ${draft.title}`;
     const updatedNotes = notes ? `${entry}\n${notes}` : entry;
@@ -66,6 +91,7 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
     onUpdate(lead.id, {
       notes: updatedNotes,
       stage: lead.stage === 'New' ? 'Contacted' : undefined,
+      nextActionDate: draft.kind === 'Proposal' ? addDaysIso(7) : undefined,
     }).catch((e: Error) => onError(e.message));
   };
 
@@ -143,6 +169,34 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
               ))}
             </div>
             {lead.stageChangedAt && <p className="hint">Zmieniono {formatDateTime(lead.stageChangedAt)}</p>}
+
+            <div className="next-action">
+              <span className="field-label">Następny krok</span>
+              <div className="next-action-row">
+                <input
+                  className="input next-action-date"
+                  type="date"
+                  value={lead.nextActionDate ?? ''}
+                  onChange={(e) => setNextAction(e.target.value || null)}
+                  aria-label="Data następnego kroku"
+                />
+                <button className="button button-small" onClick={() => setNextAction(addDaysIso(1))}>
+                  Jutro
+                </button>
+                <button className="button button-small" onClick={() => setNextAction(addDaysIso(3))}>
+                  Za 3 dni
+                </button>
+                <button className="button button-small" onClick={() => setNextAction(addDaysIso(7))}>
+                  Za tydzień
+                </button>
+                {lead.nextActionDate && (
+                  <button className="link-button small" onClick={() => setNextAction(null)}>
+                    usuń
+                  </button>
+                )}
+              </div>
+              {lead.nextActionDate && <DueHint date={lead.nextActionDate} />}
+            </div>
           </section>
 
           <section className="drawer-section">
@@ -160,7 +214,6 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
               placeholder="Np. z kim rozmawiać, kiedy oddzwonić, co ich interesuje…"
             />
           </section>
-
         </div>
 
         <footer className="drawer-footer">

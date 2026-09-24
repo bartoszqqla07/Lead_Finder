@@ -131,7 +131,7 @@ public sealed class MessageDrafter
             ? $"""
               Cześć!
 
-              Krótka informacja: link do strony w Waszej wizytówce Google ({c.Host}) obecnie się nie otwiera – kto szuka {c.Name} w Google i kliknie „Witryna”, trafia na błąd ({c.TechnicalNote}).
+              Krótka informacja: link do strony w Waszej wizytówce Google ({c.Host}) obecnie się nie otwiera – kto szuka Was w Google i kliknie „Witryna”, trafia na błąd ({c.TechnicalNote}).
 
               Może warto sprawdzić domenę albo hosting.
 
@@ -141,7 +141,7 @@ public sealed class MessageDrafter
             : $"""
               Dzień dobry,
 
-              krótka informacja: link do strony w Państwa wizytówce Google ({c.Host}) obecnie się nie otwiera – osoby, które szukają {c.Name} w Google i klikną „Witryna”, trafiają na błąd ({c.TechnicalNote}).
+              krótka informacja: link do strony w Państwa wizytówce Google ({c.Host}) obecnie się nie otwiera – osoby, które szukają Państwa w Google i klikną „Witryna”, trafiają na błąd ({c.TechnicalNote}).
 
               Może warto sprawdzić domenę albo hosting.
 
@@ -200,9 +200,9 @@ public sealed class MessageDrafter
                       "Google nie podaje e-maili: szukaj na stronie, Instagramie lub Facebooku firmy. Wyślij raz – brak odpowiedzi traktuj jako „nie”.",
             Subject: c.Lead.Status switch
             {
-                LeadStatus.WebsiteDown => $"Niedziałająca strona {c.Name}",
-                LeadStatus.NoWebsite => $"Strona internetowa dla {c.Name}?",
-                _ => $"Pomysł na stronę {c.Name}",
+                LeadStatus.WebsiteDown => "Niedziałająca strona w wizytówce Google",
+                LeadStatus.NoWebsite => $"Strona internetowa dla {c.OfYourPlace}?",
+                _ => "Pomysł na odświeżenie strony",
             },
             Body: body,
             RequiresConsent: false);
@@ -302,7 +302,7 @@ public sealed class MessageDrafter
             ? $"""
               Cześć, dzięki za odpowiedź!
 
-              Zgodnie z obietnicą podsyłam krótką propozycję dla {c.Name}.
+              Zgodnie z obietnicą podsyłam krótką propozycję strony dla {c.OfYourPlace}.
 
               {c.Tone.NicheInsight}
 
@@ -320,7 +320,7 @@ public sealed class MessageDrafter
             : $"""
               Dzień dobry,
 
-              dziękuję za odpowiedź! Zgodnie z obietnicą przesyłam krótką propozycję dla {c.Name}.
+              dziękuję za odpowiedź! Zgodnie z obietnicą przesyłam krótką propozycję strony dla {c.OfYourPlace}.
 
               {c.Tone.NicheInsight}
 
@@ -342,7 +342,7 @@ public sealed class MessageDrafter
             Channel: "Tam, gdzie firma odpowiedziała",
             Guidance: "Wysyłaj tylko po wyraźnej zgodzie („tak, proszę przesłać”). Zaznacz zgodę powyżej – data zapisze się jako dowód. " +
                       "Uzupełnij fragmenty w [nawiasach].",
-            Subject: $"Propozycja strony dla {c.Name}",
+            Subject: "Propozycja strony internetowej",
             Body: body,
             RequiresConsent: true);
     }
@@ -353,7 +353,7 @@ public sealed class MessageDrafter
             ? $"""
               Cześć!
 
-              Wracam do propozycji strony dla {c.Name}. Udało się rzucić okiem? Chętnie odpowiem na pytania albo dopasuję zakres.
+              Wracam do propozycji strony. Udało się rzucić okiem? Chętnie odpowiem na pytania albo dopasuję zakres.
 
               Pozdrawiam,
               {_name}
@@ -361,7 +361,7 @@ public sealed class MessageDrafter
             : $"""
               Dzień dobry,
 
-              wracam do propozycji strony dla {c.Name}. Czy udało się ją przejrzeć? Chętnie odpowiem na pytania albo dopasuję zakres.
+              wracam do propozycji strony. Czy udało się ją przejrzeć? Chętnie odpowiem na pytania albo dopasuję zakres.
 
               Pozdrawiam serdecznie,
               {_name}
@@ -372,7 +372,7 @@ public sealed class MessageDrafter
             Title: "Przypomnienie",
             Channel: "Tam, gdzie wysłana była propozycja",
             Guidance: "Tylko do firm, które wyraziły zgodę i dostały propozycję. Jedno przypomnienie po około tygodniu – potem odpuść.",
-            Subject: $"Re: Propozycja strony dla {c.Name}",
+            Subject: "Re: Propozycja strony internetowej",
             Body: body,
             RequiresConsent: true);
     }
@@ -386,12 +386,12 @@ public sealed class MessageDrafter
         return lead.Status switch
         {
             LeadStatus.NoWebsite when lead.WebsiteCheck?.ProfilePlatform is { } platform => c.Informal
-                ? $"{Praise(lead)}W wizytówce Google zamiast strony macie podlinkowany profil na {platform}. To dobre miejsce na zapisy, ale własna strona lepiej działa w wynikach Google i w pełni należy do Was."
-                : $"{Praise(lead)}W wizytówce Google zamiast strony jest podlinkowany profil na {platform}. To dobre miejsce na zapisy, ale własna strona lepiej działa w wynikach Google i w pełni należy do Państwa.",
+                ? $"{Praise(lead)}W wizytówce Google zamiast strony macie podlinkowany profil {OnPlatform(platform)}. To dobre miejsce na zapisy, ale własna strona lepiej działa w wynikach Google i w pełni należy do Was."
+                : $"{Praise(lead)}W wizytówce Google zamiast strony jest podlinkowany profil {OnPlatform(platform)}. To dobre miejsce na zapisy, ale własna strona lepiej działa w wynikach Google i w pełni należy do Państwa.",
 
             LeadStatus.NoWebsite => c.Informal
-                ? $"{Praise(lead)}Szukając w Google „{lead.Category.Query} {lead.City}”, trafiam na {c.Name}, ale nie widzę Waszej strony internetowej."
-                : $"{Praise(lead)}Szukając w Google „{lead.Category.Query} {lead.City}”, trafiam na {c.Name}, ale nie mogę znaleźć Państwa strony internetowej.",
+                ? $"{Praise(lead)}Szukając w Google „{lead.Category.Query} {lead.City}”, trafiam na {c.YourPlace}, ale nie widzę strony internetowej."
+                : $"{Praise(lead)}Szukając w Google „{lead.Category.Query} {lead.City}”, trafiam na {c.YourPlace}, ale nie mogę znaleźć strony internetowej.",
 
             LeadStatus.WebsiteDown => c.Informal
                 ? $"Piszę, bo strona z Waszej wizytówki Google ({c.Host}) nie otwiera się – kto w nią kliknie, zobaczy błąd zamiast oferty."
@@ -415,8 +415,8 @@ public sealed class MessageDrafter
         return lead.Status switch
         {
             LeadStatus.NoWebsite when lead.WebsiteCheck?.ProfilePlatform is { } platform => c.Informal
-                ? $"Widzę, że w Google zamiast strony macie podlinkowany profil na {platform}."
-                : $"Widzę, że w Google zamiast strony jest podlinkowany Państwa profil na {platform}.",
+                ? $"Widzę, że w Google zamiast strony macie podlinkowany profil {OnPlatform(platform)}."
+                : $"Widzę, że w Google zamiast strony jest podlinkowany Państwa profil {OnPlatform(platform)}.",
             LeadStatus.NoWebsite => (c.Informal, goodReviews) switch
             {
                 (true, true) => "Widzę Was w Google ze świetnymi opiniami, ale bez strony internetowej.",
@@ -466,21 +466,62 @@ public sealed class MessageDrafter
     private static string OrDefault(string? value, string fallback) =>
         string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
 
+    /// <summary>"na Facebooku", "na Instagramie" – nazwy platform w miejscowniku.</summary>
+    private static string OnPlatform(string platform) => "na " + platform switch
+    {
+        "Facebook" => "Facebooku",
+        "Instagram" => "Instagramie",
+        "TikTok" => "TikToku",
+        "YouTube" => "YouTubie",
+        _ => platform, // Booksy, Linktree – nieodmienne
+    };
+
+    /// <summary>Rzeczownik określający firmę w dwóch przypadkach i jego rodzaj (do odmiany zaimka "Wasz").</summary>
+    private sealed record BusinessNoun(string Accusative, string Genitive, char Gender);
+
+    /// <summary>
+    /// Zamiast oficjalnej nazwy z Google ("Klinika Zdrowego Włosa i Skóry … Katowice"), która w treści brzmi
+    /// sztucznie, piszemy "Państwa gabinet", "Wasz barbershop". Rzeczownik wynika z frazy kategorii.
+    /// </summary>
+    private static BusinessNoun NounFor(Category category) =>
+        category.Query.Split(' ', 2)[0].ToLowerInvariant() switch
+        {
+            "salon" => new("salon", "salonu", 'm'),
+            "studio" => new("studio", "studia", 'n'),
+            "gabinet" => new("gabinet", "gabinetu", 'm'),
+            "barber" => new("barbershop", "barbershopu", 'm'),
+            _ => new("firmę", "firmy", 'f'),
+        };
+
     /// <summary>Dane leada potrzebne w wielu szablonach, policzone raz.</summary>
     private sealed class DraftContext(Lead lead, ToneProfile tone)
     {
+        private readonly BusinessNoun _noun = NounFor(lead.Category);
+
         public Lead Lead { get; } = lead;
         public ToneProfile Tone { get; } = tone;
         public bool Informal => Tone.Informal;
+
+        /// <summary>Oficjalna nazwa – tylko tam, gdzie jest potrzebna (adres na liście).</summary>
         public string Name => Lead.Place.Name;
 
         public string Host { get; } =
             Uri.TryCreate(lead.Place.WebsiteUri, UriKind.Absolute, out var uri) ? uri.Host : lead.Place.WebsiteUri ?? string.Empty;
 
-        /// <summary>Czego dotyczy propozycja – "strona dla X" albo "odświeżona strona".</summary>
+        /// <summary>Biernik: "Państwa gabinet", "Wasz barbershop", "Wasze studio".</summary>
+        public string YourPlace => Informal
+            ? (_noun.Gender switch { 'n' => "Wasze", 'f' => "Waszą", _ => "Wasz" }) + " " + _noun.Accusative
+            : "Państwa " + _noun.Accusative;
+
+        /// <summary>Dopełniacz: "Państwa gabinetu", "Waszego barbershopu", "Waszej firmy".</summary>
+        public string OfYourPlace => Informal
+            ? (_noun.Gender == 'f' ? "Waszej" : "Waszego") + " " + _noun.Genitive
+            : "Państwa " + _noun.Genitive;
+
+        /// <summary>Czego dotyczy propozycja: "strona Państwa gabinetu" albo "odświeżona strona".</summary>
         public string WebsiteNoun => Lead.Status switch
         {
-            LeadStatus.NoWebsite => $"strona dla {Name}",
+            LeadStatus.NoWebsite => $"strona {OfYourPlace}",
             LeadStatus.WebsiteDown => "nowa, działająca strona",
             _ => "odświeżona strona",
         };

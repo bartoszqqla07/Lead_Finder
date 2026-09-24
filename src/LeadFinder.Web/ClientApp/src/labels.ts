@@ -21,6 +21,7 @@ export const scoreTierLabel: Record<ScoreTier, string> = {
 
 export const stages: { value: OutreachStage; label: string }[] = [
   { value: 'New', label: 'Nowy' },
+  { value: 'Later', label: 'Na później' },
   { value: 'Contacted', label: 'Skontaktowany' },
   { value: 'Replied', label: 'Odpowiedział' },
   { value: 'Client', label: 'Klient' },

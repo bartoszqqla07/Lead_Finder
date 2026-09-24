@@ -3,6 +3,7 @@ import { formatDate, formatRating, websiteHost } from '../labels';
 import type { Lead } from '../types';
 import { ScoreBadge, StageBadge, StatusBadge } from './Badges';
 import { LeadCards } from './LeadCards';
+import { NextActionDate } from './NextActionDate';
 import { useIsMobile } from '../hooks/useMediaQuery';
 
 interface Props {
@@ -119,6 +120,7 @@ export function LeadsTable({ leads, isLoading, hasAnyLeads, sort, onSort, select
                 </td>
                 <td>
                   <StageBadge stage={lead.stage} />
+                  <NextActionDate lead={lead} />
                 </td>
                 <td className="num muted">{formatDate(lead.firstSeenAt)}</td>
               </tr>
