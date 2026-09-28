@@ -207,13 +207,23 @@ zdjęć) zapamiętuje się dla każdego leada osobno. Makieta służy wyłączni
 
 | Status | Kiedy |
 |---|---|
-| **Brak strony** (gorący) | brak strony w Google albo zamiast strony profil Booksy / Facebook / Instagram |
-| **Strona nie działa** (gorący) | timeout 8 s, błąd DNS, błąd certyfikatu SSL, kod HTTP ≠ 2xx |
+| **Brak strony** (gorący) | brak strony w Google albo zamiast strony profil (Booksy, Facebook, Instagram, Fresha…) lub katalog firm (GoWork, Cylex, BliskaUsługa…), także gdy domena salonu na niego przekierowuje |
+| **Strona nie działa** (gorący) | po 3 próbach i drugiej rundzie na końcu skanu: domena nie istnieje, serwer nie odpowiada (8 s), błąd 404/5xx |
 | **WordPress** | strona działa i ma ślady WordPressa (`wp-content`, `wp-includes`, `wp-json`); wersja z meta generator, jeśli jest |
 | **Ma stronę** | pozostałe; w notatce rozpoznany kreator (Wix, Squarespace, Shopify…) |
 
-Kod 403/429 często oznacza ochronę przed botami (np. Cloudflare), a nie martwą stronę.
-Notatka przy leadzie podpowiada wtedy, żeby sprawdzić stronę ręcznie.
+„Nie działa” to najgorętszy lead, więc aplikacja unika fałszywych alarmów:
+
+- chwilowe błędy sieci (DNS, zerwane połączenie, timeout, 5xx) są ponawiane, a strony, które nie odpowiedziały,
+  sprawdzane jeszcze raz na końcu skanu;
+- kod 401/403/429 (np. Cloudflare) oznacza, że strona działa, tylko blokuje automaty. Liczy się jako „ma stronę”,
+  a notatka podpowiada, żeby wygląd ocenić w przeglądarce;
+- zły certyfikat SSL (wygasły albo wystawiony dla firmy hostingowej) to wada strony, a nie brak strony. Aplikacja
+  sprawdza ją mimo to, a w notatce opisuje problem, np. „certyfikat SSL wygasł 26.01.2026 – przeglądarka pokazuje
+  ostrzeżenie”. To dobry argument w rozmowie.
+
+Leady z wcześniejszych skanów sprawdzisz ponownie przyciskiem **„↻ Sprawdź ponownie „nie działa””** nad listą.
+Nie wysyła on zapytań do Google, więc nic nie kosztuje.
 
 ## Szansa na zlecenie (0–100)
 

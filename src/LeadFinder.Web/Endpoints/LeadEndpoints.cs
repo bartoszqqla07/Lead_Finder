@@ -1,3 +1,4 @@
+using LeadFinder.Models;
 using LeadFinder.Services;
 using LeadFinder.Web.Contracts;
 using LeadFinder.Web.Data;
@@ -17,6 +18,39 @@ public static class LeadEndpoints
         group.MapPatch("/{id:int}", UpdateAsync);
         group.MapDelete("/{id:int}", DeleteAsync);
         group.MapPost("/export", ExportAsync);
+        group.MapPost("/recheck-websites", RecheckWebsitesAsync);
+    }
+
+    /// <summary>Ile stron sprawdzamy równocześnie przy ponownym sprawdzaniu (każda i tak ma własny timeout).</summary>
+    private const int RecheckParallelism = 6;
+
+    /// <summary>
+    /// Ponownie sprawdza strony leadów oznaczonych jako "strona nie działa" – bez zapytań do Google, więc za darmo.
+    /// Naprawia fałszywe alarmy z wcześniejszych skanów (chwilowy brak sieci, blokada botów, zły certyfikat).
+    /// Etap, notatki i zgody leada zostają bez zmian.
+    /// </summary>
+    private static async Task<RecheckWebsitesResultDto> RecheckWebsitesAsync(
+        LeadFinderDbContext db, WebsiteChecker checker, CancellationToken ct)
+    {
+        var leads = await db.Leads
+            .Where(l => l.Status == LeadStatus.WebsiteDown && l.WebsiteUri != null)
+            .ToListAsync(ct);
+
+        var checks = new System.Collections.Concurrent.ConcurrentDictionary<int, WebsiteCheckResult>();
+        await Parallel.ForEachAsync(
+            leads,
+            new ParallelOptions { MaxDegreeOfParallelism = RecheckParallelism, CancellationToken = ct },
+            async (lead, token) => checks[lead.Id] = await checker.CheckAsync(lead.WebsiteUri!, token));
+
+        foreach (var lead in leads)
+        {
+            var check = checks[lead.Id];
+            lead.ApplyWebsiteCheck(check, LeadClassifier.Classify(lead.ToDomain().Place, check));
+        }
+        await db.SaveChangesAsync(ct);
+
+        var stillDown = leads.Count(l => l.Status == LeadStatus.WebsiteDown);
+        return new RecheckWebsitesResultDto(leads.Count, leads.Count - stillDown, stillDown);
     }
 
     /// <summary>

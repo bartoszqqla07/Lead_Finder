@@ -82,6 +82,10 @@ export const api = {
       headers: { 'Content-Type': 'application/octet-stream' },
     }),
 
+  /** Ponowne sprawdzenie stron "nie działa" – bez zapytań do Google; może potrwać kilka minut. */
+  recheckWebsites: () =>
+    request<{ checked: number; fixed: number; stillDown: number }>('/api/leads/recheck-websites', { method: 'POST' }),
+
   getCategories: () => request<Category[]>('/api/categories'),
 
   getRegions: () => request<Region[]>('/api/regions'),

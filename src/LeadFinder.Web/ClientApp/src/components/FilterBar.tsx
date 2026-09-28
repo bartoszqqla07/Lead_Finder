@@ -14,6 +14,10 @@ interface Props {
   visibleCount: number;
   totalCount: number;
   onExport: () => void;
+  /** Ile leadów ma status "strona nie działa" – do ponownego sprawdzenia. */
+  downCount: number;
+  isRechecking: boolean;
+  onRecheck: () => void;
 }
 
 export function FilterBar({
@@ -25,6 +29,9 @@ export function FilterBar({
   visibleCount,
   totalCount,
   onExport,
+  downCount,
+  isRechecking,
+  onRecheck,
 }: Props) {
   const isMobile = useIsMobile();
   const [showFilters, setShowFilters] = useState(false);
@@ -133,7 +140,22 @@ export function FilterBar({
           </button>
         )}
 
-        <button className="button button-small push-right" onClick={onExport} disabled={visibleCount === 0}>
+        {downCount > 0 && (
+          <button
+            className="button button-small push-right"
+            onClick={onRecheck}
+            disabled={isRechecking}
+            title="Sprawdza jeszcze raz strony oznaczone jako „nie działa” – bez zapytań do Google, za darmo"
+          >
+            {isRechecking ? 'Sprawdzam strony… (to potrwa chwilę)' : `↻ Sprawdź ponownie „nie działa” (${downCount})`}
+          </button>
+        )}
+
+        <button
+          className={`button button-small ${downCount > 0 ? '' : 'push-right'}`}
+          onClick={onExport}
+          disabled={visibleCount === 0}
+        >
           Eksport CSV ({visibleCount})
         </button>
       </div>

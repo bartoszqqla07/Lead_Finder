@@ -38,8 +38,13 @@ public static class LeadMapping
         entity.UserRatingCount = place.UserRatingCount;
         entity.BusinessStatus = place.BusinessStatus;
 
-        var check = lead.WebsiteCheck;
-        entity.Status = lead.Status;
+        entity.ApplyWebsiteCheck(lead.WebsiteCheck, lead.Status);
+    }
+
+    /// <summary>Zapisuje wynik sprawdzenia strony i wynikający z niego status (także przy ponownym sprawdzeniu).</summary>
+    public static void ApplyWebsiteCheck(this LeadEntity entity, WebsiteCheckResult? check, LeadStatus status)
+    {
+        entity.Status = status;
         entity.WebsiteReachable = check?.Reachable;
         entity.IsWordPress = check?.IsWordPress ?? false;
         entity.CheckNote = check?.Note;

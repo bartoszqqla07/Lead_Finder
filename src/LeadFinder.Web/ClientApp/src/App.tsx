@@ -143,6 +143,28 @@ export function App() {
     }
   };
 
+  const [isRechecking, setIsRechecking] = useState(false);
+  const downCount = leads.filter((l) => l.status === 'WebsiteDown').length;
+
+  /** Fałszywe "nie działa" (chwilowy brak sieci, blokada botów, zły certyfikat) – sprawdzamy ponownie za darmo. */
+  const recheckWebsites = async () => {
+    setIsRechecking(true);
+    try {
+      const result = await api.recheckWebsites();
+      await reload();
+      showToast(
+        result.fixed > 0
+          ? `Sprawdzono ${result.checked}: ${result.fixed} jednak działa, ${result.stillDown} nadal nie działa.`
+          : `Sprawdzono ${result.checked} – wszystkie nadal nie działają.`,
+        'success',
+      );
+    } catch (error) {
+      showToast((error as Error).message, 'error');
+    } finally {
+      setIsRechecking(false);
+    }
+  };
+
   const showNewFromRun = (runId: number) => {
     // Wszystkie firmy z tego wyszukiwania – także te, z którymi już był kontakt.
     setFilters({ ...defaultFilters, view: 'all', searchRunId: runId });
@@ -235,6 +257,9 @@ export function App() {
             visibleCount={visibleLeads.length}
             totalCount={leads.length}
             onExport={exportVisible}
+            downCount={downCount}
+            isRechecking={isRechecking}
+            onRecheck={() => void recheckWebsites()}
           />
           <LeadsTable
             leads={visibleLeads}

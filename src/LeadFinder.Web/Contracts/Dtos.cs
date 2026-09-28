@@ -143,3 +143,6 @@ public sealed record UpdateSettingsRequest(
     int? FreeMonthlyRequests);
 
 public sealed record VerifyApiKeyResultDto(bool Ok, string Message);
+
+/// <summary>Wynik ponownego sprawdzenia stron: ile sprawdzono, ile okazało się działać, ile nadal nie działa.</summary>
+public sealed record RecheckWebsitesResultDto(int Checked, int Fixed, int StillDown);

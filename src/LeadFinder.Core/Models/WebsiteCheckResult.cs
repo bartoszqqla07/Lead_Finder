@@ -1,7 +1,10 @@
 namespace LeadFinder.Models;
 
 /// <summary>Wynik sprawdzenia strony WWW biznesu.</summary>
-/// <param name="Reachable">Czy serwer odpowiedział kodem 2xx.</param>
+/// <param name="Reachable">
+/// Czy strona działa: odpowiedziała treścią (także mimo złego certyfikatu SSL) albo serwer tylko blokuje
+/// automaty (401/403/429). False = realnie niedostępna po kilku próbach.
+/// </param>
 /// <param name="IsWordPress">Czy w HTML znaleziono ślady WordPressa.</param>
 /// <param name="Note">Krótka notatka dla człowieka, np. "HTTP 200 · WordPress 5.8 (wp-content, wp-json)".</param>
 /// <param name="Technology">Rozpoznany CMS/kreator stron, jeśli udało się go ustalić.</param>

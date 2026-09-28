@@ -31,6 +31,9 @@ public sealed class LeadSearchPipeline
     /// </summary>
     public static readonly TimeSpan WebsiteRequestDelay = TimeSpan.FromMilliseconds(300);
 
+    /// <summary>Przerwa przed drugą rundą sprawdzania stron, które nie odpowiedziały.</summary>
+    private static readonly TimeSpan SecondPassDelay = TimeSpan.FromSeconds(5);
+
     private readonly PlacesApiClient _placesClient;
     private readonly WebsiteChecker _websiteChecker;
 
@@ -142,6 +145,21 @@ public sealed class LeadSearchPipeline
 
             progress?.Report(new SearchProgress(
                 SearchStage.CheckingWebsites, $"{uniqueUris[i]} → {check.Note}", i + 1, uniqueUris.Count));
+        }
+
+        // Druga runda dla stron, które nie odpowiedziały: dłuższa przerwa w sieci (Wi-Fi, DNS) potrafi trwać
+        // dłużej niż ponowne próby jednej strony, a "nie działa" to najgorętszy – więc najdroższy w pomyłce – lead.
+        var failed = uniqueUris.Where(uri => !results[uri].Reachable).ToList();
+        if (failed.Count > 0)
+        {
+            await Task.Delay(SecondPassDelay, cancellationToken);
+            for (var i = 0; i < failed.Count; i++)
+            {
+                var check = await _websiteChecker.CheckAsync(failed[i], cancellationToken);
+                results[failed[i]] = check;
+                progress?.Report(new SearchProgress(
+                    SearchStage.CheckingWebsites, $"Ponownie: {failed[i]} → {check.Note}", i + 1, failed.Count));
+            }
         }
 
         return results;
