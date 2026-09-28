@@ -14,8 +14,8 @@ interface Props {
   visibleCount: number;
   totalCount: number;
   onExport: () => void;
-  /** Ile leadów ma status "strona nie działa" – do ponownego sprawdzenia. */
-  downCount: number;
+  /** Ile leadów ma własną stronę (nie działa / WordPress / ma stronę) – do ponownego sprawdzenia. */
+  websiteCount: number;
   isRechecking: boolean;
   onRecheck: () => void;
 }
@@ -29,7 +29,7 @@ export function FilterBar({
   visibleCount,
   totalCount,
   onExport,
-  downCount,
+  websiteCount,
   isRechecking,
   onRecheck,
 }: Props) {
@@ -140,19 +140,19 @@ export function FilterBar({
           </button>
         )}
 
-        {downCount > 0 && (
+        {websiteCount > 0 && (
           <button
             className="button button-small push-right"
             onClick={onRecheck}
             disabled={isRechecking}
-            title="Sprawdza jeszcze raz strony oznaczone jako „nie działa” – bez zapytań do Google, za darmo"
+            title="Sprawdza jeszcze raz strony firm (czy działają, czy są nowoczesne) – bez zapytań do Google, za darmo"
           >
-            {isRechecking ? 'Sprawdzam strony… (to potrwa chwilę)' : `↻ Sprawdź ponownie „nie działa” (${downCount})`}
+            {isRechecking ? 'Sprawdzam strony… (kilka minut)' : `↻ Sprawdź strony ponownie (${websiteCount})`}
           </button>
         )}
 
         <button
-          className={`button button-small ${downCount > 0 ? '' : 'push-right'}`}
+          className={`button button-small ${websiteCount > 0 ? '' : 'push-right'}`}
           onClick={onExport}
           disabled={visibleCount === 0}
         >

@@ -18,6 +18,7 @@ public static class LeadClassifier
         if (websiteCheck is null || !websiteCheck.Reachable)
             return LeadStatus.WebsiteDown;
 
-        return websiteCheck.IsWordPress ? LeadStatus.WordPress : LeadStatus.HasWebsite;
+        // Sam WordPress to nie problem – dopracowana strona na WordPressie to "ma stronę", nie kandydat do odświeżenia.
+        return websiteCheck.IsWordPress && !websiteCheck.LooksModern ? LeadStatus.WordPress : LeadStatus.HasWebsite;
     }
 }

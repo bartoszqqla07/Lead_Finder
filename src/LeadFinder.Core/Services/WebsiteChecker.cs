@@ -230,7 +230,9 @@ public sealed class WebsiteChecker
                 IsMobileFriendly: signals.IsMobileFriendly,
                 CopyrightYear: signals.CopyrightYear,
                 // Zły certyfikat = odwiedzający widzą ostrzeżenie zamiast bezpiecznego HTTPS.
-                UsesHttps: certificateProblem is null && finalUri.Scheme == Uri.UriSchemeHttps), false);
+                UsesHttps: certificateProblem is null && finalUri.Scheme == Uri.UriSchemeHttps,
+                ModernMarkers: signals.ModernMarkers,
+                OutdatedMarkers: signals.OutdatedMarkers), false);
         }
     }
 
@@ -317,6 +319,11 @@ public sealed class WebsiteChecker
 
         if (signals.CopyrightYear is { } year && year <= DateTime.Now.Year - OutdatedCopyrightYears)
             parts.Add($"stopka © {year}");
+
+        if (signals.OutdatedMarkers.Count > 0)
+            parts.Add($"przestarzałe: {string.Join(", ", signals.OutdatedMarkers)}");
+        if (signals.ModernMarkers.Count > 0)
+            parts.Add($"nowoczesne: {string.Join(", ", signals.ModernMarkers)}");
 
         return string.Join(" · ", parts);
     }

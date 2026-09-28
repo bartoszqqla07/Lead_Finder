@@ -209,8 +209,8 @@ zdjęć) zapamiętuje się dla każdego leada osobno. Makieta służy wyłączni
 |---|---|
 | **Brak strony** (gorący) | brak strony w Google albo zamiast strony profil (Booksy, Facebook, Instagram, Fresha…) lub katalog firm (GoWork, Cylex, BliskaUsługa…), także gdy domena salonu na niego przekierowuje |
 | **Strona nie działa** (gorący) | po 3 próbach i drugiej rundzie na końcu skanu: domena nie istnieje, serwer nie odpowiada (8 s), błąd 404/5xx |
-| **WordPress** | strona działa i ma ślady WordPressa (`wp-content`, `wp-includes`, `wp-json`); wersja z meta generator, jeśli jest |
-| **Ma stronę** | pozostałe; w notatce rozpoznany kreator (Wix, Squarespace, Shopify…) |
+| **WordPress** (do odświeżenia) | strona na WordPressie, która **nie wygląda nowocześnie** (np. stara wersja, jQuery 1.x, brak wersji na telefon) |
+| **Ma stronę** | pozostałe, w tym dopracowane strony na WordPressie; w notatce rozpoznany kreator i ślady nowoczesności |
 
 „Nie działa” to najgorętszy lead, więc aplikacja unika fałszywych alarmów:
 
@@ -222,8 +222,16 @@ zdjęć) zapamiętuje się dla każdego leada osobno. Makieta służy wyłączni
   sprawdza ją mimo to, a w notatce opisuje problem, np. „certyfikat SSL wygasł 26.01.2026 – przeglądarka pokazuje
   ostrzeżenie”. To dobry argument w rozmowie.
 
-Leady z wcześniejszych skanów sprawdzisz ponownie przyciskiem **„↻ Sprawdź ponownie „nie działa””** nad listą.
-Nie wysyła on zapytań do Google, więc nic nie kosztuje.
+Sam WordPress niczego nie przesądza, bo stoją na nim i strony z 2012 roku, i świetne projekty. Aplikacja szuka w kodzie
+strony śladów nowoczesności (Elementor, Divi, Bricks, nowoczesne motywy, Webflow/Framer/Next.js, obrazy WebP, lazy loading,
+responsywne obrazy, dane strukturalne, widget rezerwacji) i przestarzałości (HTML4/XHTML, układ na tabelkach, znaczniki
+`<font>`, Flash, ramki, stare motywy Twenty Ten–Fifteen, jQuery 1.x, stara Joomla). Strona działająca na telefonie,
+z co najmniej dwoma nowoczesnymi elementami i bez przestarzałych liczy się jako „ma stronę” i dostaje −10 pkt szansy.
+Każdy przestarzały element daje +5 pkt (maks. 15).
+
+Leady z wcześniejszych skanów sprawdzisz ponownie przyciskiem **„↻ Sprawdź strony ponownie”** nad listą. Sprawdza
+on wszystkie strony firm (około 1,5 minuty na 200 stron), nie wysyła zapytań do Google, więc nic nie kosztuje,
+i nie zmienia etapów, notatek ani zgód.
 
 ## Szansa na zlecenie (0–100)
 

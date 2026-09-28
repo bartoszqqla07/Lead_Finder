@@ -144,18 +144,20 @@ export function App() {
   };
 
   const [isRechecking, setIsRechecking] = useState(false);
-  const downCount = leads.filter((l) => l.status === 'WebsiteDown').length;
+  const websiteCount = leads.filter((l) => l.status !== 'NoWebsite' && l.websiteUri).length;
 
-  /** Fałszywe "nie działa" (chwilowy brak sieci, blokada botów, zły certyfikat) – sprawdzamy ponownie za darmo. */
+  /**
+   * Ponowne sprawdzenie stron za darmo: naprawia fałszywe "nie działa" (chwilowy brak sieci, blokada botów,
+   * zły certyfikat) i ocenia nowoczesność stron, żeby dopracowane WordPressy nie udawały leadów.
+   */
   const recheckWebsites = async () => {
     setIsRechecking(true);
     try {
       const result = await api.recheckWebsites();
       await reload();
       showToast(
-        result.fixed > 0
-          ? `Sprawdzono ${result.checked}: ${result.fixed} jednak działa, ${result.stillDown} nadal nie działa.`
-          : `Sprawdzono ${result.checked} – wszystkie nadal nie działają.`,
+        `Sprawdzono ${result.checked} stron: ${result.nowWorking} jednak działa, ${result.noLongerWordPressTarget} WordPressów ` +
+          `okazało się nowoczesnych, ${result.stillDown} naprawdę nie działa.`,
         'success',
       );
     } catch (error) {
@@ -257,7 +259,7 @@ export function App() {
             visibleCount={visibleLeads.length}
             totalCount={leads.length}
             onExport={exportVisible}
-            downCount={downCount}
+            websiteCount={websiteCount}
             isRechecking={isRechecking}
             onRecheck={() => void recheckWebsites()}
           />

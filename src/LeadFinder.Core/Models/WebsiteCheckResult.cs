@@ -1,3 +1,5 @@
+using LeadFinder.Services;
+
 namespace LeadFinder.Models;
 
 /// <summary>Wynik sprawdzenia strony WWW biznesu.</summary>
@@ -17,6 +19,8 @@ namespace LeadFinder.Models;
 /// </param>
 /// <param name="CopyrightYear">Najnowszy rok ze stopki typu "© 2017"; null, gdy go nie znaleziono.</param>
 /// <param name="UsesHttps">Czy strona (po przekierowaniach) działa przez HTTPS; null, gdy nie wiadomo.</param>
+/// <param name="ModernMarkers">Ślady nowoczesnej strony (Elementor, WebP, lazy loading…); null, gdy nie sprawdzano.</param>
+/// <param name="OutdatedMarkers">Ślady przestarzałej strony (HTML4, tabelki, Flash…); null, gdy nie sprawdzano.</param>
 public sealed record WebsiteCheckResult(
     bool Reachable,
     bool IsWordPress,
@@ -25,8 +29,20 @@ public sealed record WebsiteCheckResult(
     string? ProfilePlatform = null,
     bool? IsMobileFriendly = null,
     int? CopyrightYear = null,
-    bool? UsesHttps = null)
+    bool? UsesHttps = null,
+    IReadOnlyList<string>? ModernMarkers = null,
+    IReadOnlyList<string>? OutdatedMarkers = null)
 {
+    /// <summary>
+    /// Strona działa i wygląda na współczesną, zadbaną – WordPress czy nie, trudno sprzedać nową.
+    /// Dla leadów sprawdzonych przed dodaniem tych sygnałów (markery = null) zawsze false.
+    /// </summary>
+    public bool LooksModern =>
+        Reachable
+        && ProfilePlatform is null
+        && ModernMarkers is not null
+        && PageSignals.LooksModern(IsMobileFriendly, CopyrightYear, ModernMarkers.Count, OutdatedMarkers?.Count ?? 0);
+
     public static WebsiteCheckResult Unreachable(string note) => new(false, false, note);
 
     public static WebsiteCheckResult ProfileOnly(string platform) =>

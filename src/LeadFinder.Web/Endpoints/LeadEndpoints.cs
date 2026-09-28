@@ -25,15 +25,15 @@ public static class LeadEndpoints
     private const int RecheckParallelism = 6;
 
     /// <summary>
-    /// Ponownie sprawdza strony leadów oznaczonych jako "strona nie działa" – bez zapytań do Google, więc za darmo.
-    /// Naprawia fałszywe alarmy z wcześniejszych skanów (chwilowy brak sieci, blokada botów, zły certyfikat).
-    /// Etap, notatki i zgody leada zostają bez zmian.
+    /// Ponownie sprawdza strony wszystkich leadów, które mają własną stronę (nie działa / WordPress / ma stronę) –
+    /// bez zapytań do Google, więc za darmo. Naprawia fałszywe "nie działa" z wcześniejszych skanów i ocenia
+    /// nowoczesność stron sprawdzonych, zanim aplikacja to potrafiła. Etap, notatki i zgody zostają bez zmian.
     /// </summary>
     private static async Task<RecheckWebsitesResultDto> RecheckWebsitesAsync(
         LeadFinderDbContext db, WebsiteChecker checker, CancellationToken ct)
     {
         var leads = await db.Leads
-            .Where(l => l.Status == LeadStatus.WebsiteDown && l.WebsiteUri != null)
+            .Where(l => l.Status != LeadStatus.NoWebsite && l.WebsiteUri != null)
             .ToListAsync(ct);
 
         var checks = new System.Collections.Concurrent.ConcurrentDictionary<int, WebsiteCheckResult>();
@@ -42,6 +42,7 @@ public static class LeadEndpoints
             new ParallelOptions { MaxDegreeOfParallelism = RecheckParallelism, CancellationToken = ct },
             async (lead, token) => checks[lead.Id] = await checker.CheckAsync(lead.WebsiteUri!, token));
 
+        var before = leads.ToDictionary(l => l.Id, l => l.Status);
         foreach (var lead in leads)
         {
             var check = checks[lead.Id];
@@ -49,8 +50,11 @@ public static class LeadEndpoints
         }
         await db.SaveChangesAsync(ct);
 
-        var stillDown = leads.Count(l => l.Status == LeadStatus.WebsiteDown);
-        return new RecheckWebsitesResultDto(leads.Count, leads.Count - stillDown, stillDown);
+        return new RecheckWebsitesResultDto(
+            Checked: leads.Count,
+            NowWorking: leads.Count(l => before[l.Id] == LeadStatus.WebsiteDown && l.Status != LeadStatus.WebsiteDown),
+            StillDown: leads.Count(l => l.Status == LeadStatus.WebsiteDown),
+            NoLongerWordPressTarget: leads.Count(l => before[l.Id] == LeadStatus.WordPress && l.Status == LeadStatus.HasWebsite));
     }
 
     /// <summary>

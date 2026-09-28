@@ -41,7 +41,11 @@ public static class LeadScorer
     }
 
     /// <summary>Najwięcej punktów, jakie da się zdobyć za "potrzebę" (przestarzały WordPress ze wszystkimi sygnałami).</summary>
-    private const int MaxNeedPoints = 20 + 10 + 15 + 8 + 7;
+    private const int MaxNeedPoints = 20 + 10 + 15 + 8 + 7 + MaxOutdatedPoints;
+
+    /// <summary>Po 5 pkt za każdy ślad przestarzałej technologii, maks. 15.</summary>
+    private const int PointsPerOutdatedMarker = 5;
+    private const int MaxOutdatedPoints = 15;
 
     /// <summary>
     /// Najwyższy wynik, jaki firma może dostać, zanim sprawdzimy jej stronę. Pozwala pominąć (powolne)
@@ -99,9 +103,13 @@ public static class LeadScorer
                 factors.Add(new("Brak strony internetowej", 35));
                 break;
             case LeadStatus.WordPress:
-                factors.Add(new("Strona na WordPressie – kandydat do odświeżenia", 20));
+                // Status WordPress dostają tylko strony bez znamion nowoczesności (patrz LeadClassifier).
+                factors.Add(new("WordPress bez nowoczesnych elementów – kandydat do odświeżenia", 20));
                 if (WordPressMajorVersion(check?.Technology) is < 6)
                     factors.Add(new($"Stara wersja WordPressa ({check!.Technology!["WordPress".Length..].Trim()})", 10));
+                break;
+            case LeadStatus.HasWebsite when check is { LooksModern: true }:
+                factors.Add(new($"Nowoczesna, zadbana strona ({string.Join(", ", check.ModernMarkers!.Take(3))}) – mała potrzeba", -10));
                 break;
             default:
                 factors.Add(new("Ma działającą stronę – mniejsza potrzeba", 0));
@@ -118,6 +126,10 @@ public static class LeadScorer
             factors.Add(new($"Stopka z {year} r. – strona dawno nieaktualizowana", 8));
         if (check.UsesHttps == false)
             factors.Add(new("Brak HTTPS – przeglądarka pokazuje „Niezabezpieczona”", 7));
+        if (check.OutdatedMarkers is { Count: > 0 } outdated)
+            factors.Add(new(
+                $"Przestarzała technologia: {string.Join(", ", outdated)}",
+                Math.Min(outdated.Count * PointsPerOutdatedMarker, MaxOutdatedPoints)));
     }
 
     /// <summary>Możliwości: wielkość/ruch (liczba opinii) i dbałość o wizerunek (ocena).</summary>

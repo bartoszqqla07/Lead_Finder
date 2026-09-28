@@ -21,10 +21,19 @@ public static class LeadMapping
             : new WebsiteCheckResult(
                 entity.WebsiteReachable ?? false, entity.IsWordPress, entity.CheckNote,
                 entity.Technology, entity.ProfilePlatform,
-                entity.IsMobileFriendly, entity.CopyrightYear, entity.UsesHttps);
+                entity.IsMobileFriendly, entity.CopyrightYear, entity.UsesHttps,
+                SplitMarkers(entity.ModernMarkers), SplitMarkers(entity.OutdatedMarkers));
 
         return new Lead(place, category, entity.City, entity.Status, check);
     }
+
+    private const char MarkerSeparator = '|';
+
+    private static string? JoinMarkers(IReadOnlyList<string>? markers) =>
+        markers is null ? null : string.Join(MarkerSeparator, markers);
+
+    private static IReadOnlyList<string>? SplitMarkers(string? markers) =>
+        markers is null ? null : markers.Split(MarkerSeparator, StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>Kopiuje dane z Google i wynik sprawdzenia strony; nie dotyka pól CRM.</summary>
     public static void ApplySearchResult(this LeadEntity entity, Lead lead)
@@ -53,6 +62,8 @@ public static class LeadMapping
         entity.IsMobileFriendly = check?.IsMobileFriendly;
         entity.CopyrightYear = check?.CopyrightYear;
         entity.UsesHttps = check?.UsesHttps;
+        entity.ModernMarkers = JoinMarkers(check?.ModernMarkers);
+        entity.OutdatedMarkers = JoinMarkers(check?.OutdatedMarkers);
     }
 
     /// <summary>

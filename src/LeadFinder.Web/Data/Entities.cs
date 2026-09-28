@@ -62,6 +62,12 @@ public sealed class LeadEntity
     public int? CopyrightYear { get; set; }
     public bool? UsesHttps { get; set; }
 
+    /// <summary>Ślady nowoczesnej strony, rozdzielone "|"; null = sprawdzone przed dodaniem tej analizy.</summary>
+    public string? ModernMarkers { get; set; }
+
+    /// <summary>Ślady przestarzałej strony, rozdzielone "|".</summary>
+    public string? OutdatedMarkers { get; set; }
+
     public OutreachStage Stage { get; set; } = OutreachStage.New;
     public string Notes { get; set; } = string.Empty;
     public DateTime? StageChangedAt { get; set; }

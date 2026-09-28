@@ -144,5 +144,8 @@ public sealed record UpdateSettingsRequest(
 
 public sealed record VerifyApiKeyResultDto(bool Ok, string Message);
 
-/// <summary>Wynik ponownego sprawdzenia stron: ile sprawdzono, ile okazało się działać, ile nadal nie działa.</summary>
-public sealed record RecheckWebsitesResultDto(int Checked, int Fixed, int StillDown);
+/// <summary>
+/// Wynik ponownego sprawdzenia stron: ile sprawdzono, ile "nie działa" okazało się działać, ile nadal nie działa
+/// i ile WordPressów okazało się nowoczesnych (spadły z "do odświeżenia" do "ma stronę").
+/// </summary>
+public sealed record RecheckWebsitesResultDto(int Checked, int NowWorking, int StillDown, int NoLongerWordPressTarget);
