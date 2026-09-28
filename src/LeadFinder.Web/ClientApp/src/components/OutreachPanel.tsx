@@ -53,8 +53,13 @@ export function OutreachPanel({ lead, onConsentChange, onMarkSent, onOpenStudio,
     <section className="drawer-section">
       <div className="section-title-row">
         <h3>Wiadomość</h3>
-        <span className={`step-pill ${hasConsent ? 'step-pill-done' : ''}`}>
-          {hasConsent ? 'Krok 2 · po zgodzie' : 'Krok 1 · prośba o zgodę'}
+        <span className="section-title-actions">
+          <button className="link-button small" onClick={onOpenStudio}>
+            🎨 Kreator podglądu
+          </button>
+          <span className={`step-pill ${hasConsent ? 'step-pill-done' : ''}`}>
+            {hasConsent ? 'Krok 2 · po zgodzie' : 'Krok 1 · prośba o zgodę'}
+          </span>
         </span>
       </div>
 
@@ -86,6 +91,12 @@ export function OutreachPanel({ lead, onConsentChange, onMarkSent, onOpenStudio,
       {draft.kind === 'Preview' && (
         <button className="button button-primary studio-cta" onClick={onOpenStudio}>
           🎨 Stwórz podgląd strony dla tego salonu
+        </button>
+      )}
+      {/* DM mówi „przygotowałem podgląd” – więc robimy go przed wysłaniem, żeby po „tak” wysłać od razu. */}
+      {draft.kind === 'DirectMessage' && (
+        <button className="button studio-cta" onClick={onOpenStudio}>
+          🎨 Najpierw przygotuj podgląd (kreator)
         </button>
       )}
 

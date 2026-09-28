@@ -1,0 +1,268 @@
+{
+  "barber": [
+    {
+      "file": "barber-1.jpg",
+      "author": "Barney Goodman",
+      "source": "https://unsplash.com/photos/an-empty-barbershop-interior-with-several-chairs-and-mirrors-AXurvQTtO3Y",
+      "alt": "An empty barbershop interior with several chairs and mirrors"
+    },
+    {
+      "file": "barber-2.jpg",
+      "author": "Zachary Lancaster",
+      "source": "https://unsplash.com/photos/stylish-barbershop-interior-with-a-couch-and-magazines-WlfTYvvRG_w",
+      "alt": "Stylish barbershop interior with a couch and magazines"
+    },
+    {
+      "file": "barber-3.jpg",
+      "author": "Georgi Kyurpanov",
+      "source": "https://unsplash.com/photos/red-and-black-leather-office-rolling-chair-XTAtx9UhNBo",
+      "alt": "red and black leather office rolling chair"
+    },
+    {
+      "file": "barber-4.jpg",
+      "author": "delfina pan",
+      "source": "https://unsplash.com/photos/barber-blow-drying-hair-in-salon-wJoB8D3hnzc",
+      "alt": "A barber in a denim apron blow-drying a man's hair in a salon"
+    },
+    {
+      "file": "barber-5.jpg",
+      "author": "Nazmi Javier",
+      "source": "https://unsplash.com/photos/a-group-of-keys-on-a-chain-iVIfMA9zSfQ",
+      "alt": "a group of keys on a chain"
+    },
+    {
+      "file": "barber-6.jpg",
+      "author": "Ilia",
+      "source": "https://unsplash.com/photos/vintage-barber-chair-in-a-room-with-artwork-e3T9DZ1g2Aw",
+      "alt": "Vintage barber chair in a room with artwork"
+    }
+  ],
+  "hair": [
+    {
+      "file": "hair-1.jpg",
+      "author": "Giorgio Trovato",
+      "source": "https://unsplash.com/photos/black-and-gray-chair-beside-white-wall-T9u-Xr30FY8",
+      "alt": "black and gray chair beside white wall"
+    },
+    {
+      "file": "hair-2.jpg",
+      "author": "Giorgio Trovato",
+      "source": "https://unsplash.com/photos/woman-in-white-shirt-standing-near-black-leather-chairs-OKXwmdbdXkk",
+      "alt": "woman in white shirt standing near black leather chairs"
+    },
+    {
+      "file": "hair-3.jpg",
+      "author": "Giorgio Trovato",
+      "source": "https://unsplash.com/photos/black-and-silver-office-rolling-chair-beside-mirror-gI9rvJK61L8",
+      "alt": "black and silver office rolling chair beside mirror"
+    },
+    {
+      "file": "hair-4.jpg",
+      "author": "Daniel",
+      "source": "https://unsplash.com/photos/a-woman-getting-her-hair-done-in-a-salon-PnDr2j28gXA",
+      "alt": "a woman getting her hair done in a salon"
+    },
+    {
+      "file": "hair-5.jpg",
+      "author": "Lindsay Cash",
+      "source": "https://unsplash.com/photos/a-woman-getting-her-hair-cut-by-a-hair-stylist-Md_DhaFsnCQ",
+      "alt": "a woman getting her hair cut by a hair stylist"
+    },
+    {
+      "file": "hair-6.jpg",
+      "author": "Barney Goodman",
+      "source": "https://unsplash.com/photos/a-modern-hair-salon-interior-with-stylish-chairs-and-mirrors-_Fy7Kq0w6OI",
+      "alt": "A modern hair salon interior with stylish chairs and mirrors"
+    }
+  ],
+  "beauty": [
+    {
+      "file": "beauty-1.jpg",
+      "author": "Guilherme Petri",
+      "source": "https://unsplash.com/photos/salon-chairs-at-white-vanity-PtOfbGkU3uI",
+      "alt": "Three maroon salon chairs facing a long white counter with a large mirror"
+    },
+    {
+      "file": "beauty-2.jpg",
+      "author": "Vinicius \"amnx\" Amano",
+      "source": "https://unsplash.com/photos/a-woman-getting-her-hair-done-in-a-salon-lK8oXGycy88",
+      "alt": "a woman getting her hair done in a salon"
+    },
+    {
+      "file": "beauty-3.jpg",
+      "author": "Benyamin Bohlouli",
+      "source": "https://unsplash.com/photos/modern-hair-salon-with-black-chairs-LGXN4OSQSa4",
+      "alt": "A modern hair salon with black chairs, round mirrors, and a brick wall"
+    },
+    {
+      "file": "beauty-4.jpg",
+      "author": "Hayley Kim Studios",
+      "source": "https://unsplash.com/photos/eyelash-extensions-application-in-salon-sRSRuxkOuzI",
+      "alt": "A person applying eyelash extensions to a client with tweezers in a salon"
+    },
+    {
+      "file": "beauty-5.jpg",
+      "author": "Lindsay Cash",
+      "source": "https://unsplash.com/photos/a-woman-getting-her-hair-cut-by-a-hair-stylist-Md_DhaFsnCQ",
+      "alt": "a woman getting her hair cut by a hair stylist"
+    },
+    {
+      "file": "beauty-6.jpg",
+      "author": "Baylee Gramling",
+      "source": "https://unsplash.com/photos/person-holding-gray-hair-curler-MMz03PyCOZg",
+      "alt": "person holding gray hair curler"
+    }
+  ],
+  "nails": [
+    {
+      "file": "nails-1.jpg",
+      "author": "Chelson Tamares",
+      "source": "https://unsplash.com/photos/persons-hand-on-white-textile-SyCC0GQi5S4",
+      "alt": "persons hand on white textile"
+    },
+    {
+      "file": "nails-2.jpg",
+      "author": "Giorgio Trovato",
+      "source": "https://unsplash.com/photos/a-woman-getting-her-nails-done-at-a-nail-salon-gb6gtiTZKB8",
+      "alt": "a woman getting her nails done at a nail salon"
+    },
+    {
+      "file": "nails-3.jpg",
+      "author": "DESIGNECOLOGIST",
+      "source": "https://unsplash.com/photos/selective-focus-photography-of-womans-pink-manicure-r-Ej0NQmFlQ",
+      "alt": "selective focus photography of woman's pink manicure"
+    },
+    {
+      "file": "nails-4.jpg",
+      "author": "Pablo Escobar",
+      "source": "https://unsplash.com/photos/a-woman-is-doing-a-manicure-on-a-childs-hand-zRkla85Xe2o",
+      "alt": "a woman is doing a manicure on a child's hand"
+    },
+    {
+      "file": "nails-5.jpg",
+      "author": "allison christine",
+      "source": "https://unsplash.com/photos/person-holding-brown-woven-basket-RY9w18Eq-OM",
+      "alt": "person holding brown woven basket"
+    },
+    {
+      "file": "nails-6.jpg",
+      "author": "H&CO",
+      "source": "https://unsplash.com/photos/nail-polish-bottles-on-gold-shelves-OpjlRo-31SI",
+      "alt": "Rows of colorful nail polish bottles on gold triangular shelves against a wall"
+    }
+  ],
+  "spa": [
+    {
+      "file": "spa-1.jpg",
+      "author": "engin akyurt",
+      "source": "https://unsplash.com/photos/person-with-hot-stones-at-spa-ZbzYDboN7fg",
+      "alt": "A person lying on a massage table with smooth black stones on their back"
+    },
+    {
+      "file": "spa-2.jpg",
+      "author": "Sherzod Gulomov",
+      "source": "https://unsplash.com/photos/a-couple-of-chairs-sitting-next-to-each-other-in-a-room-npE_I2GzpHY",
+      "alt": "a couple of chairs sitting next to each other in a room"
+    },
+    {
+      "file": "spa-3.jpg",
+      "author": "alan caishan",
+      "source": "https://unsplash.com/photos/woman-lying-with-prone-position-cU53ZFBr3lk",
+      "alt": "woman lying with prone position"
+    },
+    {
+      "file": "spa-4.jpg",
+      "author": "Katherine Hanlon",
+      "source": "https://unsplash.com/photos/massage-therapy-in-dim-warm-light-WAm_HaI4W2E",
+      "alt": "Hands massaging a person's face in a dimly lit room with warm bokeh"
+    },
+    {
+      "file": "spa-5.jpg",
+      "author": "Anna Keibalo",
+      "source": "https://unsplash.com/photos/a-woman-getting-a-facial-massage-at-a-spa-BJ7i-96glwM",
+      "alt": "a woman getting a facial massage at a spa"
+    },
+    {
+      "file": "spa-6.jpg",
+      "author": "Jakub Klucký",
+      "source": "https://unsplash.com/photos/massage-therapist-giving-a-back-massage-7yeqemd-p90",
+      "alt": "Massage therapist giving a back massage"
+    }
+  ],
+  "tattoo": [
+    {
+      "file": "tattoo-1.jpg",
+      "author": "benjamin lehman",
+      "source": "https://unsplash.com/photos/person-with-tattoo-on-right-arm-5t4qCgtaLGU",
+      "alt": "person with tattoo on right arm"
+    },
+    {
+      "file": "tattoo-2.jpg",
+      "author": "Chloe Boulos",
+      "source": "https://unsplash.com/photos/a-man-with-a-tattoo-on-his-arm-holding-a-gun--aLEVLQW43E",
+      "alt": "A man with a tattoo on his arm holding a gun"
+    },
+    {
+      "file": "tattoo-3.jpg",
+      "author": "Motoki Tonn",
+      "source": "https://unsplash.com/photos/man-in-orange-polo-shirt-sitting-on-black-leather-armchair-RF6NLFcWsxk",
+      "alt": "man in orange polo shirt sitting on black leather armchair"
+    },
+    {
+      "file": "tattoo-4.jpg",
+      "author": "Julia Giacomini",
+      "source": "https://unsplash.com/photos/man-doing-tattoo-on-human-arm-B_VLJouyKR4",
+      "alt": "man doing tattoo on human arm"
+    },
+    {
+      "file": "tattoo-5.jpg",
+      "author": "GRAHAM MANSFIELD",
+      "source": "https://unsplash.com/photos/a-man-getting-a-tattoo-on-his-arm-WQeNPmeA5WA",
+      "alt": "a man getting a tattoo on his arm"
+    },
+    {
+      "file": "tattoo-6.jpg",
+      "author": "Belva Adeina",
+      "source": "https://unsplash.com/photos/a-tattoo-of-a-dog-with-glasses-on-its-head-qP2HuQAtfS0",
+      "alt": "a tattoo of a dog with glasses on its head"
+    }
+  ],
+  "cosmetology": [
+    {
+      "file": "cosmetology-1.jpg",
+      "author": "karelys Ruiz",
+      "source": "https://unsplash.com/photos/woman-receiving-facial-skincare-treatment-PqyzuzFiQfY",
+      "alt": "woman receiving facial skincare treatment"
+    },
+    {
+      "file": "cosmetology-2.jpg",
+      "author": "Look Studio",
+      "source": "https://unsplash.com/photos/a-woman-getting-a-facial-peel-from-a-doctor-HtXyytr9304",
+      "alt": "a woman getting a facial peel from a doctor"
+    },
+    {
+      "file": "cosmetology-3.jpg",
+      "author": "engin akyurt",
+      "source": "https://unsplash.com/photos/woman-lying-on-blue-towel-with-white-cream-on-face-g-m8EDc4X6Q",
+      "alt": "woman lying on blue towel with white cream on face"
+    },
+    {
+      "file": "cosmetology-4.jpg",
+      "author": "Soheil Kmp",
+      "source": "https://unsplash.com/photos/a-woman-getting-a-facial-mask-on-her-face-qJ1mYraktLg",
+      "alt": "a woman getting a facial mask on her face"
+    },
+    {
+      "file": "cosmetology-5.jpg",
+      "author": "Rosa Rafael",
+      "source": "https://unsplash.com/photos/woman-receiving-facial-mask-treatment-at-spa-Pe9IXUuC6QU",
+      "alt": "woman receiving facial mask treatment at spa"
+    },
+    {
+      "file": "cosmetology-6.jpg",
+      "author": "Masum Rahimi",
+      "source": "https://unsplash.com/photos/a-woman-is-laying-down-with-her-eyes-closed-MGKzomg0Dts",
+      "alt": "a woman is laying down with her eyes closed"
+    }
+  ]
+}

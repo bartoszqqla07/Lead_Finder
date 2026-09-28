@@ -45,6 +45,40 @@
   --sp-h1: 84px;
   --sp-char: 0.6;
 }
+/* Pary czcionek – niezależne od kolorystyki (klasy po stylach, więc je nadpisują). */
+.sp-font-bold {
+  --sp-heading: 'SP Oswald', 'Arial Narrow', sans-serif;
+  --sp-body: 'SP Inter', system-ui, sans-serif;
+  --sp-h1: 104px;
+  --sp-char: 0.62;
+}
+.sp-font-elegant {
+  --sp-heading: 'SP Cormorant', Georgia, serif;
+  --sp-body: 'SP Jost', system-ui, sans-serif;
+  --sp-h1: 92px;
+  --sp-char: 0.5;
+}
+.sp-font-soft {
+  --sp-heading: 'SP DM Serif', Georgia, serif;
+  --sp-body: 'SP DM Sans', system-ui, sans-serif;
+  --sp-h1: 84px;
+  --sp-char: 0.6;
+}
+.sp-font-clean {
+  --sp-heading: 'SP Inter', system-ui, sans-serif;
+  --sp-body: 'SP Inter', system-ui, sans-serif;
+  --sp-h1: 80px;
+  --sp-char: 0.62;
+}
+.sp-btn-shape-sharp {
+  --sp-btn-radius: 2px;
+}
+.sp-btn-shape-rounded {
+  --sp-btn-radius: 12px;
+}
+.sp-btn-shape-pill {
+  --sp-btn-radius: 999px;
+}
 .sp * {
   box-sizing: border-box;
 }
@@ -61,20 +95,26 @@
   font-weight: 500;
   letter-spacing: -0.01em;
 }
-.sp-dark h1,
-.sp-dark h2,
-.sp-dark .sp-logo {
+.sp-font-bold h1,
+.sp-font-bold h2,
+.sp-font-bold .sp-logo {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
-.sp-light h1 {
+.sp-font-elegant h1 {
   font-weight: 500;
   font-style: italic;
 }
-.sp-pastel h1,
-.sp-pastel h2 {
+.sp-font-soft h1,
+.sp-font-soft h2 {
   font-weight: 400;
+}
+.sp-font-clean h1,
+.sp-font-clean h2,
+.sp-font-clean .sp-logo {
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .sp-icon {
@@ -107,7 +147,7 @@
   text-overflow: ellipsis;
   max-width: 420px;
 }
-.sp-dark .sp-logo {
+.sp-font-bold .sp-logo {
   font-size: 22px;
   letter-spacing: 0.14em;
 }
@@ -151,7 +191,7 @@
   color: #0e0e10;
   font-weight: 600;
 }
-.sp-pastel .sp-btn {
+.sp-font-soft .sp-btn {
   text-transform: none;
   letter-spacing: 0.01em;
   font-size: 16px;
@@ -162,7 +202,7 @@
   font-size: 12px;
   box-shadow: none;
 }
-.sp-pastel .sp-btn-small {
+.sp-font-soft .sp-btn-small {
   font-size: 14px;
 }
 .sp .sp-btn-ghost {
@@ -200,7 +240,12 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgb(8 8 10 / 0.86) 0%, rgb(8 8 10 / 0.55) 45%, rgb(8 8 10 / 0.1) 100%);
+  background: linear-gradient(
+    90deg,
+    rgb(8 8 10 / calc(var(--sp-overlay, 0.8) * 1.08)) 0%,
+    rgb(8 8 10 / calc(var(--sp-overlay, 0.8) * 0.7)) 45%,
+    rgb(8 8 10 / calc(var(--sp-overlay, 0.8) * 0.15)) 100%
+  );
 }
 .sp-hero-photo .sp-hero-inner {
   color: #fff;
@@ -401,7 +446,11 @@
   justify-content: center;
 }
 .sp-hero-centered.sp-hero-photo::after {
-  background: radial-gradient(ellipse at center, rgb(8 8 10 / 0.72), rgb(8 8 10 / 0.5));
+  background: radial-gradient(
+    ellipse at center,
+    rgb(8 8 10 / calc(var(--sp-overlay, 0.8) * 0.9)),
+    rgb(8 8 10 / calc(var(--sp-overlay, 0.8) * 0.62))
+  );
 }
 .sp-hero-centered .sp-hero-art {
   background:
@@ -478,7 +527,7 @@
   font-size: 58px;
   line-height: 1.05;
 }
-.sp-dark .sp-section h2 {
+.sp-font-bold .sp-section h2 {
   font-size: 50px;
 }
 
@@ -638,10 +687,10 @@
   .sp {
     --sp-h1: 50px;
   }
-  .sp-dark {
+  .sp-font-bold {
     --sp-h1: 54px;
   }
-  .sp-pastel {
+  .sp-font-soft {
     --sp-h1: 46px;
   }
   .sp-nav {
@@ -652,7 +701,7 @@
     font-size: 22px;
     max-width: 280px;
   }
-  .sp-dark .sp-logo {
+  .sp-font-bold .sp-logo {
     font-size: 17px;
   }
   .sp-links,
@@ -668,7 +717,12 @@
     align-items: flex-end;
   }
   .sp-hero-photo::after {
-    background: linear-gradient(0deg, rgb(8 8 10 / 0.9) 0%, rgb(8 8 10 / 0.55) 55%, rgb(8 8 10 / 0.15) 100%);
+    background: linear-gradient(
+      0deg,
+      rgb(8 8 10 / calc(var(--sp-overlay, 0.8) * 1.12)) 0%,
+      rgb(8 8 10 / calc(var(--sp-overlay, 0.8) * 0.7)) 55%,
+      rgb(8 8 10 / calc(var(--sp-overlay, 0.8) * 0.2)) 100%
+    );
   }
   .sp-hero-art::before {
     top: 26%;
@@ -780,7 +834,7 @@
     padding: 60px 24px;
   }
   .sp-section h2,
-  .sp-dark .sp-section h2 {
+  .sp-font-bold .sp-section h2 {
     margin-bottom: 26px;
     font-size: 40px;
   }
@@ -840,4 +894,9 @@
 /* Cormorant domyślnie rysuje cyfry "nautyczne" (110 wygląda jak ııo) – w cenach i ocenie chcemy zwykłe. */
 .sp {
   font-variant-numeric: lining-nums;
+}
+
+/* Podpis nad nazwą na zdjęciu: rozjaśniony kolor przewodni, bo ciemny akcent ginie na zdjęciu. */
+.sp-hero-photo .sp-eyebrow {
+  color: color-mix(in srgb, var(--sp-accent) 45%, #fff);
 }

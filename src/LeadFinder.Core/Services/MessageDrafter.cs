@@ -199,18 +199,33 @@ public sealed class MessageDrafter
             RequiresConsent: false);
     }
 
+    /// <summary>
+    /// Krótki DM: co zauważyłem, czym się zajmuję, mam gotowy podgląd – czy mogę go przesłać.
+    /// Sama prośba o zgodę; podgląd (obraz z ofertą) idzie dopiero po odpowiedzi „tak”.
+    /// </summary>
     private MessageDraft DirectMessage(DraftContext c)
     {
         var body = c.Informal
-            ? $"Cześć! Tu {_name}, robię strony internetowe dla {c.Tone.Audience}. {ShortHook(c)} Mogę podesłać krótki podgląd, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli nie – żaden problem, nie będę więcej pisać 🙂"
-            : $"Dzień dobry, nazywam się {_name} i tworzę strony internetowe dla {c.Tone.Audience}. {ShortHook(c)} Czy mogę przesłać krótki podgląd, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli temat Państwa nie interesuje, proszę zignorować wiadomość – nie będę więcej pisać.";
+            ? $"""
+               Cześć! Trafiłem na {c.YourPlace} i zauważyłem, że {DmObservation(c)}
+               Zajmuję się tworzeniem nowoczesnych stron dla lokalnych firm i salonów.
+               Przygotowałem nawet szybki podgląd, jak mogłaby wyglądać {DmPreviewSubject(c)} w Waszym przypadku.
+               Mogę go tutaj podesłać?
+               """
+            : $"""
+               Dzień dobry, trafiłem na {c.YourPlace} i zauważyłem, że {DmObservation(c)}
+               Zajmuję się tworzeniem nowoczesnych stron dla lokalnych firm i salonów.
+               Przygotowałem nawet szybki podgląd, jak mogłaby wyglądać {DmPreviewSubject(c)} w Państwa przypadku.
+               Czy mogę go tutaj przesłać?
+               """;
 
         return new MessageDraft(
             DraftKind.DirectMessage,
             Title: "DM – prośba o zgodę",
             Channel: "Instagram / Facebook – wiadomość prywatna do profilu firmy",
-            Guidance: "Salony najczęściej odpowiadają wieczorem, po pracy – daj im 2–3 dni. Pisz do profilu firmy, nie na prywatne konto. " +
-                      "Tylko prośba o zgodę: bez cen, opisu usług i linków. Wyślij raz – brak odpowiedzi traktuj jako „nie”.",
+            Guidance: "Zanim wyślesz, zrób podgląd w kreatorze (kilka minut) – wiadomość mówi, że już go masz, więc po „tak” " +
+                      "wysyłasz go od razu. Salony najczęściej odpowiadają wieczorem – daj im 2–3 dni. Pisz do profilu firmy, " +
+                      "nie na prywatne konto. Bez cen i linków. Wyślij raz – brak odpowiedzi traktuj jako „nie”.",
             Subject: null,
             Body: body,
             RequiresConsent: false);
@@ -619,34 +634,38 @@ public sealed class MessageDrafter
         };
     }
 
-    /// <summary>Jednozdaniowe otwarcie do krótkiego DM.</summary>
-    private static string ShortHook(DraftContext c)
+    /// <summary>Druga część zdania „…i zauważyłem, że …” w DM – tylko to, co faktycznie sprawdziła aplikacja.</summary>
+    private static string DmObservation(DraftContext c)
     {
         var lead = c.Lead;
-        var goodReviews = HasGoodReviews(lead);
+        var check = lead.WebsiteCheck;
         return lead.Status switch
         {
-            LeadStatus.NoWebsite when lead.WebsiteCheck?.ProfilePlatform is { } platform => c.Informal
-                ? $"Widzę, że w Google zamiast strony macie podlinkowany profil {OnPlatform(platform)}."
-                : $"Widzę, że w Google zamiast strony jest podlinkowany Państwa profil {OnPlatform(platform)}.",
-            LeadStatus.NoWebsite => (c.Informal, goodReviews) switch
-            {
-                (true, true) => "Widzę Was w Google ze świetnymi opiniami, ale bez strony internetowej.",
-                (true, false) => "Widzę Was w Google, ale bez strony internetowej.",
-                (false, true) => "Widzę Państwa w Google ze świetnymi opiniami, ale bez strony internetowej.",
-                (false, false) => "Widzę Państwa w Google, ale bez strony internetowej.",
-            },
+            LeadStatus.NoWebsite when check?.ProfilePlatform is { } platform => c.Informal
+                ? $"zamiast własnej strony macie w Google tylko profil {OnPlatform(platform)}."
+                : $"zamiast własnej strony mają Państwo w Google tylko profil {OnPlatform(platform)}.",
+            LeadStatus.NoWebsite => c.Informal
+                ? "nie macie własnej strony internetowej."
+                : "nie mają Państwo własnej strony internetowej.",
             LeadStatus.WebsiteDown => c.Informal
-                ? $"Link do strony w Waszej wizytówce Google ({c.Host}) się nie otwiera."
-                : $"Link do strony w Państwa wizytówce Google ({c.Host}) się nie otwiera.",
-            LeadStatus.WordPress => c.Informal
-                ? $"Oglądam Waszą stronę {c.Host} i mam pomysł, jak ją przyspieszyć na telefonie."
-                : $"Oglądam Państwa stronę {c.Host} i mam pomysł, jak ją przyspieszyć na telefonie.",
+                ? $"strona z Waszej wizytówki Google ({c.Host}) się nie otwiera."
+                : $"strona z Państwa wizytówki Google ({c.Host}) się nie otwiera.",
+            _ when check is { IsMobileFriendly: false } => c.Informal
+                ? $"Wasza strona ({c.Host}) nie jest dopasowana do telefonów."
+                : $"Państwa strona ({c.Host}) nie jest dopasowana do telefonów.",
             _ => c.Informal
-                ? $"Oglądam Waszą stronę {c.Host} i mam kilka pomysłów na rezerwacje online."
-                : $"Oglądam Państwa stronę {c.Host} i mam kilka pomysłów na rezerwacje online.",
+                ? $"Waszej stronie ({c.Host}) przydałoby się odświeżenie."
+                : $"Państwa stronie ({c.Host}) przydałoby się odświeżenie.",
         };
     }
+
+    /// <summary>„taka strona” (gdy jej nie ma), „nowa strona” (gdy nie działa), „odświeżona strona” (gdy jest).</summary>
+    private static string DmPreviewSubject(DraftContext c) => c.Lead.Status switch
+    {
+        LeadStatus.NoWebsite => "taka strona",
+        LeadStatus.WebsiteDown => "nowa strona",
+        _ => "odświeżona strona",
+    };
 
     /// <summary>
     /// Klauzula informacyjna RODO (art. 14) do listu: dane pochodzą z publicznego źródła, a nie od odbiorcy,

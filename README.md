@@ -176,24 +176,32 @@ i informacja o problemie bez oferty niosą najmniejsze ryzyko. To nie jest porad
 
 ### 🎨 Kreator podglądu strony
 
-Gdy salon zgodzi się na podgląd, nie trzeba mieć gotowych makiet. Przycisk **„Kreator podglądu strony”** w panelu leada
-składa w kilka minut obrazek „tak mogłaby wyglądać Wasza strona”. Obrazek ma cztery układy: laptop + telefon,
-sam laptop, sam telefon albo dwa telefony (strona główna i cennik):
+Nie trzeba mieć gotowych makiet. Przycisk **„🎨 Kreator podglądu”** w panelu leada składa w kilka minut obrazek
+„tak mogłaby wyglądać Wasza strona”. Obrazek ma cztery układy: laptop + telefon, sam laptop, sam telefon albo dwa
+telefony (strona główna i cennik).
 
-- makieta wygląda jak gotowa strona: nagłówek ze zdjęciem, karta z oceną Google (przy dobrej ocenie),
-  atuty salonu z ikonami, cennik, galeria, pasek rezerwacji i kontakt z mapką;
-- każdy styl ma własne czcionki (dołączone do aplikacji, działają offline i trafiają do PNG), a wielkość nazwy
-  dopasowuje się do jej długości;
-- nazwa, telefon, adres i ocena podstawiają się z danych leada, a teksty (atuty, hasła) dobierają się do branży;
-- styl (ciemny / jasny / pastelowy), kolor przewodni i przykładowy cennik dobierają się do branży. Wszystko można edytować;
-- układ strony: zdjęcie w tle, tekst obok zdjęcia albo wszystko wyśrodkowane. Ta sama treść wygląda wtedy zupełnie
-  inaczej, więc łatwo pokazać, że strona nie jest z szablonu;
-- zdjęcia (do 4) wgrywasz z Instagrama salonu. Zostają tylko w przeglądarce i znikają po zamknięciu kreatora.
-  Makieta służy wyłącznie do prywatnego wysłania salonowi, nie do publikacji;
+- **🎲 Losuj kompozycję** podsuwa nowy wariant dopasowany do branży salonu: kolorystykę, czcionki, układ, kolor,
+  hasła, atuty i zdjęcia. Barber i tatuaż dostają ciemne, mocne wersje, paznokcie pastele i miękkie czcionki,
+  spa i kosmetologia jasne i eleganckie. Nazwa, cennik, kontakt, ocena i Twoje zdjęcia zostają. **↶ Cofnij**
+  wraca do poprzedniej wersji.
+- **Gotowe zdjęcia:** makieta od razu startuje ze zdjęciami z branży salonu (po 6 na branżę, z
+  [Unsplash](https://unsplash.com/license), darmowe także do użytku komercyjnego; autorzy w
+  [public/stock/credits.json](src/LeadFinder.Web/ClientApp/public/stock/credits.json)). Najlepsze wrażenie robią
+  jednak zdjęcia salonu z jego Instagrama. Wgrane zdjęcia mają pierwszeństwo przed gotowymi, zostają tylko
+  w przeglądarce i znikają po zamknięciu kreatora.
+- **Wygląd:** kolorystyka (ciemna / jasna / pastelowa), czcionki (mocna / elegancka / miękka / nowoczesna),
+  układ nagłówka (zdjęcie w tle / obok zdjęcia / wyśrodkowany), kształt przycisków, kolor przewodni
+  i przyciemnienie zdjęcia.
+- **Teksty:** nazwa, podpis nad nazwą, hasło, tekst przycisku, ocena Google, hasło w pasku rezerwacji.
+- **Sekcje:** włączanie i wyłączanie atutów, cennika, galerii, paska rezerwacji i kontaktu, a także cennik,
+  atuty, adres, telefon i godziny.
+- Makieta wygląda jak gotowa strona: nagłówek ze zdjęciem, karta z oceną Google (przy dobrej ocenie), atuty
+  z ikonami, cennik, galeria, pasek rezerwacji i kontakt z mapką. Czcionki są dołączone do aplikacji, więc działają
+  offline i trafiają do PNG.
 - **„Kopiuj obraz”** wkleja się (Ctrl+V) prosto w wiadomość na Instagramie lub Messengerze, **„Pobierz PNG”** zapisuje plik.
 
-Ceny w cenniku są przykładowe. Podmień je na prawdziwe z Booksy lub profilu salonu albo usuń. Teksty makiety
-zapamiętują się dla każdego leada osobno.
+Ceny w cenniku są przykładowe. Podmień je na prawdziwe z Booksy lub profilu salonu albo usuń. Makieta (bez wgranych
+zdjęć) zapamiętuje się dla każdego leada osobno. Makieta służy wyłącznie do prywatnego wysłania salonowi.
 
 ## Klasyfikacja leadów
 

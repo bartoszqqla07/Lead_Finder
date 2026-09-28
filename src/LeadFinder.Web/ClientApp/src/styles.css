@@ -1775,3 +1775,8 @@ label.button {
 .hint.error-text {
   color: var(--danger);
 }
+.section-title-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}

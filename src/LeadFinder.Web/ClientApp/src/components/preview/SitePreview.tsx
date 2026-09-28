@@ -18,6 +18,8 @@ export function SitePreview({ data, from = 'top' }: Props) {
   const [hero, ...rest] = data.photos;
   const gallery = rest.slice(0, 3);
   const split = data.hero === 'split';
+  const sections = data.sections;
+  const showGallery = sections.gallery && gallery.length > 0;
   // W układzie "split" zdjęcie stoi obok tekstu; w pozostałych jest tłem pod przyciemnieniem.
   const photoBackground = hero !== undefined && !split;
   // Najdłuższe słowo nazwy – CSS dobiera wielkość nagłówka tak, żeby zmieściło się w jednej linii.
@@ -25,14 +27,17 @@ export function SitePreview({ data, from = 'top' }: Props) {
   const rating = data.rating.trim() ? <RatingCard rating={data.rating} reviews={data.reviews} /> : null;
 
   return (
-    <div className={`sp sp-${data.style}`} style={{ '--sp-accent': data.accent, '--sp-word': longestWord } as CSSProperties}>
+    <div
+      className={`sp sp-${data.style} sp-font-${data.font} sp-btn-shape-${data.buttons}`}
+      style={{ '--sp-accent': data.accent, '--sp-word': longestWord, '--sp-overlay': data.overlay } as CSSProperties}
+    >
       <header className="sp-nav">
         <span className="sp-logo">{data.name}</span>
         <nav className="sp-links">
           <span>O nas</span>
-          <span>Cennik</span>
-          {gallery.length > 0 && <span>Galeria</span>}
-          <span>Kontakt</span>
+          {sections.services && <span>Cennik</span>}
+          {showGallery && <span>Galeria</span>}
+          {sections.contact && <span>Kontakt</span>}
         </nav>
         <span className="sp-btn sp-btn-small sp-nav-cta">Zarezerwuj</span>
         <span className="sp-burger" aria-hidden="true">
@@ -52,7 +57,7 @@ export function SitePreview({ data, from = 'top' }: Props) {
               <h1>{data.name}</h1>
               <p className="sp-tagline">{data.tagline}</p>
               <div className="sp-cta">
-                <span className="sp-btn">Zarezerwuj wizytę</span>
+                <span className="sp-btn">{data.ctaLabel || 'Zarezerwuj wizytę'}</span>
                 {data.phone && <span className="sp-btn sp-btn-ghost">Zadzwoń</span>}
               </div>
               {!split && rating}
@@ -74,7 +79,7 @@ export function SitePreview({ data, from = 'top' }: Props) {
             )}
           </section>
 
-          {data.features.length > 0 && (
+          {sections.features && data.features.length > 0 && (
             <section className="sp-features">
               {data.features.map((feature, index) => (
                 <div key={`${feature.title}-${index}`} className="sp-feature">
@@ -92,21 +97,23 @@ export function SitePreview({ data, from = 'top' }: Props) {
         </>
       )}
 
-      <section className="sp-section sp-pricing">
-        <p className="sp-kicker">Usługi</p>
-        <h2>Cennik</h2>
-        <ul className="sp-services">
-          {data.services.map((service, index) => (
-            <li key={`${service.name}-${index}`}>
-              <span>{service.name}</span>
-              <span className="sp-dots" aria-hidden="true" />
-              <strong>{service.price}</strong>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {sections.services && (
+        <section className="sp-section sp-pricing">
+          <p className="sp-kicker">Usługi</p>
+          <h2>Cennik</h2>
+          <ul className="sp-services">
+            {data.services.map((service, index) => (
+              <li key={`${service.name}-${index}`}>
+                <span>{service.name}</span>
+                <span className="sp-dots" aria-hidden="true" />
+                <strong>{service.price}</strong>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-      {gallery.length > 0 && (
+      {showGallery && (
         <section className="sp-section sp-gallery-section">
           <p className="sp-kicker">Galeria</p>
           <h2>Nasze prace</h2>
@@ -118,41 +125,47 @@ export function SitePreview({ data, from = 'top' }: Props) {
         </section>
       )}
 
-      <section className="sp-band">
-        <h2>{data.ctaTitle}</h2>
-        <span className="sp-btn sp-btn-inverse">Zarezerwuj online</span>
-      </section>
+      {sections.band && (
+        <section className="sp-band">
+          <h2>{data.ctaTitle}</h2>
+          <span className="sp-btn sp-btn-inverse">Zarezerwuj online</span>
+        </section>
+      )}
 
-      <section className="sp-section sp-contact">
-        <div>
-          <p className="sp-kicker">Kontakt</p>
-          <h2>Zapraszamy</h2>
-          <ul className="sp-contact-list">
-            <li>
-              <Icon name="pin" />
-              {data.address}
-            </li>
-            {data.phone && (
+      {sections.contact && (
+        <section className="sp-section sp-contact">
+          <div>
+            <p className="sp-kicker">Kontakt</p>
+            <h2>Zapraszamy</h2>
+            <ul className="sp-contact-list">
               <li>
-                <Icon name="phone" />
-                {data.phone}
+                <Icon name="pin" />
+                {data.address}
               </li>
-            )}
-            <li>
-              <Icon name="clock" />
-              {data.hours}
-            </li>
-          </ul>
-        </div>
-        <div className="sp-map" aria-hidden="true">
-          <span className="sp-map-pin">
-            <Icon name="pin" />
-          </span>
-        </div>
-      </section>
+              {data.phone && (
+                <li>
+                  <Icon name="phone" />
+                  {data.phone}
+                </li>
+              )}
+              <li>
+                <Icon name="clock" />
+                {data.hours}
+              </li>
+            </ul>
+          </div>
+          <div className="sp-map" aria-hidden="true">
+            <span className="sp-map-pin">
+              <Icon name="pin" />
+            </span>
+          </div>
+        </section>
+      )}
 
       <footer className="sp-footer">
-        <span>© {new Date().getFullYear()} {data.name}</span>
+        <span>
+          © {new Date().getFullYear()} {data.name}
+        </span>
         <span>Rezerwacja online 24/7</span>
       </footer>
     </div>
@@ -185,7 +198,10 @@ const ICON_PATHS: Record<IconName | 'phone', string[]> = {
   ],
   pin: ['M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z', 'M12 7.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5z'],
   star: ['M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6l-5.4 2.9 1.2-6-4.5-4.2 6.1-.7z'],
-  sparkle: ['M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z', 'M18.5 14.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z'],
+  sparkle: [
+    'M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z',
+    'M18.5 14.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z',
+  ],
   leaf: ['M5 19C5 11 10 5 20 5c0 10-6 15-13 15-1.2 0-2-.3-2-1z', 'M5 19l8-8'],
   heart: ['M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z'],
   shield: ['M12 3l7 3v5.5c0 4.6-3.2 8-7 9.5-3.8-1.5-7-4.9-7-9.5V6z', 'M9 12l2.2 2.2L15.5 10'],

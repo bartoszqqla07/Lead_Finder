@@ -9,6 +9,20 @@ export type PreviewStyle = 'dark' | 'light' | 'pastel';
  */
 export type HeroLayout = 'overlay' | 'split' | 'centered';
 
+/** Para czcionek (nagłówki + tekst) – niezależna od kolorystyki. */
+export type FontPair = 'bold' | 'elegant' | 'soft' | 'clean';
+
+export type ButtonShape = 'sharp' | 'rounded' | 'pill';
+
+/** Które sekcje strony pokazać pod nagłówkiem. */
+export interface PreviewSections {
+  features: boolean;
+  services: boolean;
+  gallery: boolean;
+  band: boolean;
+  contact: boolean;
+}
+
 export type IconName = 'clock' | 'scissors' | 'pin' | 'star' | 'sparkle' | 'leaf' | 'heart' | 'shield' | 'drop' | 'pen';
 
 export interface ServiceItem {
@@ -33,7 +47,14 @@ export interface PreviewData {
   reviews: string;
   style: PreviewStyle;
   hero: HeroLayout;
+  font: FontPair;
+  buttons: ButtonShape;
+  /** Przyciemnienie zdjęcia w nagłówku, 0–1 – żeby tekst był czytelny na jasnych zdjęciach. */
+  overlay: number;
   accent: string;
+  /** Tekst głównego przycisku w nagłówku. */
+  ctaLabel: string;
+  sections: PreviewSections;
   address: string;
   phone: string;
   hours: string;
@@ -44,13 +65,17 @@ export interface PreviewData {
   icons: IconName[];
   /** Hasło w pasku rezerwacji na dole strony. */
   ctaTitle: string;
-  /** Adresy obrazków (blob: z wgranych plików); pierwszy to zdjęcie główne. */
+  /**
+   * Adresy obrazków: blob: z wgranych plików albo /stock/… (gotowe zdjęcia branżowe);
+   * pierwszy to zdjęcie główne, kolejne trafiają do galerii.
+   */
   photos: string[];
 }
 
 interface Preset {
   style: PreviewStyle;
   hero: HeroLayout;
+  font: FontPair;
   accent: string;
   eyebrow: string;
   tagline: string;
@@ -68,6 +93,7 @@ const PRESETS: Record<string, Preset> = {
   barber: {
     style: 'dark',
     hero: 'overlay',
+    font: 'bold',
     accent: '#c8a165',
     eyebrow: 'Barbershop',
     tagline: 'Klasyczne cięcia, dopracowana broda i dobra atmosfera.',
@@ -88,6 +114,7 @@ const PRESETS: Record<string, Preset> = {
   hair: {
     style: 'light',
     hero: 'split',
+    font: 'elegant',
     accent: '#b08968',
     eyebrow: 'Salon fryzjerski',
     tagline: 'Fryzury dopasowane do Ciebie – od cięcia po koloryzację.',
@@ -108,6 +135,7 @@ const PRESETS: Record<string, Preset> = {
   beauty: {
     style: 'light',
     hero: 'split',
+    font: 'elegant',
     accent: '#c48b8b',
     eyebrow: 'Salon kosmetyczny',
     tagline: 'Zabiegi, po których poczujesz się pięknie.',
@@ -128,6 +156,7 @@ const PRESETS: Record<string, Preset> = {
   nails: {
     style: 'pastel',
     hero: 'centered',
+    font: 'soft',
     accent: '#d9779f',
     eyebrow: 'Stylizacja paznokci',
     tagline: 'Stylizacje, które cieszą oko przez długie tygodnie.',
@@ -148,6 +177,7 @@ const PRESETS: Record<string, Preset> = {
   spa: {
     style: 'light',
     hero: 'centered',
+    font: 'elegant',
     accent: '#7d8f6e',
     eyebrow: 'Spa & masaż',
     tagline: 'Chwila tylko dla Ciebie – odpocznij i zregeneruj się.',
@@ -168,6 +198,7 @@ const PRESETS: Record<string, Preset> = {
   tattoo: {
     style: 'dark',
     hero: 'overlay',
+    font: 'bold',
     accent: '#d64545',
     eyebrow: 'Studio tatuażu',
     tagline: 'Autorskie projekty i precyzyjne wykonanie.',
@@ -188,6 +219,7 @@ const PRESETS: Record<string, Preset> = {
   cosmetology: {
     style: 'light',
     hero: 'split',
+    font: 'elegant',
     accent: '#5f93a8',
     eyebrow: 'Gabinet kosmetologii',
     tagline: 'Profesjonalna pielęgnacja oparta na wiedzy.',
@@ -210,6 +242,7 @@ const PRESETS: Record<string, Preset> = {
 const DEFAULT_PRESET: Preset = {
   style: 'light',
   hero: 'split',
+  font: 'elegant',
   accent: '#4f46e5',
   eyebrow: 'Salon',
   tagline: 'Profesjonalne usługi w przyjaznej atmosferze.',
@@ -248,7 +281,12 @@ export function initialPreviewData(lead: {
     reviews: goodReviews ? String(lead.userRatingCount) : '',
     style: preset.style,
     hero: preset.hero,
+    font: preset.font,
+    buttons: DEFAULT_BUTTONS[preset.font],
+    overlay: 0.8,
     accent: preset.accent,
+    ctaLabel: 'Zarezerwuj wizytę',
+    sections: { features: true, services: true, gallery: true, band: true, contact: true },
     address: lead.address ?? lead.city,
     phone: lead.phone ?? '',
     hours: 'Pon–Pt 9:00–19:00 · Sob 9:00–15:00',
@@ -256,9 +294,38 @@ export function initialPreviewData(lead: {
     features: preset.features(lead.city),
     icons: preset.icons,
     ctaTitle: preset.ctaTitle,
-    photos: [],
+    // Od razu gotowe zdjęcia z branży – makieta nigdy nie startuje pusta; zdjęcia salonu można wgrać na ich miejsce.
+    photos: stockPhotos(lead.categoryTone).slice(0, 4),
   };
 }
+
+const DEFAULT_BUTTONS: Record<FontPair, ButtonShape> = {
+  bold: 'sharp',
+  elegant: 'sharp',
+  soft: 'pill',
+  clean: 'rounded',
+};
+
+/** Branże, dla których są gotowe zdjęcia (public/stock, licencja Unsplash – szczegóły w credits.json). */
+export const STOCK_TONES: { value: string; label: string }[] = [
+  { value: 'barber', label: 'Barber' },
+  { value: 'hair', label: 'Fryzjer' },
+  { value: 'beauty', label: 'Salon urody' },
+  { value: 'nails', label: 'Paznokcie' },
+  { value: 'spa', label: 'Spa / masaż' },
+  { value: 'tattoo', label: 'Tatuaż' },
+  { value: 'cosmetology', label: 'Kosmetologia' },
+];
+
+const STOCK_PER_TONE = 6;
+
+/** Sześć gotowych zdjęć dla branży (dla nieznanej branży – zdjęcia salonu urody). */
+export function stockPhotos(tone: string): string[] {
+  const known = STOCK_TONES.some((t) => t.value === tone) ? tone : 'beauty';
+  return Array.from({ length: STOCK_PER_TONE }, (_, i) => `${import.meta.env.BASE_URL}stock/${known}-${i + 1}.jpg`);
+}
+
+export const isUploadedPhoto = (url: string) => url.startsWith('blob:');
 
 /** "312 opinii w Google" – z poprawną odmianą. */
 export function reviewsLabel(reviews: string): string {

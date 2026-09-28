@@ -335,3 +335,103 @@
   margin-top: -8px;
   margin-bottom: 12px;
 }
+
+/* ----- Losowanie, zakładki formularza ----- */
+.studio-dice {
+  display: flex;
+  gap: 8px;
+}
+.studio-dice .button-primary {
+  flex: 1;
+}
+.studio-dice-hint {
+  margin: 6px 0 14px;
+}
+.studio-tabs {
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 16px;
+}
+
+/* ----- Gotowe zdjęcia ----- */
+.stock-toolbar {
+  display: flex;
+  gap: 8px;
+}
+.stock-toolbar .select {
+  flex: 1;
+  min-width: 0;
+}
+.stock-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.stock-thumb {
+  position: relative;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--surface-2);
+  aspect-ratio: 3 / 2;
+}
+.stock-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.stock-thumb:hover {
+  border-color: var(--border-strong);
+}
+.stock-thumb.active {
+  border-color: var(--accent);
+}
+.stock-thumb.active::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ----- Sekcje, suwak ----- */
+.section-toggles {
+  display: grid;
+  gap: 8px;
+}
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.checkbox-row input {
+  accent-color: var(--accent);
+}
+.range {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+/* Starsza reguła .segmented (3 kolumny) ma tę samą specyficzność – podwójna klasa ją nadpisuje. */
+.segmented.segmented-4 {
+  grid-template-columns: repeat(4, auto);
+}
+.segmented.studio-tabs {
+  grid-template-columns: repeat(4, 1fr);
+}
+.studio-form .segmented-4 button {
+  padding-inline: 6px;
+}
