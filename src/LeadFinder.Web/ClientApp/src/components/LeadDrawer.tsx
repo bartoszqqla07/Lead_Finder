@@ -3,6 +3,7 @@ import { addDaysIso, todayIso } from '../filters';
 import { formatDateTime, formatRating, plural, stages } from '../labels';
 import type { Lead, LeadChanges, MessageDraft, OutreachStage } from '../types';
 import { StatusBadge } from './Badges';
+import { ContactsSection } from './ContactsSection';
 import { OutreachPanel } from './OutreachPanel';
 import { ScoreBreakdown } from './ScoreBreakdown';
 import { PreviewStudio } from './preview/PreviewStudio';
@@ -31,17 +32,6 @@ function DueHint({ date }: { date: string }) {
           : `Za ${diffDays} dni`;
   return <p className={`hint ${diffDays <= 0 ? 'due-now' : ''}`}>{text}</p>;
 }
-const googleSearch = (query: string) => `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-
-/** "booksy.com" zamiast długiego adresu profilu – pełny adres jest w podpowiedzi i pod linkiem. */
-function shortUrl(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www[.]/, '');
-  } catch {
-    return url;
-  }
-}
-
 const today = () =>
   new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
 
@@ -142,42 +132,11 @@ export function LeadDrawer({ lead, onClose, onUpdate, onDelete, onError }: Props
 
           <ScoreBreakdown score={lead.score} />
 
-          <section className="drawer-section">
-            <h3>Kontakt</h3>
-            <dl className="details">
-              <dt>Telefon</dt>
-              <dd>{lead.phone ? <a href={`tel:${lead.phone.replace(/\s/g, '')}`}>{lead.phone}</a> : '—'}</dd>
-              <dt>Adres</dt>
-              <dd>
-                {lead.address ?? '—'}{' '}
-                <a href={lead.googleMapsUrl} target="_blank" rel="noreferrer">
-                  mapa ↗
-                </a>
-              </dd>
-              <dt>{lead.profilePlatform ? 'Profil' : 'Strona'}</dt>
-              <dd>
-                {lead.websiteUri ? (
-                  <a href={lead.websiteUri} target="_blank" rel="noreferrer" title={lead.websiteUri}>
-                    {shortUrl(lead.websiteUri)} ↗
-                  </a>
-                ) : (
-                  '—'
-                )}
-              </dd>
-              <dt>Szukaj</dt>
-              <dd className="search-links">
-                <a href={googleSearch(`site:instagram.com "${lead.name}" ${lead.city}`)} target="_blank" rel="noreferrer">
-                  Instagram ↗
-                </a>
-                <a href={googleSearch(`site:facebook.com "${lead.name}" ${lead.city}`)} target="_blank" rel="noreferrer">
-                  Facebook ↗
-                </a>
-                <a href={googleSearch(`"${lead.name}" ${lead.city} e-mail kontakt`)} target="_blank" rel="noreferrer">
-                  e-mail ↗
-                </a>
-              </dd>
-            </dl>
-          </section>
+          <ContactsSection
+            lead={lead}
+            onSave={(contacts) => onUpdate(lead.id, { contacts })}
+            onError={onError}
+          />
 
           <OutreachPanel
             lead={lead}

@@ -68,6 +68,18 @@ public sealed class LeadEntity
     /// <summary>Ślady przestarzałej strony, rozdzielone "|".</summary>
     public string? OutdatedMarkers { get; set; }
 
+    /// <summary>E-maile znalezione na stronie firmy, rozdzielone "|"; null = jeszcze nie szukano.</summary>
+    public string? Emails { get; set; }
+
+    public string? InstagramUrl { get; set; }
+    public string? FacebookUrl { get; set; }
+
+    /// <summary>
+    /// Kontakty poprawione ręcznie w aplikacji – ponowne sprawdzenie strony ich nie nadpisuje
+    /// (użytkownik wie lepiej niż automat, który czasem nic nie znajduje).
+    /// </summary>
+    public bool ContactsEditedByUser { get; set; }
+
     public OutreachStage Stage { get; set; } = OutreachStage.New;
     public string Notes { get; set; } = string.Empty;
     public DateTime? StageChangedAt { get; set; }

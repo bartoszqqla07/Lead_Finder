@@ -25,6 +25,10 @@ public sealed record LeadDto(
     string? CheckNote,
     string? Technology,
     string? ProfilePlatform,
+    IReadOnlyList<string> Emails,
+    string? InstagramUrl,
+    string? FacebookUrl,
+    bool ContactsEditedByUser,
     OutreachStage Stage,
     string Notes,
     DateTime? StageChangedAt,
@@ -44,7 +48,15 @@ public sealed record LeadDto(
 /// (i przesuwa etap na "Odpowiedział"), false ją usuwa. ClearNextAction=true usuwa przypomnienie.
 /// </summary>
 public sealed record UpdateLeadRequest(
-    OutreachStage? Stage, string? Notes, bool? ConsentGiven, DateOnly? NextActionDate, bool? ClearNextAction);
+    OutreachStage? Stage,
+    string? Notes,
+    bool? ConsentGiven,
+    DateOnly? NextActionDate,
+    bool? ClearNextAction,
+    ContactsUpdate? Contacts = null);
+
+/// <summary>Kontakty wpisane ręcznie – zastępują wszystkie trzy pola (pusty = wyczyść).</summary>
+public sealed record ContactsUpdate(string? Email, string? InstagramUrl, string? FacebookUrl);
 
 public sealed record ExportLeadsRequest(IReadOnlyList<int>? Ids, string? Label);
 

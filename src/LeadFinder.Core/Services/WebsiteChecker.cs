@@ -23,8 +23,14 @@ public sealed class WebsiteChecker
     /// <summary>Przerwy przed kolejnymi próbami przy chwilowych błędach (DNS, połączenie, timeout, 5xx).</summary>
     private static readonly TimeSpan[] RetryDelays = [TimeSpan.FromSeconds(1.5), TimeSpan.FromSeconds(4)];
 
-    /// <summary>Wystarczy początek strony: ślady CMS-a są w &lt;head&gt; i pierwszych zasobach.</summary>
-    private const int MaxHtmlChars = 512 * 1024;
+    /// <summary>
+    /// Ile HTML czytamy. Ślady CMS-a są na początku, ale Instagram i e-mail zwykle w stopce – na końcu strony,
+    /// która przy Elementorze/Wix potrafi mieć ponad 1 MB (wcześniejszy limit 512 KB gubił te kontakty).
+    /// </summary>
+    private const int MaxHtmlChars = 3 * 1024 * 1024;
+
+    /// <summary>Ile podstron ("Kontakt", "O nas") odwiedzamy, gdy na głównej brakuje e-maila lub profili.</summary>
+    private const int MaxContactPages = 2;
 
     /// <summary>
     /// SocketsHttpHandler nie przechodzi automatycznie z https na http. Takie przekierowania
@@ -50,6 +56,8 @@ public sealed class WebsiteChecker
         ("tiktok.com", "TikTok"),
         ("youtube.com", "YouTube"),
         ("fresha.com", "Fresha"),
+        ("alteg.io", "Altegio"),
+        ("versum.com", "Versum"),
         ("treatwell.pl", "Treatwell"),
         ("moment.pl", "Moment"),
         ("gowork.pl", "GoWork"),
@@ -126,7 +134,7 @@ public sealed class WebsiteChecker
         }
 
         if (DetectProfilePlatform(uri) is { } platform)
-            return WebsiteCheckResult.ProfileOnly(platform);
+            return WebsiteCheckResult.ProfileOnly(platform, await ProfileContactsAsync(uri, platform, cancellationToken));
 
         for (var attempt = 0; ; attempt++)
         {
@@ -200,7 +208,7 @@ public sealed class WebsiteChecker
             // Domena salonu przekierowuje na Facebooka/Booksy – to profil, nie strona (Facebook dodatkowo
             // odpowiada botom kodem 400, co wyglądało jak awaria).
             if (DetectProfilePlatform(finalUri) is { } platform)
-                return (WebsiteCheckResult.ProfileOnly(platform), false);
+                return (WebsiteCheckResult.ProfileOnly(platform, LinkAsContact(platform, finalUri)), false);
 
             // Przekierowanie, którego handler nie wykonał sam (https → http).
             if (IsRedirect(response.StatusCode) && response.Headers.Location is { } location && redirects < MaxManualRedirects)
@@ -222,6 +230,16 @@ public sealed class WebsiteChecker
             var technology = TechnologyDetector.Detect(html, response.Headers);
             var signals = PageSignals.Detect(html);
 
+            // E-mail i profile są zwykle w stopce albo na podstronach "Kontakt"/"O nas" – te odwiedzamy tylko,
+            // gdy czegoś brakuje na głównej.
+            var contacts = ContactExtractor.Extract(html, finalUri);
+            foreach (var page in ContactExtractor.FindContactPages(html, finalUri).Take(MaxContactPages))
+            {
+                if (contacts.IsComplete)
+                    break;
+                contacts = contacts.Merge(await TryGetContactsAsync(client, page, cancellationToken));
+            }
+
             return (new WebsiteCheckResult(
                 Reachable: true,
                 IsWordPress: technology.IsWordPress,
@@ -232,7 +250,52 @@ public sealed class WebsiteChecker
                 // Zły certyfikat = odwiedzający widzą ostrzeżenie zamiast bezpiecznego HTTPS.
                 UsesHttps: certificateProblem is null && finalUri.Scheme == Uri.UriSchemeHttps,
                 ModernMarkers: signals.ModernMarkers,
-                OutdatedMarkers: signals.OutdatedMarkers), false);
+                OutdatedMarkers: signals.OutdatedMarkers,
+                Emails: contacts.Emails,
+                InstagramUrl: contacts.InstagramUrl,
+                FacebookUrl: contacts.FacebookUrl), false);
+        }
+    }
+
+    /// <summary>Limit na pobranie dodatkowej strony (podstrona "Kontakt", profil Booksy).</summary>
+    private static readonly TimeSpan ExtraPageTimeout = TimeSpan.FromSeconds(6);
+
+    /// <summary>
+    /// Kontakty dla firmy, która zamiast strony podała profil: link do Facebooka/Instagrama sam jest kontaktem,
+    /// a profil Booksy linkuje do Instagrama i Facebooka salonu (e-maili Booksy nie pokazuje).
+    /// </summary>
+    private async Task<ContactInfo> ProfileContactsAsync(Uri uri, string platform, CancellationToken cancellationToken)
+    {
+        var own = LinkAsContact(platform, uri);
+        if (platform is not ("Booksy" or "Linktree"))
+            return own;
+
+        return own.Merge(await TryGetContactsAsync(_httpClient, uri, cancellationToken));
+    }
+
+    private static ContactInfo LinkAsContact(string platform, Uri uri) => platform switch
+    {
+        "Facebook" => new ContactInfo([], null, uri.GetLeftPart(UriPartial.Path)),
+        "Instagram" => new ContactInfo([], uri.GetLeftPart(UriPartial.Path), null),
+        _ => ContactInfo.Empty,
+    };
+
+    /// <summary>Kontakty z dodatkowej strony; błąd albo timeout to po prostu brak kontaktów, nie awaria strony.</summary>
+    private static async Task<ContactInfo> TryGetContactsAsync(HttpClient client, Uri uri, CancellationToken cancellationToken)
+    {
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCts.CancelAfter(ExtraPageTimeout);
+        try
+        {
+            using var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, timeoutCts.Token);
+            if (!response.IsSuccessStatusCode)
+                return ContactInfo.Empty;
+            var html = await ReadHtmlPrefixAsync(response.Content, timeoutCts.Token);
+            return ContactExtractor.Extract(html, response.RequestMessage?.RequestUri ?? uri);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException && !cancellationToken.IsCancellationRequested)
+        {
+            return ContactInfo.Empty;
         }
     }
 
@@ -346,17 +409,18 @@ public sealed class WebsiteChecker
 
     private static async Task<string> ReadHtmlPrefixAsync(HttpContent content, CancellationToken cancellationToken)
     {
+        // Większość stron to 50–300 KB – czytamy kawałkami zamiast od razu rezerwować bufor na cały limit.
         await using var stream = await content.ReadAsStreamAsync(cancellationToken);
         // Szukane znaczniki są w ASCII, więc ewentualnie błędne dekodowanie strony w innym kodowaniu nie szkodzi.
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
 
-        var buffer = new char[MaxHtmlChars];
-        var total = 0;
+        var html = new StringBuilder();
+        var chunk = new char[64 * 1024];
         int read;
-        while (total < buffer.Length && (read = await reader.ReadAsync(buffer.AsMemory(total), cancellationToken)) > 0)
-            total += read;
+        while (html.Length < MaxHtmlChars && (read = await reader.ReadAsync(chunk.AsMemory(0, Math.Min(chunk.Length, MaxHtmlChars - html.Length)), cancellationToken)) > 0)
+            html.Append(chunk, 0, read);
 
-        return new string(buffer, 0, total);
+        return html.ToString();
     }
 
     private static string? DetectProfilePlatform(Uri uri)

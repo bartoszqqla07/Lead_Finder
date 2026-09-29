@@ -25,15 +25,16 @@ public static class LeadEndpoints
     private const int RecheckParallelism = 6;
 
     /// <summary>
-    /// Ponownie sprawdza strony wszystkich leadów, które mają własną stronę (nie działa / WordPress / ma stronę) –
-    /// bez zapytań do Google, więc za darmo. Naprawia fałszywe "nie działa" z wcześniejszych skanów i ocenia
-    /// nowoczesność stron sprawdzonych, zanim aplikacja to potrafiła. Etap, notatki i zgody zostają bez zmian.
+    /// Ponownie sprawdza strony (i profile Booksy/Facebook) wszystkich leadów, które podały link w Google –
+    /// bez zapytań do Google, więc za darmo. Naprawia fałszywe "nie działa", ocenia nowoczesność stron
+    /// i uzupełnia kontakty (e-mail, Instagram, Facebook). Etap, notatki i zgody zostają bez zmian.
     /// </summary>
     private static async Task<RecheckWebsitesResultDto> RecheckWebsitesAsync(
         LeadFinderDbContext db, WebsiteChecker checker, CancellationToken ct)
     {
         var leads = await db.Leads
-            .Where(l => l.Status != LeadStatus.NoWebsite && l.WebsiteUri != null)
+            // Także profile (Booksy, Facebook) – z nich pochodzą linki do Instagrama i Facebooka salonu.
+            .Where(l => l.WebsiteUri != null)
             .ToListAsync(ct);
 
         var checks = new System.Collections.Concurrent.ConcurrentDictionary<int, WebsiteCheckResult>();
@@ -100,6 +101,25 @@ public static class LeadEndpoints
             case false:
                 lead.ConsentGivenAt = null;
                 break;
+        }
+
+        if (body.Contacts is { } contacts)
+        {
+            try
+            {
+                var email = ContactNormalizer.Email(contacts.Email);
+                var others = (lead.Emails ?? string.Empty).Split('|', StringSplitOptions.RemoveEmptyEntries)
+                    .Where(e => !e.Equals(email, StringComparison.OrdinalIgnoreCase));
+                // Wpisany adres idzie na początek (to on trafia do "Do:"), pozostałe znalezione zostają pod nim.
+                lead.Emails = email is null ? null : string.Join('|', new[] { email }.Concat(others));
+                lead.InstagramUrl = ContactNormalizer.Instagram(contacts.InstagramUrl);
+                lead.FacebookUrl = ContactNormalizer.Facebook(contacts.FacebookUrl);
+                lead.ContactsEditedByUser = true;
+            }
+            catch (FormatException ex)
+            {
+                return Results.Problem(ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
         }
 
         if (body.ClearNextAction == true)

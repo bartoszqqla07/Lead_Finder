@@ -12,13 +12,18 @@ interface Props {
 
 /**
  * Który szkic pokazać na start: po zgodzie – podgląd (makieta); przy niedziałającej stronie – sama informacja
- * o problemie; w pozostałych przypadkach – DM na Instagramie (tam salony odpowiadają najszybciej).
+ * o problemie; gdy znamy e-mail salonu – e-mail (na DM-y salony często nie odpisują); w pozostałych – DM.
  */
 function recommendedKind(lead: Lead): DraftKind {
   if (lead.consentGivenAt) return 'Preview';
   if (lead.drafts.some((d) => d.kind === 'ProblemNotice') && lead.stage === 'New') return 'ProblemNotice';
+  if (lead.emails.length > 0) return 'Email';
   return 'DirectMessage';
 }
+
+/** Link otwierający program pocztowy z gotowym adresem, tematem i treścią – wysyła się ręcznie. */
+const mailtoUrl = (to: string, subject: string, body: string) =>
+  `mailto:${encodeURIComponent(to).replace(/%40/g, '@')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
 /**
  * Wiadomość do salonu – pokazuje tylko bieżący krok: przed zgodą prośby o zgodę, po zgodzie podgląd i ofertę.
@@ -27,12 +32,17 @@ function recommendedKind(lead: Lead): DraftKind {
 export function OutreachPanel({ lead, onConsentChange, onMarkSent, onOpenStudio, onError }: Props) {
   const [kind, setKind] = useState<DraftKind>(() => recommendedKind(lead));
   const [copied, setCopied] = useState<'body' | 'subject' | null>(null);
+  const [chosenSubject, setChosenSubject] = useState<string | null>(null);
   const hasConsent = lead.consentGivenAt !== null;
   const stepDrafts = lead.drafts.filter((d) => d.requiresConsent === hasConsent);
   const draft = stepDrafts.find((d) => d.kind === kind) ?? stepDrafts[0];
   const recommended = recommendedKind(lead);
 
   if (!draft) return null;
+
+  // Wybrany temat obowiązuje tylko dla szkicu, który go oferuje; inaczej domyślny temat szkicu.
+  const subject =
+    chosenSubject && draft.subjectOptions?.includes(chosenSubject) ? chosenSubject : draft.subject;
 
   const copy = async (text: string, what: 'body' | 'subject') => {
     try {
@@ -100,20 +110,80 @@ export function OutreachPanel({ lead, onConsentChange, onMarkSent, onOpenStudio,
         </button>
       )}
 
-      {draft.subject && (
-        <div className="subject-row">
-          <span className="muted">Temat:</span>
-          <span className="subject">{draft.subject}</span>
-          <button className="link-button small" onClick={() => void copy(draft.subject!, 'subject')}>
-            {copied === 'subject' ? 'skopiowano ✓' : 'kopiuj'}
-          </button>
+      {subject && (
+        <div className="subject-block">
+          <div className="subject-row">
+            <span className="muted">Temat:</span>
+            <span className="subject">{subject}</span>
+            <button className="link-button small" onClick={() => void copy(subject, 'subject')}>
+              {copied === 'subject' ? 'skopiowano ✓' : 'kopiuj'}
+            </button>
+          </div>
+          {draft.subjectOptions && draft.subjectOptions.length > 1 && (
+            <div className="subject-options" role="radiogroup" aria-label="Temat wiadomości">
+              {draft.subjectOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  aria-checked={option === subject}
+                  className={`subject-option ${option === subject ? 'active' : ''}`}
+                  onClick={() => setChosenSubject(option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+      )}
+
+      {draft.kind === 'Email' && (
+        <p className={`email-to ${lead.emails.length > 0 ? '' : 'muted'}`}>
+          {lead.emails.length > 0 ? (
+            <>
+              <span className="muted">Do:</span> <strong>{lead.emails[0]}</strong>
+              {lead.emails.length > 1 && <span className="muted"> (inne adresy w sekcji Kontakt)</span>}
+            </>
+          ) : (
+            'Brak e-maila – znajdź go przez „szukaj ↗” w sekcji Kontakt i kliknij „dodaj”, albo napisz DM-a.'
+          )}
+        </p>
       )}
 
       <pre className="draft">{draft.body}</pre>
 
       <div className="button-row">
-        <button className="button button-small button-primary" onClick={() => void copy(draft.body, 'body')}>
+        {draft.kind === 'Email' && (
+          <a
+            className="button button-small button-primary"
+            href={mailtoUrl(lead.emails[0] ?? '', subject ?? '', draft.body)}
+            title="Otwiera Twój program pocztowy z gotowym adresem, tematem i treścią – wysyłasz sam"
+          >
+            ✉️ Otwórz w poczcie
+          </a>
+        )}
+        {/* Messenger strony firmowej trafia do skrzynki w Meta Business Suite – salony czytają ją częściej niż
+            "Prośby o wiadomość" na Instagramie (tam lądują DM-y od kont, których nie obserwują). */}
+        {draft.kind === 'DirectMessage' && lead.facebookUrl && (
+          <a className="button button-small button-primary" href={lead.facebookUrl} target="_blank" rel="noreferrer">
+            💬 Otwórz Facebook salonu
+          </a>
+        )}
+        {draft.kind === 'DirectMessage' && lead.instagramUrl && (
+          <a
+            className={`button button-small ${lead.facebookUrl ? '' : 'button-primary'}`}
+            href={lead.instagramUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            📷 Otwórz Instagram salonu
+          </a>
+        )}
+        <button
+          className={`button button-small ${draft.kind === 'Email' || (draft.kind === 'DirectMessage' && (lead.instagramUrl || lead.facebookUrl)) ? '' : 'button-primary'}`}
+          onClick={() => void copy(draft.body, 'body')}
+        >
           {copied === 'body' ? 'Skopiowano ✓' : 'Kopiuj treść'}
         </button>
         {draft.kind === 'Letter' && (

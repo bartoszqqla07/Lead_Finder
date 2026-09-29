@@ -163,7 +163,22 @@ zakazuje też *Prawo komunikacji elektronicznej* (art. 398). Dotyczy to równie�
 | | **Oferta – krótka** / **Oferta – pełna** | Na komunikator albo e-mail: co dostają, dlaczego strona robiona od zera zamiast szablonu, proces współpracy, cena i czas. Dane uzupełniasz raz w Ustawieniach. |
 | | **Odpowiedź: cena** i jedno **przypomnienie** | Gdy pytają o koszt; przypomnienie po tygodniu ustawia się samo po wysłaniu oferty. |
 
-- **Znajdź kontakt:** linki do wyszukania profilu firmy na Instagramie, Facebooku i jej adresu e-mail.
+- **Kontakty pod ręką:** Google nie podaje e-maili, więc aplikacja szuka ich na stronie firmy:
+  - na całej stronie głównej (do 3 MB, razem ze stopką) i na podstronach „Kontakt” i „O nas”;
+  - także adresy ukryte przez Cloudflare i zapisane jako „[at]”;
+  - najpierw skrzynki dla klientów (kontakt@, biuro@, recepcja@), na końcu księgowość i rekrutacja.
+
+  Linki do Instagrama i Facebooka salonu zbiera ze strony, z profilu Booksy (także z danych strony) i z tekstu
+  „Instagram: @nazwa”. Na liście leadów jest kolumna **E-mail** z przyciskiem „kopiuj” i linkami do profili.
+- **Uzupełnianie ręczne:** salony bez strony zwykle nigdzie publicznie nie podają e-maila, a wyszukiwarki blokują
+  automatyczne zapytania. Dlatego przy każdym brakującym kontakcie jest „szukaj ↗” (dokładne wyszukiwanie w Google)
+  i „dodaj”. Wklejasz, co znalazłeś: „@salon”, link albo e-mail, a aplikacja sama poprawi format. Ręcznie
+  poprawione kontakty nie są nadpisywane przy ponownym sprawdzaniu stron.
+- **E-mail w 2 kliknięcia:** 3 krótkie tematy z nazwą salonu, dobrane do jego sytuacji (np. „Est Clinic – strona
+  poza Booksy?”), bez słów, które łapią filtry antyspamowe. Przycisk **„✉️ Otwórz w poczcie”** otwiera Twój
+  program pocztowy z adresem, tematem i treścią. Wysyłasz sam.
+- **DM:** przyciski „Otwórz Facebook salonu” i „Otwórz Instagram salonu”. Messenger strony firmowej trafia do
+  skrzynki firmy, a DM na Instagramie od nieobserwowanego konta ląduje w „Prośbach o wiadomość”.
 - **„Oznacz jako wysłane”** dopisuje do notatek datę i rodzaj wiadomości, a etap zmienia na „Skontaktowany”.
 - **Brak odpowiedzi traktuj jako „nie”.** Nie ponawiaj prośby o zgodę.
 - **Sprzeciw:** „Usuń lead → Usuń i nie pokazuj więcej” kasuje dane firmy i zapamiętuje tylko jej identyfikator Google,

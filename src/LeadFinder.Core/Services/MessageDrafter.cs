@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using LeadFinder.Common;
 using LeadFinder.Models;
 
@@ -30,7 +31,7 @@ namespace LeadFinder.Services;
 /// pasowały niezależnie od płci nadawcy.
 /// </para>
 /// </remarks>
-public sealed class MessageDrafter
+public sealed partial class MessageDrafter
 {
     public const string DefaultSenderName = "[Twoje imię]";
     public const string DefaultSignature = "[Imię Nazwisko]\n[telefon] · [link do portfolio]";
@@ -224,59 +225,114 @@ public sealed class MessageDrafter
             Title: "DM – prośba o zgodę",
             Channel: "Instagram / Facebook – wiadomość prywatna do profilu firmy",
             Guidance: "Zanim wyślesz, zrób podgląd w kreatorze (kilka minut) – wiadomość mówi, że już go masz, więc po „tak” " +
-                      "wysyłasz go od razu. Salony najczęściej odpowiadają wieczorem – daj im 2–3 dni. Pisz do profilu firmy, " +
-                      "nie na prywatne konto. Bez cen i linków. Wyślij raz – brak odpowiedzi traktuj jako „nie”.",
+                      "wysyłasz go od razu. Jeśli salon ma Facebooka, pisz przez Messenger strony – trafia do skrzynki firmy. " +
+                      "Na Instagramie wiadomość od konta, którego nie obserwują, ląduje w „Prośbach o wiadomość”, które salony " +
+                      "rzadko sprawdzają. Odpowiadają zwykle wieczorem – daj im 2–3 dni. Bez cen i linków. Wyślij raz.",
             Subject: null,
             Body: body,
             RequiresConsent: false);
     }
 
+    /// <summary>
+    /// E-mail w tym samym stylu co DM: co zauważyłem, czym się zajmuję, mam gotowy podgląd – czy mogę go przesłać.
+    /// Nadal tylko prośba o zgodę (bez cen i oferty), z kilkoma tematami do wyboru i informacją, skąd mam adres.
+    /// </summary>
     private MessageDraft EmailDraft(DraftContext c)
     {
         var body = c.Informal
             ? $"""
               Cześć!
 
-              tu {_name} – robię strony internetowe dla {c.Tone.Audience}.
+              Trafiłem na {c.YourPlace} i zauważyłem, że {DmObservation(c)}
 
-              {StatusHook(c)}
+              Zajmuję się tworzeniem nowoczesnych stron dla lokalnych firm i salonów. Przygotowałem nawet szybki podgląd, jak mogłaby wyglądać {DmPreviewSubject(c)} w Waszym przypadku – mogę go podesłać w odpowiedzi na tego maila?
 
-              Mogę podesłać krótki podgląd, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli to nie temat dla Was – żaden problem, nie będę więcej pisać.
+              Jeśli to nie temat dla Was, po prostu nie odpisujcie – nie będę więcej pisać.
 
               Pozdrawiam,
               {_signature}
 
-              Kontakt do Was pochodzi z publicznej wizytówki Google. Jeśli nie chcecie, żeby był u mnie zapisany, dajcie znać – usunę go.
+              {EmailSourceNote(c)}
               """
             : $"""
               Dzień dobry,
 
-              nazywam się {_name} i tworzę strony internetowe dla {c.Tone.Audience}.
+              trafiłem na {c.YourPlace} i zauważyłem, że {DmObservation(c)}
 
-              {StatusHook(c)}
+              Zajmuję się tworzeniem nowoczesnych stron internetowych dla lokalnych firm i salonów. Przygotowałem nawet szybki podgląd, jak mogłaby wyglądać {DmPreviewSubject(c)} w Państwa przypadku. Czy mogę go przesłać w odpowiedzi na tę wiadomość?
 
-              Czy mogę przesłać krótki podgląd, jak mogłaby wyglądać {c.WebsiteNoun}? Jeśli temat Państwa nie interesuje, proszę po prostu zignorować tę wiadomość – nie będę więcej pisać.
+              Jeśli temat Państwa nie interesuje, wystarczy nie odpowiadać – nie będę więcej pisać.
 
               Pozdrawiam serdecznie,
               {_signature}
 
-              Dane kontaktowe pochodzą z publicznej wizytówki Google. Jeśli nie życzą sobie Państwo ich przechowywania, proszę o krótką odpowiedź – usunę je.
+              {EmailSourceNote(c)}
               """;
 
+        var subjects = EmailSubjects(c);
         return new MessageDraft(
             DraftKind.Email,
             Title: "E-mail – prośba o zgodę",
-            Channel: "E-mail lub formularz kontaktowy na stronie firmy",
-            Guidance: "Tylko prośba o zgodę – bez cen, opisu usług i linków. Wysyłaj ręcznie, pojedynczo, ze swojej skrzynki. " +
-                      "Google nie podaje e-maili: szukaj na stronie, Instagramie lub Facebooku firmy. Wyślij raz – brak odpowiedzi traktuj jako „nie”.",
-            Subject: c.Lead.Status switch
-            {
-                LeadStatus.WebsiteDown => "Niedziałająca strona w wizytówce Google",
-                LeadStatus.NoWebsite => $"Strona internetowa dla {c.OfYourPlace}?",
-                _ => "Pomysł na odświeżenie strony",
-            },
+            Channel: "E-mail – adres w sekcji „Kontakt” (znaleziony na stronie firmy)",
+            Guidance: "Przed wysłaniem zrób podgląd w kreatorze – mail mówi, że już go masz. Wybierz temat i kliknij „Otwórz w poczcie” – " +
+                      "adres, temat i treść wypełnią się same, a wysyłasz ze swojej skrzynki, pojedynczo. Najlepiej we wtorek–czwartek rano. " +
+                      "Bez cen i linków. Wyślij raz – brak odpowiedzi traktuj jako „nie”.",
+            Subject: subjects[0],
             Body: body,
-            RequiresConsent: false);
+            RequiresConsent: false,
+            SubjectOptions: subjects);
+    }
+
+    /// <summary>
+    /// Tematy do wyboru. Najlepiej otwierane są krótkie (3–6 słów), z nazwą odbiorcy i brzmiące jak wiadomość
+    /// od człowieka, nie reklama: bez "oferta", "promocja", wykrzykników i wielkich liter (filtry antyspamowe).
+    /// Pierwszy temat to najmocniejszy dla sytuacji salonu.
+    /// </summary>
+    private static IReadOnlyList<string> EmailSubjects(DraftContext c)
+    {
+        var name = c.ShortName;
+        return c.Lead.Status switch
+        {
+            LeadStatus.WebsiteDown =>
+            [
+                name is null ? $"Strona {c.Host} się nie otwiera" : $"{name} – strona się nie otwiera",
+                $"Problem z {c.Host}",
+                name is null ? "Podgląd nowej strony dla Was" : $"Podgląd nowej strony dla {name}",
+            ],
+            LeadStatus.NoWebsite when c.Lead.WebsiteCheck?.ProfilePlatform is "Booksy" =>
+            [
+                name is null ? "Strona poza Booksy?" : $"{name} – strona poza Booksy?",
+                name is null ? "Podgląd strony dla Was" : $"Podgląd strony dla {name}",
+                name is null ? "Krótkie pytanie" : $"{name} – krótkie pytanie",
+            ],
+            LeadStatus.NoWebsite =>
+            [
+                name is null ? "Krótkie pytanie o stronę" : $"{name} – krótkie pytanie",
+                name is null ? "Podgląd strony dla Was" : $"Podgląd strony dla {name}",
+                name is null ? "Zrobiłem podgląd Waszej strony" : $"Zrobiłem coś dla {name}",
+            ],
+            _ =>
+            [
+                name is null ? $"Pomysł na {c.Host}" : $"{name} – pomysł na stronę",
+                $"Podgląd nowej wersji {c.Host}",
+                name is null ? "Krótkie pytanie o stronę" : $"{name} – krótkie pytanie",
+            ],
+        };
+    }
+
+    /// <summary>
+    /// Skąd mam adres (RODO art. 14) i jak się wypisać – krótko, pod podpisem. Neutralnie płciowo.
+    /// </summary>
+    private static string EmailSourceNote(DraftContext c)
+    {
+        var fromWebsite = c.Lead.WebsiteCheck?.Emails is { Count: > 0 } && c.Lead.WebsiteCheck.ProfilePlatform is null;
+        return (c.Informal, fromWebsite) switch
+        {
+            (true, true) => $"Adres maila mam z Waszej strony ({c.Host}). Jeśli nie chcecie, żeby był u mnie zapisany, dajcie znać – usunę go.",
+            (true, false) => "Kontakt do Was pochodzi z publicznie dostępnych danych firmy. Jeśli nie chcecie, żeby był u mnie zapisany, dajcie znać – usunę go.",
+            (false, true) => $"Adres e-mail pochodzi z Państwa strony internetowej ({c.Host}). Jeśli nie chcą Państwo, żeby był u mnie zapisany, proszę o krótką odpowiedź – usunę go.",
+            (false, false) => "Dane kontaktowe pochodzą z publicznie dostępnych informacji o firmie. Jeśli nie chcą Państwo, żeby były u mnie zapisane, proszę o krótką odpowiedź – usunę je.",
+        };
     }
 
     private MessageDraft Letter(DraftContext c)
@@ -725,7 +781,7 @@ public sealed class MessageDrafter
         };
 
     /// <summary>Dane leada potrzebne w wielu szablonach, policzone raz.</summary>
-    private sealed class DraftContext(Lead lead, ToneProfile tone)
+    private sealed partial class DraftContext(Lead lead, ToneProfile tone)
     {
         private readonly BusinessNoun _noun = NounFor(lead.Category);
 
@@ -736,8 +792,42 @@ public sealed class MessageDrafter
         /// <summary>Oficjalna nazwa – tylko tam, gdzie jest potrzebna (adres na liście).</summary>
         public string Name => Lead.Place.Name;
 
+        /// <summary>
+        /// Krótka nazwa do tematu maila: "Est Clinic Katowice" → "Est Clinic", "Studio X – fryzjer, Katowice" → "Studio X".
+        /// Null, gdy po skróceniu nazwa jest nadal długa albo opisowa – wtedy temat bez nazwy.
+        /// </summary>
+        public string? ShortName { get; } = Shorten(lead.Place.Name, lead.City);
+
+        private static string? Shorten(string name, string city)
+        {
+            // Emoji i flagi ("ASMA BARBER Katowice!🇺🇦") nie pasują do tematu maila.
+            var cut = new string(name.Where(ch => !char.IsSurrogate(ch) && CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.OtherSymbol).ToArray());
+            foreach (var separator in new[] { " - ", " – ", " — ", " | ", ",", "(", " · " })
+            {
+                var index = cut.IndexOf(separator, StringComparison.Ordinal);
+                if (index > 0)
+                    cut = cut[..index];
+            }
+
+            // "En Vogue. Studio fryzjerskie" → "En Vogue" – po kropce jest tylko opis branży.
+            var dot = cut.IndexOf(". ", StringComparison.Ordinal);
+            if (dot > 1 && BusinessWordsRegex().IsMatch(cut[(dot + 2)..]))
+                cut = cut[..dot];
+
+            // Adres dopisany do nazwy ("… Św. Jana 5") i miasto na końcu nic nie wnoszą w temacie.
+            cut = TrailingAddressRegex().Replace(cut.Trim().TrimEnd('!', '.', ' '), string.Empty);
+            if (cut.EndsWith(" " + city, StringComparison.OrdinalIgnoreCase))
+                cut = cut[..^(city.Length + 1)];
+
+            cut = cut.Trim().TrimEnd('!', '.', ' ');
+            return cut.Length is >= 2 and <= 32 ? cut : null;
+        }
+
+        /// <summary>Adres strony do tekstu wiadomości – bez "www.", tak jak mówi się o nim na co dzień.</summary>
         public string Host { get; } =
-            Uri.TryCreate(lead.Place.WebsiteUri, UriKind.Absolute, out var uri) ? uri.Host : lead.Place.WebsiteUri ?? string.Empty;
+            Uri.TryCreate(lead.Place.WebsiteUri, UriKind.Absolute, out var uri)
+                ? (uri.Host.StartsWith("www.", StringComparison.OrdinalIgnoreCase) ? uri.Host[4..] : uri.Host)
+                : lead.Place.WebsiteUri ?? string.Empty;
 
         /// <summary>Biernik: "Państwa gabinet", "Wasz barbershop", "Wasze studio".</summary>
         public string YourPlace => Informal
@@ -767,5 +857,12 @@ public sealed class MessageDrafter
 
         /// <summary>Wynik sprawdzenia strony w nawiasie, np. "domena nie istnieje lub nie ma rekordów DNS".</summary>
         public string TechnicalNote => Lead.WebsiteCheck?.Note ?? "strona nie odpowiada";
+
+        [GeneratedRegex("""\b(studio|salon|fryzjer|barber|gabinet|spa|kosmetyk|beauty|paznok|tatua|masaż|klinika)""", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+        private static partial Regex BusinessWordsRegex();
+
+        // " Św. Jana 5", " ul. Mariacka 12a", " Rynek 3" na końcu nazwy
+        [GeneratedRegex("""\s+(?:ul\.\s*|al\.\s*|pl\.\s*)?(?:\p{Lu}[\p{L}.]*\s+){1,2}\d+[a-zA-Z]?$""", RegexOptions.CultureInvariant)]
+        private static partial Regex TrailingAddressRegex();
     }
 }

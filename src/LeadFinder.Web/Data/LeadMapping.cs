@@ -22,7 +22,9 @@ public static class LeadMapping
                 entity.WebsiteReachable ?? false, entity.IsWordPress, entity.CheckNote,
                 entity.Technology, entity.ProfilePlatform,
                 entity.IsMobileFriendly, entity.CopyrightYear, entity.UsesHttps,
-                SplitMarkers(entity.ModernMarkers), SplitMarkers(entity.OutdatedMarkers));
+                SplitMarkers(entity.ModernMarkers), SplitMarkers(entity.OutdatedMarkers),
+                // Ręcznie wpisany e-mail nie pochodzi ze strony – szkic nie może tak twierdzić w notce o źródle.
+                entity.ContactsEditedByUser ? null : SplitMarkers(entity.Emails), entity.InstagramUrl, entity.FacebookUrl);
 
         return new Lead(place, category, entity.City, entity.Status, check);
     }
@@ -64,6 +66,12 @@ public static class LeadMapping
         entity.UsesHttps = check?.UsesHttps;
         entity.ModernMarkers = JoinMarkers(check?.ModernMarkers);
         entity.OutdatedMarkers = JoinMarkers(check?.OutdatedMarkers);
+        if (!entity.ContactsEditedByUser)
+        {
+            entity.Emails = JoinMarkers(check?.Emails);
+            entity.InstagramUrl = check?.InstagramUrl;
+            entity.FacebookUrl = check?.FacebookUrl;
+        }
     }
 
     /// <summary>
@@ -92,6 +100,10 @@ public static class LeadMapping
             entity.CheckNote,
             entity.Technology,
             entity.ProfilePlatform,
+            SplitMarkers(entity.Emails) ?? [],
+            entity.InstagramUrl,
+            entity.FacebookUrl,
+            entity.ContactsEditedByUser,
             entity.Stage,
             entity.Notes,
             entity.StageChangedAt,

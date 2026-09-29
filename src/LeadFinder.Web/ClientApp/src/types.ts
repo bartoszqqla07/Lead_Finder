@@ -26,6 +26,12 @@ export interface Lead {
   checkNote: string | null;
   technology: string | null;
   profilePlatform: string | null;
+  /** E-maile znalezione na stronie firmy (najpierw w jej domenie). */
+  emails: string[];
+  instagramUrl: string | null;
+  facebookUrl: string | null;
+  /** Kontakty poprawione ręcznie – ponowne sprawdzenie strony ich nie nadpisuje. */
+  contactsEditedByUser: boolean;
   stage: OutreachStage;
   notes: string;
   stageChangedAt: string | null;
@@ -70,6 +76,8 @@ export interface MessageDraft {
   subject: string | null;
   body: string;
   requiresConsent: boolean;
+  /** Tematy do wyboru (e-mail); pierwszy = subject. */
+  subjectOptions: string[] | null;
 }
 
 export interface LeadChanges {
@@ -78,6 +86,8 @@ export interface LeadChanges {
   consentGiven?: boolean;
   nextActionDate?: string;
   clearNextAction?: boolean;
+  /** Ręcznie wpisane kontakty – zastępują wszystkie trzy (pusty tekst = wyczyść). */
+  contacts?: { email: string; instagramUrl: string; facebookUrl: string };
 }
 
 export interface SearchRun {

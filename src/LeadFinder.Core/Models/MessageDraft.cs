@@ -50,7 +50,8 @@ public sealed record MessageDraft(
     string Guidance,
     string? Subject,
     string Body,
-    bool RequiresConsent);
+    bool RequiresConsent,
+    IReadOnlyList<string>? SubjectOptions = null);
 
 /// <summary>Dane nadawcy wstawiane do szkiców. Puste pola zastępowane są placeholderami w nawiasach.</summary>
 /// <param name="Name">Imię (w zdaniu "nazywam się …").</param>

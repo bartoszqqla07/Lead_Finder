@@ -58,6 +58,7 @@ export function LeadCards({ leads, sort, onSort, onSelect }: Props) {
                 <span className="cell-sub">
                   {lead.categoryName} · {lead.address ?? lead.city}
                 </span>
+                {lead.emails[0] && <span className="cell-sub lead-card-email">✉ {lead.emails[0]}</span>}
                 <span className="lead-card-meta">
                   <ScoreBadge score={lead.score} />
                   <StatusBadge status={lead.status} />

@@ -1,9 +1,10 @@
 import type { SortKey, SortState } from '../filters';
-import { formatDate, formatRating, websiteHost } from '../labels';
+import { formatDate, formatRating } from '../labels';
 import type { Lead } from '../types';
 import { ScoreBadge, StageBadge, StatusBadge } from './Badges';
 import { LeadCards } from './LeadCards';
 import { NextActionDate } from './NextActionDate';
+import { ContactCell } from './ContactCell';
 import { useIsMobile } from '../hooks/useMediaQuery';
 
 interface Props {
@@ -65,16 +66,14 @@ export function LeadsTable({ leads, isLoading, hasAnyLeads, sort, onSort, select
             {header('name', 'Firma')}
             {header('score', 'Szansa', 'num')}
             {header('priority', 'Status')}
-            <th>Strona</th>
+            <th>E-mail i profile</th>
             {header('rating', 'Ocena', 'num')}
             <th>Etap</th>
             {header('firstSeen', 'Dodano', 'num')}
           </tr>
         </thead>
         <tbody>
-          {leads.map((lead) => {
-            const host = websiteHost(lead);
-            return (
+          {leads.map((lead) => (
               <tr
                 key={lead.id}
                 className={lead.id === selectedId ? 'selected' : ''}
@@ -100,14 +99,8 @@ export function LeadsTable({ leads, isLoading, hasAnyLeads, sort, onSort, select
                   )}
                   {lead.profilePlatform && <div className="cell-sub">tylko {lead.profilePlatform}</div>}
                 </td>
-                <td className="truncate">
-                  {host ? (
-                    <a href={lead.websiteUri!} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
-                      {host}
-                    </a>
-                  ) : (
-                    <span className="muted">—</span>
-                  )}
+                <td className="cell-contact">
+                  <ContactCell lead={lead} />
                 </td>
                 <td className="num">
                   {lead.rating !== null ? (
@@ -125,8 +118,7 @@ export function LeadsTable({ leads, isLoading, hasAnyLeads, sort, onSort, select
                 </td>
                 <td className="num muted">{formatDate(lead.firstSeenAt)}</td>
               </tr>
-            );
-          })}
+          ))}
         </tbody>
       </table>
     </div>
